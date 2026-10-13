@@ -1,0 +1,240 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MAPA BALAM · Sonora / DS05</title>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+<style>
+:root{--teal:#409993;--aqua:#7BB7B7;--green:#5E9569;--pink:#EC889B;--taupe:#817060;--ink:#173a37;--muted:#6f8783;--line:#d7e5e2;--paper:#f7fbfa;--white:#fff;--danger:#ce6675}
+*{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#eef5f3}
+body{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
+header{display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--teal);color:white;box-shadow:0 2px 14px rgba(20,70,67,.18);z-index:1001}
+.brand{display:flex;align-items:center;gap:11px;min-width:240px}.brand svg{width:46px;height:46px}.brand strong{font-size:24px;letter-spacing:.08em}.brand small{display:block;font-size:11px;opacity:.78;letter-spacing:.06em;text-transform:uppercase}
+.header-meta{margin-left:auto;text-align:right;font-size:12px;line-height:1.35;opacity:.94}
+.shell{display:grid;grid-template-columns:330px minmax(0,1fr);min-height:0}
+aside{background:#fff;border-right:1px solid var(--line);padding:16px;overflow:auto}
+main{position:relative;min-width:0;min-height:620px}.map{position:absolute;inset:0}
+.card{border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;margin-bottom:12px}
+.card h2,.card h3{margin:0 0 8px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.12em;color:var(--teal);text-transform:uppercase}
+.lead{font-size:13px;line-height:1.45;color:#496a65}.tiny{font-size:11px;line-height:1.45;color:var(--muted)}
+.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpi{border:1px solid var(--line);border-radius:13px;padding:10px;background:var(--paper)}.kpi b{display:block;font-size:21px}.kpi span{font-size:10px;color:var(--muted)}
+.control{margin:10px 0}.control label{display:block;font-size:11px;font-weight:800;margin-bottom:5px;color:#4d6e69}.control select,.control button{width:100%;min-height:42px;border-radius:11px;border:1px solid #bfd4d0;background:#fff;color:var(--ink);padding:8px 10px;font-size:13px}
+.control button{cursor:pointer;font-weight:800}.control button.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.control button.secondary{background:#edf7f5}.control button.pink{background:#fff0f3;border-color:#f1c6cf;color:#904b58}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.status{padding:9px 10px;border-radius:11px;background:#eef7f5;border:1px solid #cee1dd;font-size:11px;line-height:1.35}
+.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;background:#e8f5f2;color:#256d64;margin:2px}
+.badge.pink{background:#fff0f3;color:#a14f61}.badge.taupe{background:#f1ece8;color:#6f6256}
+.detail-title{font-size:18px;font-weight:900}.metricline{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed #dce8e5;font-size:12px}.metricline:last-child{border-bottom:0}.metricline b{color:#285f58}
+.legend{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.sw{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px}
+.map-float{position:absolute;z-index:900;right:12px;top:12px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:10px 12px;max-width:280px;box-shadow:0 6px 25px rgba(33,80,75,.13);font-size:11px;line-height:1.4}
+.map-float b{font-size:12px}.leaflet-tooltip{font-family:inherit}
+.progress{height:6px;background:#e8efed;border-radius:999px;overflow:hidden;margin-top:5px}.progress i{display:block;height:100%;background:var(--teal)}
+.footer-note{font-size:10px;color:#738b87;margin-top:10px;line-height:1.45}
+@media(max-width:860px){.shell{grid-template-columns:1fr;grid-template-rows:auto 70vh}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}main{min-height:70vh}.header-meta{display:none}.brand{min-width:0}}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand">
+    <svg viewBox="0 0 72 72" aria-hidden="true">
+      <path d="M11 43c2-14 9-26 22-31 7-3 15-3 22 1l7-3-2 11c4 5 5 11 3 17-3 10-12 18-25 20-12 2-23-2-27-15z" fill="#f5efe4"/>
+      <path d="M51 18l10-5-3 11z" fill="#817060"/><path d="M17 48c9-3 18-1 25 6-9 8-23 7-31-1z" fill="#7BB7B7"/>
+      <circle cx="42" cy="28" r="3" fill="#409993"/><path d="M49 37c5 1 8 4 9 7-5 2-10 1-14-2z" fill="#817060"/>
+      <g fill="#5E9569"><circle cx="29" cy="23" r="2.3"/><circle cx="24" cy="31" r="2"/><circle cx="34" cy="36" r="2.4"/><circle cx="21" cy="40" r="2.2"/><circle cx="39" cy="18" r="2"/></g>
+      <path d="M25 55c-3 5-7 8-13 9 2-6 6-10 11-12z" fill="#EC889B"/>
+    </svg>
+    <div><strong>BALAM</strong><small>Mapa territorial · Sonora</small></div>
+  </div>
+  <div class="header-meta"><b>Distrito de Salud 05 · Navojoa</b><br>Corte BALAM 12/10/2026 · sólo agregados territoriales</div>
+</header>
+
+<div class="shell">
+<aside>
+  <div class="card">
+    <div class="eyebrow">MAPA BALAM · v0.1</div>
+    <h2>Sonora completo, DS05 con lupa</h2>
+    <p class="lead">Contexto estatal con 72 municipios. El Distrito 05 se activa como territorio analítico y el detalle de manzanas se solicita únicamente al entrar a cada municipio.</p>
+    <div class="kpis">
+      <div class="kpi"><b id="kCases">…</b><span>casos / atenciones</span></div>
+      <div class="kpi"><b id="kActions">…</b><span>acciones operativas</span></div>
+      <div class="kpi"><b id="kLocs">…</b><span>localidades</span></div>
+      <div class="kpi"><b id="kLatrines">…</b><span>letrinas encaladas</span></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>Lente territorial</h3>
+    <div class="control"><label for="lens">Variable de lectura</label>
+      <select id="lens">
+        <option value="territorio">Territorio DS05</option>
+        <option value="canonical_rows">Captura canónica acumulada</option>
+        <option value="atencion_medica">Atención Médica</option>
+        <option value="promocion_salud">Promoción de la Salud</option>
+        <option value="vigilancia_epidemiologica">Vigilancia epidemiológica</option>
+        <option value="enfermeria">Enfermería</option>
+        <option value="cecosabi">CECOSABI · encalamiento</option>
+      </select>
+    </div>
+    <div class="row">
+      <div class="control"><button id="fitDs" class="primary">Enfocar DS05</button></div>
+      <div class="control"><button id="fitSonora" class="secondary">Ver Sonora</button></div>
+    </div>
+    <div class="control"><button id="clearBlocks" class="pink">Quitar manzanas cargadas</button></div>
+    <div id="status" class="status">Preparando geometría estatal…</div>
+    <div id="legend" class="legend"></div>
+  </div>
+
+  <div class="card" id="detail">
+    <div class="eyebrow">Selección</div>
+    <div class="detail-title">Haz clic en un municipio</div>
+    <p class="tiny">Los municipios fuera de DS05 se muestran como contexto. En los cinco municipios del distrito aparece la ficha BALAM y puede activarse el detalle de manzanas.</p>
+  </div>
+
+  <div class="card">
+    <h3>Reglas de lectura</h3>
+    <div class="tiny"><b>Ausencia de captura ≠ cero actividad.</b> Los módulos municipales representan filas canónicas disponibles, no personas ni acciones discretas. Los 977 encalamientos permanecen como acumulado distrital hasta tener una llave territorial inequívoca para cada registro.</div>
+    <div class="footer-note">Privacidad: esta página pública no contiene nombres, CURP, teléfonos, expedientes ni domicilios individuales.</div>
+  </div>
+</aside>
+
+<main>
+  <div id="map" class="map"></div>
+  <div class="map-float"><b>🐆 Arquitectura jaguar</b><br>Sonora abre ligero. El detalle pesado sólo despierta cuando seleccionas un municipio DS05 y solicitas sus manzanas.</div>
+</main>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+(function(){
+'use strict';
+var COLORS={teal:'#409993',aqua:'#7BB7B7',green:'#5E9569',pink:'#EC889B',taupe:'#817060',muted:'#dfe8e6',ink:'#173a37'};
+var DS05=new Set(['26003','26026','26033','26042','26071']);
+var MUN_URL='https://raw.githubusercontent.com/MacWilliXD/INEGI-geojson/main/geojson_descargas/AGEM_26.geojson';
+var BLOCK_URL='https://geomaticasig1.semarnat.gob.mx/arcgis/rest/services/apsDev/Temas_rio_Tula/MapServer/82/query';
+var map=L.map('map',{preferCanvas:true,zoomControl:true}).setView([29.1,-110.5],7);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
+var stateLayer=null,blockLayer=null,metrics=null,munIndex={},selected=null,dsBounds=null,stateBounds=null;
+var statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),lensEl=document.getElementById('lens'),legendEl=document.getElementById('legend');
+function fmt(n){return Number(n||0).toLocaleString('es-MX')}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function codeOf(f){var p=f.properties||{};return String(p.cvegeo||p.CVEGEO||'')}
+function nameOf(f){var p=f.properties||{};return p.nom_agem||p.NOM_AGEM||p.nombre||p.NOMBRE||'Municipio'}
+function mMetric(code){return munIndex[code]||null}
+function lensValue(m,lens){
+ if(!m)return 0;
+ if(lens==='territorio')return 1;
+ if(lens==='canonical_rows')return Number(m.canonical_rows||0);
+ if(lens==='cecosabi')return null;
+ return Number((m.modules||{})[lens]||0)
+}
+function lensLabel(l){
+ return {territorio:'Territorio DS05',canonical_rows:'Filas canónicas',atencion_medica:'Atención Médica',promocion_salud:'Promoción',vigilancia_epidemiologica:'Vigilancia',enfermeria:'Enfermería',cecosabi:'CECOSABI / encalamiento'}[l]||l
+}
+function scaleColor(value,max){
+ if(value===null)return COLORS.pink;
+ if(max<=0)return COLORS.aqua;
+ var r=value/max;
+ if(r>=.75)return '#2f746e';
+ if(r>=.45)return COLORS.teal;
+ if(r>=.20)return COLORS.aqua;
+ if(r>0)return '#b7d9d4';
+ return '#e7efed'
+}
+function currentMax(){
+ var l=lensEl.value;if(l==='territorio'||l==='cecosabi')return 1;
+ var vals=metrics.municipalities.map(function(m){return lensValue(m,l)});return Math.max.apply(null,vals.concat([1]))
+}
+function styleFeature(f){
+ var code=codeOf(f),isDS=DS05.has(code),m=mMetric(code),l=lensEl.value,max=currentMax();
+ if(!isDS)return {color:'#b8c8c5',weight:.7,fillColor:'#edf2f1',fillOpacity:.38};
+ var fill=l==='territorio'?COLORS.teal:scaleColor(lensValue(m,l),max);
+ return {color:selected===code?'#173a37':'#ffffff',weight:selected===code?3:1.5,fillColor:fill,fillOpacity:l==='territorio'?.68:.78}
+}
+function updateStyles(){if(stateLayer)stateLayer.setStyle(styleFeature);renderLegend();if(selected)renderDetail(selected)}
+function renderLegend(){
+ var l=lensEl.value;
+ if(l==='territorio'){legendEl.innerHTML='<span class="badge"><i class="sw" style="background:'+COLORS.teal+'"></i>Distrito 05</span><span class="badge taupe"><i class="sw" style="background:#edf2f1"></i>Contexto Sonora</span>';return}
+ if(l==='cecosabi'){legendEl.innerHTML='<span class="badge pink">977 encalamientos · dato distrital</span><span class="tiny">Sin reparto municipal automático.</span>';return}
+ legendEl.innerHTML='<span class="badge"><i class="sw" style="background:#2f746e"></i>Mayor</span><span class="badge"><i class="sw" style="background:'+COLORS.teal+'"></i>Alta</span><span class="badge"><i class="sw" style="background:'+COLORS.aqua+'"></i>Media</span><span class="badge taupe"><i class="sw" style="background:#e7efed"></i>Sin captura canónica</span>'
+}
+function renderDetail(code){
+ var m=mMetric(code),l=lensEl.value;
+ if(!m){detailEl.innerHTML='<div class="eyebrow">Contexto estatal</div><div class="detail-title">'+esc((stateLayer&&stateLayer._layers)?'Municipio fuera de DS05':'Municipio')+'</div><p class="tiny">Este municipio se conserva para lectura estatal. La analítica BALAM v0.1 se concentra inicialmente en el Distrito 05.</p>';return}
+ var value=lensValue(m,l);
+ var lensLine=l==='cecosabi'?'Acumulado distrital: '+fmt(metrics.cecosabi.latrines_limed_total)+' letrinas encaladas. Sin asignación municipal automática.':lensLabel(l)+': '+fmt(value);
+ detailEl.innerHTML=
+ '<div class="eyebrow">Distrito 05 · '+esc(m.code)+'</div>'+
+ '<div class="detail-title">'+esc(m.name)+'</div>'+
+ '<div class="metricline"><span>Población 2026</span><b>'+fmt(m.population_2026)+'</b></div>'+
+ '<div class="metricline"><span>Localidades documentadas</span><b>'+fmt(m.documented_localities)+'</b></div>'+
+ '<div class="metricline"><span>Filas canónicas</span><b>'+fmt(m.canonical_rows)+'</b></div>'+
+ '<div class="metricline"><span>Atención Médica</span><b>'+fmt(m.modules.atencion_medica)+'</b></div>'+
+ '<div class="metricline"><span>Promoción</span><b>'+fmt(m.modules.promocion_salud)+'</b></div>'+
+ '<div class="metricline"><span>Vigilancia</span><b>'+fmt(m.modules.vigilancia_epidemiologica)+'</b></div>'+
+ '<div class="metricline"><span>Enfermería</span><b>'+fmt(m.modules.enfermeria)+'</b></div>'+
+ '<p class="tiny"><b>Lente activa:</b> '+esc(lensLine)+'</p>'+
+ '<div class="control"><button id="loadBlocksBtn" class="primary">Cargar manzanas de '+esc(m.name)+'</button></div>'+
+ '<div class="tiny">Las manzanas se descargan sólo al pedirlas. No contienen información nominal BALAM.</div>';
+ var b=document.getElementById('loadBlocksBtn');if(b)b.addEventListener('click',function(){loadBlocks(m.code,m.name)})
+}
+function onEach(f,layer){
+ var code=codeOf(f),name=nameOf(f);
+ layer.bindTooltip(name+(DS05.has(code)?' · DS05':''),{sticky:true});
+ layer.on('click',function(){
+   selected=code;updateStyles();renderDetail(code);
+   if(DS05.has(code))map.fitBounds(layer.getBounds(),{padding:[30,30],maxZoom:10})
+ })
+}
+function clearBlocks(){
+ if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
+ statusEl.textContent='Capa de manzanas retirada. El núcleo estatal permanece ligero.'
+}
+async function loadBlocks(mun,name){
+ clearBlocks();statusEl.textContent='Cargando manzanas de '+name+' bajo demanda…';
+ var all=[],pageSize=2000;
+ try{
+  for(var offset=0;offset<60000;offset+=pageSize){
+   var p=new URLSearchParams({where:"CVE_ENT='26' AND CVE_MUN='"+mun+"'",outFields:'*',returnGeometry:'true',outSR:'4326',f:'geojson',resultOffset:String(offset),resultRecordCount:String(pageSize)});
+   var r=await fetch(BLOCK_URL+'?'+p.toString());
+   if(!r.ok)throw new Error('HTTP '+r.status);
+   var j=await r.json(),ff=(j&&j.features)||[];all=all.concat(ff);
+   statusEl.textContent='Cargando '+fmt(all.length)+' manzanas de '+name+'…';
+   if(ff.length<pageSize)break
+  }
+  blockLayer=L.geoJSON({type:'FeatureCollection',features:all},{
+   renderer:L.canvas({padding:.5}),
+   style:{color:'#557b75',weight:.45,fillColor:'#f7fbfa',fillOpacity:.12},
+   onEachFeature:function(f,l){var p=f.properties||{};l.bindTooltip('Manzana '+esc(p.CVE_MZA||p.cve_mza||'')+' · AGEB '+esc(p.CVE_AGEB||p.cve_ageb||''),{sticky:true})}
+  }).addTo(map);
+  statusEl.textContent=name+': '+fmt(all.length)+' manzanas activas. Capa cargada sólo bajo demanda.';
+ }catch(e){statusEl.textContent='No fue posible cargar manzanas: '+e.message+'. El mapa estatal y los indicadores BALAM siguen disponibles.'}
+}
+async function init(){
+ try{
+  metrics=await fetch('data/ds05_metrics.json').then(function(r){if(!r.ok)throw new Error('métricas HTTP '+r.status);return r.json()});
+  metrics.municipalities.forEach(function(m){munIndex[m.cvegeo]=m});
+  document.getElementById('kCases').textContent=fmt(metrics.current_filter.cases_or_attentions);
+  document.getElementById('kActions').textContent=fmt(metrics.current_filter.discrete_operational_actions);
+  document.getElementById('kLocs').textContent=fmt(metrics.current_filter.localities);
+  document.getElementById('kLatrines').textContent=fmt(metrics.current_filter.cecosabi_latrines_limed);
+  var gj=await fetch(MUN_URL).then(function(r){if(!r.ok)throw new Error('municipios HTTP '+r.status);return r.json()});
+  stateLayer=L.geoJSON(gj,{style:styleFeature,onEachFeature:onEach}).addTo(map);
+  stateBounds=stateLayer.getBounds();
+  var dsFeatures=gj.features.filter(function(f){return DS05.has(codeOf(f))});
+  var dsTemp=L.geoJSON({type:'FeatureCollection',features:dsFeatures});dsBounds=dsTemp.getBounds();
+  map.fitBounds(stateBounds,{padding:[18,18]});
+  statusEl.textContent='Sonora cargado: '+fmt(gj.features.length)+' municipios. Distrito 05 resaltado.';
+  renderLegend()
+ }catch(e){statusEl.textContent='Error de carga: '+e.message+'. Verifica conexión a internet.'}
+}
+lensEl.addEventListener('change',updateStyles);
+document.getElementById('fitDs').addEventListener('click',function(){if(dsBounds)map.fitBounds(dsBounds,{padding:[28,28]})});
+document.getElementById('fitSonora').addEventListener('click',function(){if(stateBounds)map.fitBounds(stateBounds,{padding:[18,18]})});
+document.getElementById('clearBlocks').addEventListener('click',clearBlocks);
+init();
+})();
+</script>
+</body>
+</html>
