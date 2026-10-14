@@ -37,7 +37,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .ageb-item input{width:17px;height:17px}
 .ageb-item .ageb-name{font-size:10.5px;font-weight:800}
 .ageb-item .ageb-meta{font-size:9px;color:var(--muted)}
-.ageb-item .ageb-state{font-size:9px;font-weight:900;color:#2f746e}.ageb-focus{min-height:28px;border:1px solid #bfd4d0;border-radius:8px;background:#fff;color:#285f58;padding:3px 7px;font-size:9px;font-weight:900;cursor:pointer}
+.ageb-item .ageb-state{font-size:9px;font-weight:900;color:#2f746e}.ageb-focus{border:1px solid #c8d9d6;background:#fff;color:#285f58;border-radius:7px;min-width:28px;height:28px;cursor:pointer;font-weight:900}.ageb-focus{min-height:28px;border:1px solid #bfd4d0;border-radius:8px;background:#fff;color:#285f58;padding:3px 7px;font-size:9px;font-weight:900;cursor:pointer}
 @media(max-width:900px){.shell{grid-template-columns:1fr;grid-template-rows:auto 72vh}.header-meta{display:none}.brand-logo{width:220px;height:50px}aside{border-right:0;border-bottom:1px solid var(--line)}main{min-height:72vh}}
 </style>
 </head>
@@ -227,6 +227,7 @@ function focusSelectedAgebs(){
 }
 function updateAgebManager(){
  var root=document.getElementById('agebManager');if(!root||!currentFine)return;
+ var previousList=document.getElementById('agebList'),previousScroll=previousList?previousList.scrollTop:0;
  var items=Array.from(agebIndex.values()).sort(function(a,b){return (a.ageb+a.loc).localeCompare(b.ageb+b.loc)});
  var activeCount=selectedAgebs.size,loadedCount=0;selectedAgebs.forEach(function(k){if(blockLayers.has(k))loadedCount++});
  root.innerHTML=
@@ -237,7 +238,8 @@ function updateAgebManager(){
     '<button class="btn" type="button" id="agebSelection">Ver selección</button>'+
     '<button class="btn" type="button" id="agebAll">Todas</button>'+
     '<button class="btn" type="button" id="agebNone">Ninguna</button>'+
-    '<button class="btn" type="button" id="agebInvert">Invertir</button>'+
+    '<button class="btn" type="button" id="agebInvert">Invertir</button>'+ 
+    '<button class="btn primary" type="button" id="agebFitAll">Ver todas las AGEB</button>'+
   '</div>'+
   '<div class="ageb-list" id="agebList"></div>'+
   '<div class="tiny" style="margin-top:7px">Marca una o varias AGEB. Cada casilla controla exclusivamente las manzanas de esa AGEB; los polígonos AGEB permanecen visibles.</div>';
@@ -255,14 +257,15 @@ function updateAgebManager(){
  document.getElementById('agebSelection').addEventListener('click',focusSelectedAgebs);
  document.getElementById('agebAll').addEventListener('click',function(){setAllAgebs(true)});
  document.getElementById('agebNone').addEventListener('click',function(){setAllAgebs(false)});
- document.getElementById('agebInvert').addEventListener('click',invertAgebs)
+ document.getElementById('agebInvert').addEventListener('click',invertAgebs);
+ document.getElementById('agebFitAll').addEventListener('click',function(){if(currentFine&&currentFine.bounds)map.fitBounds(currentFine.bounds,{padding:[28,28],maxZoom:11});else if(agebLayer)map.fitBounds(agebLayer.getBounds(),{padding:[28,28],maxZoom:11})});
+ var rebuilt=document.getElementById('agebList');if(rebuilt)rebuilt.scrollTop=previousScroll
 }
 async function setAgebSelected(key,on,zoomTo){
  var info=agebIndex.get(key);if(!info)return;
  if(on)selectedAgebs.add(key);else selectedAgebs.delete(key);
  syncAgebStyles();updateAgebManager();
  if(on){
-   if(zoomTo&&info.layer)map.fitBounds(info.layer.getBounds(),{padding:[28,28],maxZoom:14});
    await ensureBlockLayer(info)
  }else removeBlockLayer(key);
  syncAgebStyles();updateAgebManager()
@@ -330,7 +333,7 @@ async function loadAgeb(mun,name,did,municipalityBounds){
      })
    }
   }).addTo(map);
-  statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' AGEB visibles. Haz clic o usa las casillas para activar manzanas.';
+  statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' AGEB visibles. Selecciona una, varias o todas sin perder el encuadre municipal.';
   updateAgebManager()
  }catch(e){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message}
 }
