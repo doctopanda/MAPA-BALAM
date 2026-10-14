@@ -27,6 +27,17 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:900;background:#eef4f2}
 .detail-title{font-size:18px;font-weight:900}.metricline{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed #dce8e5;font-size:11px}.metricline b{color:#285f58}
 .map-float{position:absolute;z-index:900;right:12px;top:12px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:13px;padding:9px 11px;max-width:285px;box-shadow:0 6px 25px rgba(33,80,75,.13);font-size:10px;line-height:1.4}
+.ageb-manager{margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+.ageb-toolbar{display:flex;gap:6px;flex-wrap:wrap;margin:7px 0}
+.ageb-toolbar .btn{min-height:32px;padding:5px 8px;font-size:10px}
+.ageb-summary{font-size:10px;color:var(--muted);margin:6px 0}
+.ageb-list{display:grid;gap:5px;max-height:260px;overflow:auto;padding-right:3px}
+.ageb-item{display:grid;grid-template-columns:auto 1fr auto;gap:7px;align-items:center;border:1px solid #dce8e5;border-radius:9px;padding:6px 7px;background:#fbfdfc}
+.ageb-item.active{background:#eef8f6;border-color:#8fc4bd}
+.ageb-item input{width:17px;height:17px}
+.ageb-item .ageb-name{font-size:10.5px;font-weight:800}
+.ageb-item .ageb-meta{font-size:9px;color:var(--muted)}
+.ageb-item .ageb-state{font-size:9px;font-weight:900;color:#2f746e}
 @media(max-width:900px){.shell{grid-template-columns:1fr;grid-template-rows:auto 72vh}.header-meta{display:none}.brand-logo{width:220px;height:50px}aside{border-right:0;border-bottom:1px solid var(--line)}main{min-height:72vh}}
 </style>
 </head>
@@ -38,7 +49,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.3</div>
+    <div class="eyebrow">MAPA BALAM · v0.4</div>
     <h2>Seis distritos, una sola piel</h2>
     <p class="lead">Activa uno o varios Distritos de Salud. Cada distrito puede mostrar una lectura distinta sin obligar al navegador a cargar toda la cartografía fina.</p>
     <div class="row"><button class="btn primary" id="fitActive">Enfocar activos</button><button class="btn" id="onlyDs05">Sólo DS05</button><button class="btn pink" id="clearDetail">Quitar AGEB/manzanas</button></div>
@@ -52,7 +63,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
   <div class="card" id="detail">
     <div class="eyebrow">Selección</div>
     <div class="detail-title">Elige un municipio activo</div>
-    <p class="tiny">Al tocar un municipio de un distrito activo, BALAM carga sus AGEB urbanas y rurales. Al tocar una AGEB, carga únicamente sus manzanas.</p>
+    <p class="tiny">Al tocar un municipio activo, BALAM conserva todas sus AGEB visibles. Puedes activar manzanas de una, varias o todas las AGEB y desactivarlas a voluntad.</p>
   </div>
   <div class="card">
     <h3>Regla BALAM</h3>
@@ -61,7 +72,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 </aside>
 <main>
   <div id="map" class="map"></div>
-  <div class="map-float"><b>🐆 LOD territorial</b><br>Sonora y distritos primero. AGEB al entrar al municipio. Manzanas sólo al tocar una AGEB.</div>
+  <div class="map-float"><b>🐆 LOD territorial</b><br>Sonora → municipio → AGEB multiselección. Las manzanas son capas independientes por AGEB.</div>
 </main>
 </div>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
@@ -92,7 +103,9 @@ var LENSES=[
 ];
 var map=L.map('map',{preferCanvas:true,zoomControl:true}).setView([29.1,-110.5],7);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-var districtCfg=null,districtByMun={},districtData={},active=new Set(['DS05']),lensByDistrict={},stateLayer=null,stateBounds=null,agebLayer=null,blockLayer=null,selectedMun=null,selectedAgeb=null,geoCache={};
+map.createPane('blocksPane');map.getPane('blocksPane').style.zIndex=420;
+map.createPane('agebPane');map.getPane('agebPane').style.zIndex=430;
+var districtCfg=null,districtByMun={},districtData={},active=new Set(['DS05']),lensByDistrict={},stateLayer=null,stateBounds=null,agebLayer=null,selectedMun=null,geoCache={},agebIndex=new Map(),selectedAgebs=new Set(),blockLayers=new Map(),currentFine=null;
 var controls=document.getElementById('districtControls'),statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),legendEl=document.getElementById('legend');
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function fmt(n){return n==null?'—':Number(n).toLocaleString('es-MX')}
@@ -164,7 +177,7 @@ function onEach(f,layer){
  layer.bindTooltip(name+(did?' · '+did:''),{sticky:true});
  layer.on('click',function(){
   if(!did||!active.has(did)){statusEl.textContent='Activa '+(did||'el distrito correspondiente')+' para explorar '+name+'.';return}
-  selectedMun=code;selectedAgeb=null;renderDetail(code,name,did);map.fitBounds(layer.getBounds(),{padding:[28,28],maxZoom:10});loadAgeb(code.slice(2),name,did)
+  selectedMun=code;renderDetail(code,name,did);map.fitBounds(layer.getBounds(),{padding:[28,28],maxZoom:10});loadAgeb(code.slice(2),name,did)
  })
 }
 function renderDetail(code,name,did){
@@ -174,36 +187,136 @@ function renderDetail(code,name,did){
  if(mv!=null)lines+='<div class="metricline"><span>Valor municipal</span><b>'+fmt(mv)+'</b></div>';
  else if(dv!=null)lines+='<div class="metricline"><span>Valor distrital</span><b>'+fmt(dv)+'</b></div>';
  else if(lens!=='territorio')lines+='<p class="tiny">Esta fuente todavía no tiene un corte territorial cargado para '+did+'. BALAM no la interpreta como cero.</p>';
- lines+='<p class="tiny">AGEB se cargará automáticamente. Toca una AGEB para bajar a manzana.</p>';
+ lines+='<p class="tiny">Las AGEB se cargan automáticamente y permanecen visibles. Usa el gestor para decidir de cuáles quieres mostrar manzanas.</p><div id="agebManager" class="ageb-manager"><div class="tiny">Cargando catálogo AGEB…</div></div>';
  detailEl.innerHTML=lines
 }
 function fc(j){if(j&&j.type==='FeatureCollection'&&Array.isArray(j.features))return j;if(j&&Array.isArray(j.features))return {type:'FeatureCollection',features:j.features};return {type:'FeatureCollection',features:[]}}
 async function cachedJson(url){if(geoCache[url])return geoCache[url];var r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);var j=await r.json();geoCache[url]=j;return j}
-function clearFine(){if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}selectedAgeb=null}
+function agebKey(f,mun){
+ var p=f.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']);
+ return prop(p,['cvegeo','CVEGEO'])||(mun+'-'+loc+'-'+ageb)
+}
+function agebInfo(f,mun){
+ var p=f.properties||{};
+ return {key:agebKey(f,mun),ageb:prop(p,['cve_ageb','CVE_AGEB']),loc:prop(p,['cve_loc','CVE_LOC']),amb:p.__ambito||'AGEB',feature:f}
+}
+function clearBlockLayers(){
+ blockLayers.forEach(function(layer){if(map.hasLayer(layer))map.removeLayer(layer)});
+ blockLayers.clear()
+}
+function clearFine(){
+ if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}
+ clearBlockLayers();agebIndex.clear();selectedAgebs.clear();currentFine=null
+}
+function agebStyle(f){
+ var info=agebInfo(f,currentFine?currentFine.mun:'');
+ var on=selectedAgebs.has(info.key),p=f.properties||{};
+ return {pane:'agebPane',color:on?'#173a37':'#409993',weight:on?3:1.15,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:on?.24:.12}
+}
+function syncAgebStyles(){if(agebLayer)agebLayer.setStyle(agebStyle)}
+function updateAgebManager(){
+ var root=document.getElementById('agebManager');if(!root||!currentFine)return;
+ var items=Array.from(agebIndex.values()).sort(function(a,b){return (a.ageb+a.loc).localeCompare(b.ageb+b.loc)});
+ var activeCount=selectedAgebs.size,loadedCount=0;selectedAgebs.forEach(function(k){if(blockLayers.has(k))loadedCount++});
+ root.innerHTML=
+  '<div class="eyebrow">AGEB / manzanas</div>'+
+  '<div class="ageb-summary"><b>'+fmt(items.length)+'</b> AGEB visibles · <b>'+fmt(activeCount)+'</b> seleccionadas · <b>'+fmt(loadedCount)+'</b> con manzanas cargadas</div>'+
+  '<div class="ageb-toolbar">'+
+    '<button class="btn" type="button" id="agebAll">Todas</button>'+
+    '<button class="btn" type="button" id="agebNone">Ninguna</button>'+
+    '<button class="btn" type="button" id="agebInvert">Invertir</button>'+
+  '</div>'+
+  '<div class="ageb-list" id="agebList"></div>'+
+  '<div class="tiny" style="margin-top:7px">Marca una o varias AGEB. Cada casilla controla exclusivamente las manzanas de esa AGEB; los polígonos AGEB permanecen visibles.</div>';
+ var list=document.getElementById('agebList');
+ items.forEach(function(info){
+   var row=document.createElement('label');row.className='ageb-item'+(selectedAgebs.has(info.key)?' active':'');
+   var cb=document.createElement('input');cb.type='checkbox';cb.checked=selectedAgebs.has(info.key);cb.setAttribute('aria-label','Mostrar manzanas AGEB '+info.ageb);
+   var txt=document.createElement('div');txt.innerHTML='<div class="ageb-name">AGEB '+esc(info.ageb)+'</div><div class="ageb-meta">'+esc(info.amb)+(info.loc?' · Loc. '+esc(info.loc):'')+'</div>';
+   var st=document.createElement('div');st.className='ageb-state';st.textContent=blockLayers.has(info.key)?'manzanas':'';
+   cb.addEventListener('change',function(){setAgebSelected(info.key,cb.checked,true)});
+   row.appendChild(cb);row.appendChild(txt);row.appendChild(st);list.appendChild(row)
+ });
+ document.getElementById('agebAll').addEventListener('click',function(){setAllAgebs(true)});
+ document.getElementById('agebNone').addEventListener('click',function(){setAllAgebs(false)});
+ document.getElementById('agebInvert').addEventListener('click',invertAgebs)
+}
+async function setAgebSelected(key,on,zoomTo){
+ var info=agebIndex.get(key);if(!info)return;
+ if(on)selectedAgebs.add(key);else selectedAgebs.delete(key);
+ syncAgebStyles();updateAgebManager();
+ if(on){
+   if(zoomTo&&info.layer)map.fitBounds(info.layer.getBounds(),{padding:[28,28],maxZoom:14});
+   await ensureBlockLayer(info)
+ }else removeBlockLayer(key);
+ syncAgebStyles();updateAgebManager()
+}
+async function setAllAgebs(on){
+ var keys=Array.from(agebIndex.keys());
+ if(!on){selectedAgebs.clear();clearBlockLayers();syncAgebStyles();updateAgebManager();statusEl.textContent='AGEB visibles; manzanas desactivadas.';return}
+ keys.forEach(function(k){selectedAgebs.add(k)});syncAgebStyles();updateAgebManager();
+ statusEl.textContent='Cargando manzanas de '+fmt(keys.length)+' AGEB en progresivo…';
+ for(var i=0;i<keys.length;i++){
+   if(!selectedAgebs.has(keys[i]))continue;
+   await ensureBlockLayer(agebIndex.get(keys[i]),true);
+ }
+ statusEl.textContent=currentFine.name+' · '+currentFine.did+': manzanas activas en '+fmt(selectedAgebs.size)+' AGEB.';
+ updateAgebManager()
+}
+async function invertAgebs(){
+ var keys=Array.from(agebIndex.keys()),target=[];
+ keys.forEach(function(k){if(selectedAgebs.has(k)){selectedAgebs.delete(k);removeBlockLayer(k)}else{selectedAgebs.add(k);target.push(k)}});
+ syncAgebStyles();updateAgebManager();
+ statusEl.textContent='Invirtiendo selección: '+fmt(selectedAgebs.size)+' AGEB activas…';
+ for(var i=0;i<target.length;i++)await ensureBlockLayer(agebIndex.get(target[i]),true);
+ updateAgebManager()
+}
+function removeBlockLayer(key){
+ var layer=blockLayers.get(key);if(layer&&map.hasLayer(layer))map.removeLayer(layer);blockLayers.delete(key)
+}
+async function ensureBlockLayer(info,silent){
+ if(!info||blockLayers.has(info.key))return;
+ var mun=currentFine.mun,name=currentFine.name,did=currentFine.did;
+ if(!silent)statusEl.textContent='Cargando manzanas de AGEB '+info.ageb+' · '+name+'…';
+ try{
+  var url=info.loc?MZA_URL+mun+'/'+info.loc:MZA_URL+mun;
+  var j=await cachedJson(url),all=fc(j).features.filter(function(f){
+    var q=f.properties||{};
+    return prop(q,['cve_ageb','CVE_AGEB'])===info.ageb&&(!info.loc||prop(q,['cve_loc','CVE_LOC'])===info.loc)
+  });
+  if(!selectedAgebs.has(info.key))return;
+  var layer=L.geoJSON({type:'FeatureCollection',features:all},{
+    pane:'blocksPane',renderer:L.canvas({padding:.5}),interactive:false,
+    style:{color:'#557b75',weight:.5,fillColor:'#fff',fillOpacity:.23}
+  }).addTo(map);
+  blockLayers.set(info.key,layer);
+  if(agebLayer)agebLayer.bringToFront();
+  if(!silent)statusEl.textContent=did+' · '+name+' · AGEB '+info.ageb+': '+fmt(all.length)+' manzanas activas. Puedes seguir seleccionando otras AGEB.';
+ }catch(e){if(!silent)statusEl.textContent='No fue posible cargar manzanas de AGEB '+info.ageb+': '+e.message}
+ updateAgebManager()
+}
 async function loadAgeb(mun,name,did){
- clearFine();statusEl.textContent='Cargando AGEB de '+name+' · '+did+'…';
+ clearFine();currentFine={mun:mun,name:name,did:did};statusEl.textContent='Cargando AGEB de '+name+' · '+did+'…';
  try{
   var rs=await Promise.allSettled([cachedJson(AGEBU_URL+mun),cachedJson(AGEBR_URL+mun)]),all=[];
   if(rs[0].status==='fulfilled')fc(rs[0].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Urbana';all.push(f)});
   if(rs[1].status==='fulfilled')fc(rs[1].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Rural';all.push(f)});
   if(!all.length)throw new Error('sin AGEB');
   agebLayer=L.geoJSON({type:'FeatureCollection',features:all},{
-   renderer:L.canvas({padding:.5}),
-   style:function(f){var p=f.properties||{},key=prop(p,['cvegeo','CVEGEO']);return {color:key===selectedAgeb?'#173a37':'#409993',weight:key===selectedAgeb?3:1.15,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:key===selectedAgeb?.28:.15}},
-   onEachFeature:function(f,l){var p=f.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']),key=prop(p,['cvegeo','CVEGEO'])||(mun+'-'+loc+'-'+ageb);l.bindTooltip('AGEB '+esc(ageb)+' · '+esc(p.__ambito||'')+(loc?' · Loc. '+esc(loc):''),{sticky:true});l.on('click',function(ev){if(ev&&ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);selectedAgeb=key;if(agebLayer)agebLayer.setStyle(function(x){var xp=x.properties||{},xk=prop(xp,['cvegeo','CVEGEO'])||(mun+'-'+prop(xp,['cve_loc','CVE_LOC'])+'-'+prop(xp,['cve_ageb','CVE_AGEB']));return {color:xk===selectedAgeb?'#173a37':'#409993',weight:xk===selectedAgeb?3:1.15,fillColor:xp.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:xk===selectedAgeb?.28:.15}});map.fitBounds(l.getBounds(),{padding:[28,28],maxZoom:14});loadBlocks(f,mun,name,did)})}
+   pane:'agebPane',renderer:L.canvas({padding:.5}),
+   style:agebStyle,
+   onEachFeature:function(f,l){
+     var info=agebInfo(f,mun);info.layer=l;agebIndex.set(info.key,info);
+     l.bindTooltip('AGEB '+esc(info.ageb)+' · '+esc(info.amb)+(info.loc?' · Loc. '+esc(info.loc):''),{sticky:true});
+     l.on('click',function(ev){
+       if(ev&&ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);
+       setAgebSelected(info.key,!selectedAgebs.has(info.key),true)
+     })
+   }
   }).addTo(map);
-  statusEl.textContent=name+' · '+did+': '+all.length.toLocaleString('es-MX')+' AGEB. Aqua urbana · rosa rural.';
+  statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' AGEB visibles. Haz clic o usa las casillas para activar manzanas.';
+  updateAgebManager()
  }catch(e){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message}
-}
-async function loadBlocks(agebFeature,mun,name,did){
- if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
- var p=agebFeature.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']);
- statusEl.textContent='Cargando manzanas de AGEB '+ageb+' · '+name+'…';
- try{
-  var url=loc?MZA_URL+mun+'/'+loc:MZA_URL+mun,j=await cachedJson(url),all=fc(j).features.filter(function(f){var q=f.properties||{};return prop(q,['cve_ageb','CVE_AGEB'])===ageb&&(!loc||prop(q,['cve_loc','CVE_LOC'])===loc)});
-  blockLayer=L.geoJSON({type:'FeatureCollection',features:all},{renderer:L.canvas({padding:.5}),style:{color:'#557b75',weight:.55,fillColor:'#fff',fillOpacity:.22},onEachFeature:function(f,l){var q=f.properties||{};l.bindTooltip('Manzana '+esc(prop(q,['cve_mza','CVE_MZA']))+' · AGEB '+esc(ageb),{sticky:true})}}).addTo(map);
-  statusEl.textContent=did+' · '+name+' · AGEB '+ageb+': '+all.length.toLocaleString('es-MX')+' manzanas activas.';
- }catch(e){statusEl.textContent='No fue posible cargar manzanas: '+e.message}
 }
 function fitActive(){
  if(!stateLayer)return;var b=null;stateLayer.eachLayer(function(l){var code=codeOf(l.feature),did=districtFor(code);if(active.has(did)){var lb=l.getBounds();b=b?b.extend(lb):lb}});if(b)map.fitBounds(b,{padding:[22,22]})
