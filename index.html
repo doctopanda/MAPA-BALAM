@@ -44,7 +44,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.7.1</div>
+    <div class="eyebrow">MAPA BALAM · v0.7.2</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Activa uno o varios distritos y construye una sola lectura comparable: modo, fuente, programa, indicador y periodo.</p>
     <div class="row">
@@ -172,7 +172,7 @@ function styleFeature(f){
  var code=codeOf(f),did=districtFor(code),d=did?cfg(did):null;
  if(!did||!active.has(did))return {color:'#bdcac8',weight:.65,fillColor:'#edf2f1',fillOpacity:.30};
  var ind=indicatorCfg();
- if(ind.scope==='territory')return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.25,fillColor:d.color,fillOpacity:.57};
+ if(ind.scope==='territory')return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.6,fillColor:d.color,fillOpacity:.68};
  if(!currentAvailability())return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14};
  if(ind.scope==='municipality'){
    var v=municipalityValue(did,code);
@@ -213,10 +213,10 @@ function updateMap(){
 async function ensureDistrictData(did){
  if(districtData[did]!==undefined)return districtData[did];
  var d=cfg(did);
- if(!d||!d.dataUrl){districtData[did]=null;renderDistrictControls();updateMap();return null}
+ if(!d||!d.dataUrl){districtData[did]=null;refreshDistrictControl(did);updateMap();return null}
  try{var r=await fetch(d.dataUrl);if(!r.ok)throw new Error('HTTP '+r.status);districtData[did]=await r.json()}
  catch(e){districtData[did]=null}
- renderDistrictControls();updateMap();return districtData[did]
+ refreshDistrictControl(did);updateMap();return districtData[did]
 }
 function setOptions(select,items,value){
  select.innerHTML='';
@@ -257,29 +257,43 @@ programSelect.addEventListener('change',function(){analysis.program=programSelec
 indicatorSelect.addEventListener('change',function(){analysis.indicator=indicatorSelect.value;renderLayerControls();updateMap()});
 periodSelect.addEventListener('change',function(){analysis.period=periodSelect.value;updateMap()});
 
+function districtChipText(d){
+ if(d.dataUrl)return districtData[d.id]?'datos cargados':'datos disponibles';
+ return 'territorio'
+}
+function refreshDistrictControl(did){
+ var row=document.getElementById('districtRow_'+did),cb=document.getElementById('districtCb_'+did),chip=document.getElementById('districtChip_'+did);
+ if(row)row.classList.toggle('active',active.has(did));
+ if(cb)cb.checked=active.has(did);
+ if(chip){
+   var d=cfg(did);
+   chip.className='data-chip'+(districtData[did]?' ready':'');
+   chip.textContent=d?districtChipText(d):'territorio'
+ }
+}
 function renderDistrictControls(){
  controls.innerHTML='';
  districtCfg.districts.forEach(function(d){
-   var row=document.createElement('label');row.className='district-row'+(active.has(d.id)?' active':'');
-   var cb=document.createElement('input');cb.type='checkbox';cb.checked=active.has(d.id);cb.setAttribute('aria-label','Mostrar '+d.id);
+   var row=document.createElement('div');row.id='districtRow_'+d.id;row.className='district-row'+(active.has(d.id)?' active':'');
+   var cb=document.createElement('input');cb.id='districtCb_'+d.id;cb.type='checkbox';cb.checked=active.has(d.id);cb.setAttribute('aria-label','Mostrar '+d.id);
    var sw=document.createElement('span');sw.className='swatch';sw.style.background=d.color;
-   var tx=document.createElement('div');tx.innerHTML='<div class="district-name">'+d.id+' · '+esc(d.head)+'</div><div class="district-head">'+d.municipalities.length+' municipios</div>';
-   var chip=document.createElement('span');
-   chip.className='data-chip'+(districtData[d.id]?' ready':'');
-   chip.textContent=d.dataUrl?(districtData[d.id]?'datos cargados':'datos disponibles'):'territorio';
+   var tx=document.createElement('label');tx.setAttribute('for',cb.id);tx.style.cursor='pointer';tx.innerHTML='<div class="district-name">'+d.id+' · '+esc(d.head)+'</div><div class="district-head">'+d.municipalities.length+' municipios</div>';
+   var chip=document.createElement('span');chip.id='districtChip_'+d.id;chip.className='data-chip'+(districtData[d.id]?' ready':'');chip.textContent=districtChipText(d);
    cb.addEventListener('change',function(){
      if(cb.checked){
        active.add(d.id);
-       renderDistrictControls();
+       refreshDistrictControl(d.id);
        updateMap();
        fitActive();
+       statusEl.textContent=d.id+' · '+d.head+' activado · '+active.size+' distrito(s) visibles.';
        ensureDistrictData(d.id);
      }else{
        active.delete(d.id);
+       refreshDistrictControl(d.id);
        if(currentFine&&currentFine.did===d.id)cleanMap();
-       renderDistrictControls();
        updateMap();
        fitActive();
+       statusEl.textContent=d.id+' · '+d.head+' desactivado · '+active.size+' distrito(s) visibles.'
      }
    });
    row.appendChild(cb);row.appendChild(sw);row.appendChild(tx);row.appendChild(chip);controls.appendChild(row)
