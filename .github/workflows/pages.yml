@@ -33,6 +33,9 @@ jobs:
         with:
           path: .
 
+      - name: Wait for Pages lock release
+        run: sleep 30
+
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
