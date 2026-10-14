@@ -1,0 +1,128 @@
+{
+  "schema": "BALAM-DISTRICTS-0.3",
+  "generated": "2026-10-14",
+  "source_note": "Cabeceras distritales vigentes según Guía de Distritos de Salud Sonora 2026. Agrupación municipal base según Anuario Estadístico del Sistema Estatal de Salud 2023 (distribución distrital 2022), conservando DS05 validado en BALAM.",
+  "districts": [
+    {
+      "id": "DS01",
+      "name": "Distrito de Salud 01",
+      "head": "Hermosillo",
+      "color": "#409993",
+      "municipalities": [
+        "001",
+        "005",
+        "008",
+        "009",
+        "013",
+        "014",
+        "020",
+        "021",
+        "023",
+        "024",
+        "028",
+        "030",
+        "032",
+        "034",
+        "037",
+        "038",
+        "040",
+        "041",
+        "044",
+        "045",
+        "050",
+        "052",
+        "053",
+        "054",
+        "056",
+        "057",
+        "061",
+        "062",
+        "063",
+        "066",
+        "067",
+        "068"
+      ]
+    },
+    {
+      "id": "DS02",
+      "name": "Distrito de Salud 02",
+      "head": "Caborca",
+      "color": "#EC889B",
+      "municipalities": [
+        "004",
+        "007",
+        "017",
+        "046",
+        "047",
+        "060",
+        "065"
+      ]
+    },
+    {
+      "id": "DS03",
+      "name": "Distrito de Salud 03",
+      "head": "Santa Ana",
+      "color": "#5E9569",
+      "municipalities": [
+        "002",
+        "006",
+        "010",
+        "011",
+        "015",
+        "016",
+        "019",
+        "022",
+        "027",
+        "031",
+        "035",
+        "036",
+        "039",
+        "043",
+        "058",
+        "059",
+        "064"
+      ]
+    },
+    {
+      "id": "DS04",
+      "name": "Distrito de Salud 04",
+      "head": "Cajeme",
+      "color": "#7BB7B7",
+      "municipalities": [
+        "012",
+        "018",
+        "025",
+        "029",
+        "049",
+        "051",
+        "069",
+        "072"
+      ]
+    },
+    {
+      "id": "DS05",
+      "name": "Distrito de Salud 05",
+      "head": "Navojoa",
+      "color": "#817060",
+      "municipalities": [
+        "003",
+        "026",
+        "033",
+        "042",
+        "071"
+      ],
+      "dataUrl": "data/ds05_metrics.json"
+    },
+    {
+      "id": "DS06",
+      "name": "Distrito de Salud 06",
+      "head": "San Luis Río Colorado",
+      "color": "#2F746E",
+      "municipalities": [
+        "048",
+        "055",
+        "070"
+      ]
+    }
+  ]
+}
