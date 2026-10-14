@@ -225,7 +225,7 @@ async function loadAgeb(mun,name){
      l.on('click',function(ev){
        if(ev&&ev.originalEvent&&L.DomEvent)L.DomEvent.stopPropagation(ev.originalEvent);
        selectedAgeb=key;
-       if(agebLayer)agebLayer.setStyle(function(x){var xp=x.properties||{},xk=prop(xp,['cvegeo','CVEGEO'])||(mun+'-'+prop(xp,['cve_loc','CVE_LOC'])+'-'+prop(xp,['cve_ageb','CVE_AGEB']));return {color:xk===selectedAgeb?'#173a37':'#409993',weight:xk===selectedAgeb?3:1.25,fillColor:xp.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:xk===selectedAgeb?.28:.16}});
+       if(agebLayer)agebLayer.setStyle(function(x){var xp=x.properties||{},xk=prop(xp,['cvegeo','CVEGEO'])||(mun+'-'+prop(xp,['cve_loc','CVE_LOC'])+'-'+prop(xp,['cve_ageb','CVE_AGEB']));return {color:xk===selectedAgeb?'#173a37':'#409993',weight:xk===selectedAgeb?3:1.25,fillColor:xp.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:xk===selectedAgeb ? .28 : .16}});
        map.fitBounds(l.getBounds(),{padding:[28,28],maxZoom:14});
        loadBlocksForAgeb(f,mun,name)
      })
