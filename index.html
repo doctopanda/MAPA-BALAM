@@ -44,7 +44,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.7</div>
+    <div class="eyebrow">MAPA BALAM · v0.7.1</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Activa uno o varios distritos y construye una sola lectura comparable: modo, fuente, programa, indicador y periodo.</p>
     <div class="row">
@@ -173,19 +173,19 @@ function styleFeature(f){
  if(!did||!active.has(did))return {color:'#bdcac8',weight:.65,fillColor:'#edf2f1',fillOpacity:.30};
  var ind=indicatorCfg();
  if(ind.scope==='territory')return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.25,fillColor:d.color,fillOpacity:.57};
- if(!currentAvailability())return {color:d.color,weight:1.2,dashArray:'5 4',fillColor:'#e8e3df',fillOpacity:.38};
+ if(!currentAvailability())return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14};
  if(ind.scope==='municipality'){
    var v=municipalityValue(did,code);
-   if(v==null)return {color:d.color,weight:1.15,dashArray:'5 4',fillColor:'#e8e3df',fillOpacity:.42};
+   if(v==null)return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14};
    var ratio=v/globalMax();
    return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.35,fillColor:fillScale(ratio),fillOpacity:.82}
  }
  if(ind.scope==='district'){
    var dv=districtValue(did);
-   if(dv==null)return {color:d.color,weight:1.15,dashArray:'5 4',fillColor:'#e8e3df',fillOpacity:.42};
+   if(dv==null)return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14};
    return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.35,dashArray:'3 3',fillColor:d.color,fillOpacity:.32}
  }
- return {color:d.color,weight:1.15,dashArray:'5 4',fillColor:'#e8e3df',fillOpacity:.38}
+ return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14}
 }
 function tooltipText(f){
  var code=codeOf(f),name=nameOf(f),did=districtFor(code),ind=indicatorCfg();
@@ -213,7 +213,7 @@ function updateMap(){
 async function ensureDistrictData(did){
  if(districtData[did]!==undefined)return districtData[did];
  var d=cfg(did);
- if(!d||!d.dataUrl){districtData[did]=null;renderDistrictControls();return null}
+ if(!d||!d.dataUrl){districtData[did]=null;renderDistrictControls();updateMap();return null}
  try{var r=await fetch(d.dataUrl);if(!r.ok)throw new Error('HTTP '+r.status);districtData[did]=await r.json()}
  catch(e){districtData[did]=null}
  renderDistrictControls();updateMap();return districtData[did]
@@ -268,8 +268,19 @@ function renderDistrictControls(){
    chip.className='data-chip'+(districtData[d.id]?' ready':'');
    chip.textContent=d.dataUrl?(districtData[d.id]?'datos cargados':'datos disponibles'):'territorio';
    cb.addEventListener('change',function(){
-     if(cb.checked){active.add(d.id);ensureDistrictData(d.id)}
-     else{active.delete(d.id);if(currentFine&&currentFine.did===d.id)cleanMap();renderDistrictControls();updateMap();fitActive()}
+     if(cb.checked){
+       active.add(d.id);
+       renderDistrictControls();
+       updateMap();
+       fitActive();
+       ensureDistrictData(d.id);
+     }else{
+       active.delete(d.id);
+       if(currentFine&&currentFine.did===d.id)cleanMap();
+       renderDistrictControls();
+       updateMap();
+       fitActive();
+     }
    });
    row.appendChild(cb);row.appendChild(sw);row.appendChild(tx);row.appendChild(chip);controls.appendChild(row)
  })
@@ -280,11 +291,11 @@ function renderLegend(){
  if(ind.scope==='municipality'&&currentAvailability()){
    html.push('<span class="badge"><i class="legend-swatch" style="background:#2f746e"></i>mayor</span>');
    html.push('<span class="badge"><i class="legend-swatch" style="background:#7BB7B7"></i>media</span>');
-   html.push('<span class="badge"><i class="legend-swatch" style="background:#e8e3df"></i>sin dato</span>')
+   html.push('<span class="badge">borde/tinte distrital = activo sin dato</span>')
  }else if(ind.scope==='district'){
    html.push('<span class="badge">trazo discontinuo = dato distrital</span>')
  }else if(ind.scope==='unavailable'||!currentAvailability()){
-   html.push('<span class="badge"><i class="legend-swatch" style="background:#e8e3df"></i>sin corte territorial</span>')
+   html.push('<span class="badge">tinte distrital discontinuo = activo sin corte</span>')
  }
  legendEl.innerHTML=html.join('')
 }
