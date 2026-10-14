@@ -53,9 +53,9 @@ main{position:relative;min-width:0;min-height:620px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.1</div>
+    <div class="eyebrow">MAPA BALAM · v0.2</div>
     <h2>Sonora completo, DS05 con lupa</h2>
-    <p class="lead">Contexto estatal con 72 municipios. El Distrito 05 se activa como territorio analítico y el detalle de manzanas se solicita únicamente al entrar a cada municipio.</p>
+    <p class="lead">Contexto estatal con 72 municipios. Al entrar a un municipio del Distrito 05 se cargan sus AGEB urbanas y rurales; las manzanas sólo despiertan al seleccionar una AGEB.</p>
     <div class="kpis">
       <div class="kpi"><b id="kCases">…</b><span>casos / atenciones</span></div>
       <div class="kpi"><b id="kActions">…</b><span>acciones operativas</span></div>
@@ -81,7 +81,7 @@ main{position:relative;min-width:0;min-height:620px}.map{position:absolute;inset
       <div class="control"><button id="fitDs" class="primary">Enfocar DS05</button></div>
       <div class="control"><button id="fitSonora" class="secondary">Ver Sonora</button></div>
     </div>
-    <div class="control"><button id="clearBlocks" class="pink">Quitar manzanas cargadas</button></div>
+    <div class="control"><button id="clearDetail" class="pink">Quitar AGEB / manzanas</button></div>
     <div id="status" class="status">Preparando geometría estatal…</div>
     <div id="legend" class="legend"></div>
   </div>
@@ -101,7 +101,7 @@ main{position:relative;min-width:0;min-height:620px}.map{position:absolute;inset
 
 <main>
   <div id="map" class="map"></div>
-  <div class="map-float"><b>🐆 Arquitectura jaguar</b><br>Sonora abre ligero. El detalle pesado sólo despierta cuando seleccionas un municipio DS05 y solicitas sus manzanas.</div>
+  <div class="map-float"><b>🐆 Arquitectura jaguar</b><br>Sonora abre ligero. Municipio → AGEB → manzana. Cada nivel despierta únicamente cuando se necesita.</div>
 </main>
 </div>
 
@@ -112,10 +112,12 @@ main{position:relative;min-width:0;min-height:620px}.map{position:absolute;inset
 var COLORS={teal:'#409993',aqua:'#7BB7B7',green:'#5E9569',pink:'#EC889B',taupe:'#817060',muted:'#dfe8e6',ink:'#173a37'};
 var DS05=new Set(['26003','26026','26033','26042','26071']);
 var MUN_URL='https://raw.githubusercontent.com/MacWilliXD/INEGI-geojson/main/geojson_descargas/AGEM_26.geojson';
-var BLOCK_URL='https://geomaticasig1.semarnat.gob.mx/arcgis/rest/services/apsDev/Temas_rio_Tula/MapServer/82/query';
+var AGEBU_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/agebu/26/';
+var AGEBR_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/agebr/26/';
+var MZA_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/mza/26/';
 var map=L.map('map',{preferCanvas:true,zoomControl:true}).setView([29.1,-110.5],7);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-var stateLayer=null,blockLayer=null,metrics=null,munIndex={},selected=null,dsBounds=null,stateBounds=null;
+var stateLayer=null,agebLayer=null,blockLayer=null,metrics=null,munIndex={},selected=null,selectedAgeb=null,dsBounds=null,stateBounds=null,geoCache={};
 var statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),lensEl=document.getElementById('lens'),legendEl=document.getElementById('legend');
 function fmt(n){return Number(n||0).toLocaleString('es-MX')}
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
@@ -175,41 +177,83 @@ function renderDetail(code){
  '<div class="metricline"><span>Vigilancia</span><b>'+fmt(m.modules.vigilancia_epidemiologica)+'</b></div>'+
  '<div class="metricline"><span>Enfermería</span><b>'+fmt(m.modules.enfermeria)+'</b></div>'+
  '<p class="tiny"><b>Lente activa:</b> '+esc(lensLine)+'</p>'+
- '<div class="control"><button id="loadBlocksBtn" class="primary">Cargar manzanas de '+esc(m.name)+'</button></div>'+
- '<div class="tiny">Las manzanas se descargan sólo al pedirlas. No contienen información nominal BALAM.</div>';
- var b=document.getElementById('loadBlocksBtn');if(b)b.addEventListener('click',function(){loadBlocks(m.code,m.name)})
+ '<div class="control"><button id="loadAgebBtn" class="primary">Recargar AGEB de '+esc(m.name)+'</button></div>'+
+ '<div class="tiny">AGEB urbanas y rurales: INEGI. Al tocar una AGEB, BALAM carga únicamente sus manzanas. La geometría no contiene nominales BALAM.</div>';
+ var b=document.getElementById('loadAgebBtn');if(b)b.addEventListener('click',function(){loadAgeb(m.code,m.name)})
 }
 function onEach(f,layer){
  var code=codeOf(f),name=nameOf(f);
  layer.bindTooltip(name+(DS05.has(code)?' · DS05':''),{sticky:true});
  layer.on('click',function(){
-   selected=code;updateStyles();renderDetail(code);
-   if(DS05.has(code))map.fitBounds(layer.getBounds(),{padding:[30,30],maxZoom:10})
+   selected=code;selectedAgeb=null;updateStyles();renderDetail(code);
+   if(DS05.has(code)){
+     map.fitBounds(layer.getBounds(),{padding:[30,30],maxZoom:10});
+     loadAgeb(code.slice(2),name);
+   }
  })
 }
-function clearBlocks(){
- if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
- statusEl.textContent='Capa de manzanas retirada. El núcleo estatal permanece ligero.'
+function prop(p,names){for(var i=0;i<names.length;i++){if(p&&p[names[i]]!=null&&String(p[names[i]]).trim()!=='')return String(p[names[i]])}return ''}
+function fc(j){if(j&&j.type==='FeatureCollection'&&Array.isArray(j.features))return j;if(j&&Array.isArray(j.features))return {type:'FeatureCollection',features:j.features};return {type:'FeatureCollection',features:[]}}
+async function cachedJson(url){
+ if(geoCache[url])return geoCache[url];
+ var r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);
+ var j=await r.json();geoCache[url]=j;return j
 }
-async function loadBlocks(mun,name){
- clearBlocks();statusEl.textContent='Cargando manzanas de '+name+' bajo demanda…';
- var all=[],pageSize=2000;
+function clearDetail(){
+ if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}
+ if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
+ selectedAgeb=null;
+ statusEl.textContent='Detalle AGEB/manzana retirado. El núcleo estatal permanece ligero.'
+}
+async function loadAgeb(mun,name){
+ clearDetail();statusEl.textContent='Cargando AGEB urbanas y rurales de '+name+'…';
  try{
-  for(var offset=0;offset<60000;offset+=pageSize){
-   var p=new URLSearchParams({where:"CVE_ENT='26' AND CVE_MUN='"+mun+"'",outFields:'*',returnGeometry:'true',outSR:'4326',f:'geojson',resultOffset:String(offset),resultRecordCount:String(pageSize)});
-   var r=await fetch(BLOCK_URL+'?'+p.toString());
-   if(!r.ok)throw new Error('HTTP '+r.status);
-   var j=await r.json(),ff=(j&&j.features)||[];all=all.concat(ff);
-   statusEl.textContent='Cargando '+fmt(all.length)+' manzanas de '+name+'…';
-   if(ff.length<pageSize)break
-  }
+  var settled=await Promise.allSettled([cachedJson(AGEBU_URL+mun),cachedJson(AGEBR_URL+mun)]);
+  var all=[];
+  if(settled[0].status==='fulfilled')fc(settled[0].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Urbana';all.push(f)});
+  if(settled[1].status==='fulfilled')fc(settled[1].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Rural';all.push(f)});
+  if(!all.length)throw new Error('INEGI no devolvió AGEB para este municipio');
+  agebLayer=L.geoJSON({type:'FeatureCollection',features:all},{
+   renderer:L.canvas({padding:.5}),
+   style:function(f){
+     var p=f.properties||{},key=prop(p,['cvegeo','CVEGEO']);
+     return {color:key===selectedAgeb?'#173a37':'#409993',weight:key===selectedAgeb?3:1.25,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:.16}
+   },
+   onEachFeature:function(f,l){
+     var p=f.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']),amb=p.__ambito||'AGEB',key=prop(p,['cvegeo','CVEGEO'])||(mun+'-'+loc+'-'+ageb);
+     l.bindTooltip('AGEB '+esc(ageb)+' · '+esc(amb)+(loc?' · Loc. '+esc(loc):''),{sticky:true});
+     l.on('click',function(ev){
+       if(ev&&ev.originalEvent&&L.DomEvent)L.DomEvent.stopPropagation(ev.originalEvent);
+       selectedAgeb=key;
+       if(agebLayer)agebLayer.setStyle(function(x){var xp=x.properties||{},xk=prop(xp,['cvegeo','CVEGEO'])||(mun+'-'+prop(xp,['cve_loc','CVE_LOC'])+'-'+prop(xp,['cve_ageb','CVE_AGEB']));return {color:xk===selectedAgeb?'#173a37':'#409993',weight:xk===selectedAgeb?3:1.25,fillColor:xp.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:xk===selectedAgeb?.28:.16}});
+       map.fitBounds(l.getBounds(),{padding:[28,28],maxZoom:14});
+       loadBlocksForAgeb(f,mun,name)
+     })
+   }
+  }).addTo(map);
+  statusEl.textContent=name+': '+fmt(all.length)+' AGEB activas. Rosa = rural · aqua = urbana. Toca una AGEB para ver sus manzanas.';
+ }catch(e){statusEl.textContent='No fue posible cargar AGEB: '+e.message+'. El mapa municipal sigue disponible.'}
+}
+async function loadBlocksForAgeb(agebFeature,mun,name){
+ if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
+ var p=agebFeature.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']),amb=p.__ambito||'';
+ statusEl.textContent='Cargando manzanas de AGEB '+ageb+' · '+name+'…';
+ try{
+  var url=loc?MZA_URL+mun+'/'+loc:MZA_URL+mun;
+  var j=await cachedJson(url),all=fc(j).features.filter(function(f){
+    var q=f.properties||{};
+    return prop(q,['cve_ageb','CVE_AGEB'])===ageb && (!loc || prop(q,['cve_loc','CVE_LOC'])===loc)
+  });
   blockLayer=L.geoJSON({type:'FeatureCollection',features:all},{
    renderer:L.canvas({padding:.5}),
-   style:{color:'#557b75',weight:.45,fillColor:'#f7fbfa',fillOpacity:.12},
-   onEachFeature:function(f,l){var p=f.properties||{};l.bindTooltip('Manzana '+esc(p.CVE_MZA||p.cve_mza||'')+' · AGEB '+esc(p.CVE_AGEB||p.cve_ageb||''),{sticky:true})}
+   style:{color:'#557b75',weight:.55,fillColor:'#ffffff',fillOpacity:.22},
+   onEachFeature:function(f,l){
+     var q=f.properties||{},mza=prop(q,['cve_mza','CVE_MZA']),qloc=prop(q,['cve_loc','CVE_LOC']);
+     l.bindTooltip('Manzana '+esc(mza)+' · AGEB '+esc(ageb)+(qloc?' · Loc. '+esc(qloc):''),{sticky:true})
+   }
   }).addTo(map);
-  statusEl.textContent=name+': '+fmt(all.length)+' manzanas activas. Capa cargada sólo bajo demanda.';
- }catch(e){statusEl.textContent='No fue posible cargar manzanas: '+e.message+'. El mapa estatal y los indicadores BALAM siguen disponibles.'}
+  statusEl.textContent='AGEB '+ageb+': '+fmt(all.length)+' manzanas activas. El resto del municipio no se descargó.';
+ }catch(e){statusEl.textContent='No fue posible cargar las manzanas de AGEB '+ageb+': '+e.message+'. La capa AGEB permanece activa.'}
 }
 async function init(){
  try{
@@ -231,8 +275,8 @@ async function init(){
 }
 lensEl.addEventListener('change',updateStyles);
 document.getElementById('fitDs').addEventListener('click',function(){if(dsBounds)map.fitBounds(dsBounds,{padding:[28,28]})});
-document.getElementById('fitSonora').addEventListener('click',function(){if(stateBounds)map.fitBounds(stateBounds,{padding:[18,18]})});
-document.getElementById('clearBlocks').addEventListener('click',clearBlocks);
+document.getElementById('fitSonora').addEventListener('click',function(){clearDetail();if(stateBounds)map.fitBounds(stateBounds,{padding:[18,18]})});
+document.getElementById('clearDetail').addEventListener('click',clearDetail);
 init();
 })();
 </script>
