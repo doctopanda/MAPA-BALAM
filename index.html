@@ -3,280 +3,224 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>MAPA BALAM · Sonora / DS05</title>
+<title>MAPA BALAM · Sonora · 6 Distritos</title>
 <link rel="preconnect" href="https://unpkg.com">
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 <style>
-:root{--teal:#409993;--aqua:#7BB7B7;--green:#5E9569;--pink:#EC889B;--taupe:#817060;--ink:#173a37;--muted:#6f8783;--line:#d7e5e2;--paper:#f7fbfa;--white:#fff;--danger:#ce6675}
+:root{--teal:#409993;--aqua:#7BB7B7;--green:#5E9569;--pink:#EC889B;--taupe:#817060;--ink:#173a37;--muted:#6f8783;--line:#d7e5e2;--paper:#f7fbfa}
 *{box-sizing:border-box}html,body{margin:0;height:100%;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;color:var(--ink);background:#eef5f3}
 body{display:grid;grid-template-rows:auto 1fr;min-height:100vh}
-header{display:flex;align-items:center;gap:16px;padding:12px 18px;background:var(--teal);color:white;box-shadow:0 2px 14px rgba(20,70,67,.18);z-index:1001}
-.brand{display:flex;align-items:center;gap:11px;min-width:240px}.brand svg{width:46px;height:46px}.brand strong{font-size:24px;letter-spacing:.08em}.brand small{display:block;font-size:11px;opacity:.78;letter-spacing:.06em;text-transform:uppercase}
-.header-meta{margin-left:auto;text-align:right;font-size:12px;line-height:1.35;opacity:.94}
-.shell{display:grid;grid-template-columns:330px minmax(0,1fr);min-height:0}
-aside{background:#fff;border-right:1px solid var(--line);padding:16px;overflow:auto}
-main{position:relative;min-width:0;min-height:620px}.map{position:absolute;inset:0}
-.card{border:1px solid var(--line);background:#fff;border-radius:16px;padding:14px;margin-bottom:12px}
-.card h2,.card h3{margin:0 0 8px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.12em;color:var(--teal);text-transform:uppercase}
-.lead{font-size:13px;line-height:1.45;color:#496a65}.tiny{font-size:11px;line-height:1.45;color:var(--muted)}
-.kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px}.kpi{border:1px solid var(--line);border-radius:13px;padding:10px;background:var(--paper)}.kpi b{display:block;font-size:21px}.kpi span{font-size:10px;color:var(--muted)}
-.control{margin:10px 0}.control label{display:block;font-size:11px;font-weight:800;margin-bottom:5px;color:#4d6e69}.control select,.control button{width:100%;min-height:42px;border-radius:11px;border:1px solid #bfd4d0;background:#fff;color:var(--ink);padding:8px 10px;font-size:13px}
-.control button{cursor:pointer;font-weight:800}.control button.primary{background:var(--teal);color:#fff;border-color:var(--teal)}.control button.secondary{background:#edf7f5}.control button.pink{background:#fff0f3;border-color:#f1c6cf;color:#904b58}
-.row{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.status{padding:9px 10px;border-radius:11px;background:#eef7f5;border:1px solid #cee1dd;font-size:11px;line-height:1.35}
-.badge{display:inline-flex;align-items:center;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:900;background:#e8f5f2;color:#256d64;margin:2px}
-.badge.pink{background:#fff0f3;color:#a14f61}.badge.taupe{background:#f1ece8;color:#6f6256}
-.detail-title{font-size:18px;font-weight:900}.metricline{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-bottom:1px dashed #dce8e5;font-size:12px}.metricline:last-child{border-bottom:0}.metricline b{color:#285f58}
-.legend{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}.sw{width:10px;height:10px;border-radius:3px;display:inline-block;margin-right:5px}
-.map-float{position:absolute;z-index:900;right:12px;top:12px;background:rgba(255,255,255,.96);backdrop-filter:blur(8px);border:1px solid var(--line);border-radius:14px;padding:10px 12px;max-width:280px;box-shadow:0 6px 25px rgba(33,80,75,.13);font-size:11px;line-height:1.4}
-.map-float b{font-size:12px}.leaflet-tooltip{font-family:inherit}
-.progress{height:6px;background:#e8efed;border-radius:999px;overflow:hidden;margin-top:5px}.progress i{display:block;height:100%;background:var(--teal)}
-.footer-note{font-size:10px;color:#738b87;margin-top:10px;line-height:1.45}
-@media(max-width:860px){.shell{grid-template-columns:1fr;grid-template-rows:auto 70vh}aside{max-height:none;border-right:0;border-bottom:1px solid var(--line)}main{min-height:70vh}.header-meta{display:none}.brand{min-width:0}}
+header{display:flex;align-items:center;gap:14px;padding:8px 16px;background:#168f8b;color:#fff;box-shadow:0 2px 14px rgba(20,70,67,.18);z-index:1001}
+.brand-logo{width:270px;max-width:48vw;height:58px;object-fit:contain;object-position:left center;display:block}
+.header-meta{margin-left:auto;text-align:right;font-size:12px;line-height:1.35}
+.shell{display:grid;grid-template-columns:390px minmax(0,1fr);min-height:0}
+aside{background:#fff;border-right:1px solid var(--line);padding:14px;overflow:auto}
+main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset:0}
+.card{border:1px solid var(--line);background:#fff;border-radius:15px;padding:13px;margin-bottom:11px}
+.card h2,.card h3{margin:0 0 7px}.eyebrow{font-size:10px;font-weight:900;letter-spacing:.12em;color:var(--teal);text-transform:uppercase}
+.lead{font-size:12px;line-height:1.45;color:#496a65}.tiny{font-size:10.5px;line-height:1.45;color:var(--muted)}
+.row{display:flex;gap:7px;flex-wrap:wrap}.btn{min-height:38px;border:1px solid #bfd4d0;border-radius:10px;background:#edf7f5;color:var(--ink);padding:8px 10px;font-weight:800;cursor:pointer}.btn.primary{background:var(--teal);border-color:var(--teal);color:#fff}.btn.pink{background:#fff0f3;border-color:#f1c6cf;color:#904b58}
+.status{padding:9px 10px;border-radius:10px;background:#eef7f5;border:1px solid #cee1dd;font-size:10.5px;line-height:1.4;margin-top:8px}
+.district-list{display:grid;gap:8px}.district-row{border:1px solid var(--line);border-radius:12px;padding:9px;background:#fbfdfc}.district-row.active{background:#f5fbfa;border-color:#9dc9c3}
+.district-top{display:grid;grid-template-columns:auto 13px 1fr auto;gap:8px;align-items:center}.district-top input{width:18px;height:18px}.swatch{width:12px;height:12px;border-radius:4px}.district-name{font-size:12px;font-weight:900}.district-head{font-size:10px;color:var(--muted)}.data-chip{font-size:9px;padding:3px 6px;border-radius:999px;background:#eef2f1;color:#6e817e}.data-chip.ready{background:#e8f5f2;color:#246f65}
+.district-row select{margin-top:7px;width:100%;min-height:36px;border:1px solid #c8d9d6;border-radius:9px;background:#fff;color:var(--ink);padding:6px 8px;font-size:11px}
+.legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}.badge{display:inline-flex;align-items:center;gap:5px;border-radius:999px;padding:4px 7px;font-size:9px;font-weight:900;background:#eef4f2}
+.detail-title{font-size:18px;font-weight:900}.metricline{display:flex;justify-content:space-between;gap:12px;padding:6px 0;border-bottom:1px dashed #dce8e5;font-size:11px}.metricline b{color:#285f58}
+.map-float{position:absolute;z-index:900;right:12px;top:12px;background:rgba(255,255,255,.96);border:1px solid var(--line);border-radius:13px;padding:9px 11px;max-width:285px;box-shadow:0 6px 25px rgba(33,80,75,.13);font-size:10px;line-height:1.4}
+@media(max-width:900px){.shell{grid-template-columns:1fr;grid-template-rows:auto 72vh}.header-meta{display:none}.brand-logo{width:220px;height:50px}aside{border-right:0;border-bottom:1px solid var(--line)}main{min-height:72vh}}
 </style>
 </head>
 <body>
 <header>
-  <div class="brand">
-    <svg viewBox="0 0 72 72" aria-hidden="true">
-      <path d="M11 43c2-14 9-26 22-31 7-3 15-3 22 1l7-3-2 11c4 5 5 11 3 17-3 10-12 18-25 20-12 2-23-2-27-15z" fill="#f5efe4"/>
-      <path d="M51 18l10-5-3 11z" fill="#817060"/><path d="M17 48c9-3 18-1 25 6-9 8-23 7-31-1z" fill="#7BB7B7"/>
-      <circle cx="42" cy="28" r="3" fill="#409993"/><path d="M49 37c5 1 8 4 9 7-5 2-10 1-14-2z" fill="#817060"/>
-      <g fill="#5E9569"><circle cx="29" cy="23" r="2.3"/><circle cx="24" cy="31" r="2"/><circle cx="34" cy="36" r="2.4"/><circle cx="21" cy="40" r="2.2"/><circle cx="39" cy="18" r="2"/></g>
-      <path d="M25 55c-3 5-7 8-13 9 2-6 6-10 11-12z" fill="#EC889B"/>
-    </svg>
-    <div><strong>BALAM</strong><small>Mapa territorial · Sonora</small></div>
-  </div>
-  <div class="header-meta"><b>Distrito de Salud 05 · Navojoa</b><br>Corte BALAM 12/10/2026 · sólo agregados territoriales</div>
+<img class="brand-logo" src="data:image/webp;base64,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" alt="BALAM · jaguar">
+<div class="header-meta"><b>Mapa estatal multi-distrito</b><br>Municipio → AGEB → manzana · datos agregados BALAM</div>
 </header>
-
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.2</div>
-    <h2>Sonora completo, DS05 con lupa</h2>
-    <p class="lead">Contexto estatal con 72 municipios. Al entrar a un municipio del Distrito 05 se cargan sus AGEB urbanas y rurales; las manzanas sólo despiertan al seleccionar una AGEB.</p>
-    <div class="kpis">
-      <div class="kpi"><b id="kCases">…</b><span>casos / atenciones</span></div>
-      <div class="kpi"><b id="kActions">…</b><span>acciones operativas</span></div>
-      <div class="kpi"><b id="kLocs">…</b><span>localidades</span></div>
-      <div class="kpi"><b id="kLatrines">…</b><span>letrinas encaladas</span></div>
-    </div>
+    <div class="eyebrow">MAPA BALAM · v0.3</div>
+    <h2>Seis distritos, una sola piel</h2>
+    <p class="lead">Activa uno o varios Distritos de Salud. Cada distrito puede mostrar una lectura distinta sin obligar al navegador a cargar toda la cartografía fina.</p>
+    <div class="row"><button class="btn primary" id="fitActive">Enfocar activos</button><button class="btn" id="onlyDs05">Sólo DS05</button><button class="btn pink" id="clearDetail">Quitar AGEB/manzanas</button></div>
   </div>
-
   <div class="card">
-    <h3>Lente territorial</h3>
-    <div class="control"><label for="lens">Variable de lectura</label>
-      <select id="lens">
-        <option value="territorio">Territorio DS05</option>
-        <option value="canonical_rows">Captura canónica acumulada</option>
-        <option value="atencion_medica">Atención Médica</option>
-        <option value="promocion_salud">Promoción de la Salud</option>
-        <option value="vigilancia_epidemiologica">Vigilancia epidemiológica</option>
-        <option value="enfermeria">Enfermería</option>
-        <option value="cecosabi">CECOSABI · encalamiento</option>
-      </select>
-    </div>
-    <div class="row">
-      <div class="control"><button id="fitDs" class="primary">Enfocar DS05</button></div>
-      <div class="control"><button id="fitSonora" class="secondary">Ver Sonora</button></div>
-    </div>
-    <div class="control"><button id="clearDetail" class="pink">Quitar AGEB / manzanas</button></div>
-    <div id="status" class="status">Preparando geometría estatal…</div>
+    <h3>Distritos visibles</h3>
+    <div id="districtControls" class="district-list"></div>
     <div id="legend" class="legend"></div>
+    <div id="status" class="status">Preparando Sonora…</div>
   </div>
-
   <div class="card" id="detail">
     <div class="eyebrow">Selección</div>
-    <div class="detail-title">Haz clic en un municipio</div>
-    <p class="tiny">Los municipios fuera de DS05 se muestran como contexto. En los cinco municipios del distrito aparece la ficha BALAM y puede activarse el detalle de manzanas.</p>
+    <div class="detail-title">Elige un municipio activo</div>
+    <p class="tiny">Al tocar un municipio de un distrito activo, BALAM carga sus AGEB urbanas y rurales. Al tocar una AGEB, carga únicamente sus manzanas.</p>
   </div>
-
   <div class="card">
-    <h3>Reglas de lectura</h3>
-    <div class="tiny"><b>Ausencia de captura ≠ cero actividad.</b> Los módulos municipales representan filas canónicas disponibles, no personas ni acciones discretas. Los 977 encalamientos permanecen como acumulado distrital hasta tener una llave territorial inequívoca para cada registro.</div>
-    <div class="footer-note">Privacidad: esta página pública no contiene nombres, CURP, teléfonos, expedientes ni domicilios individuales.</div>
+    <h3>Regla BALAM</h3>
+    <div class="tiny"><b>Ausencia de captura no significa cero actividad.</b> Las capas SIESA, bases maestras, CECOSABI y demás fuentes sólo colorean un territorio cuando existe una llave geográfica defendible. La página pública no contiene nominales.</div>
   </div>
 </aside>
-
 <main>
   <div id="map" class="map"></div>
-  <div class="map-float"><b>🐆 Arquitectura jaguar</b><br>Sonora abre ligero. Municipio → AGEB → manzana. Cada nivel despierta únicamente cuando se necesita.</div>
+  <div class="map-float"><b>🐆 LOD territorial</b><br>Sonora y distritos primero. AGEB al entrar al municipio. Manzanas sólo al tocar una AGEB.</div>
 </main>
 </div>
-
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
 'use strict';
-var COLORS={teal:'#409993',aqua:'#7BB7B7',green:'#5E9569',pink:'#EC889B',taupe:'#817060',muted:'#dfe8e6',ink:'#173a37'};
-var DS05=new Set(['26003','26026','26033','26042','26071']);
 var MUN_URL='https://raw.githubusercontent.com/MacWilliXD/INEGI-geojson/main/geojson_descargas/AGEM_26.geojson';
 var AGEBU_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/agebu/26/';
 var AGEBR_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/agebr/26/';
 var MZA_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/mza/26/';
+var LENSES=[
+ ['territorio','Territorio'],
+ ['canonical_rows','SIESA · captura canónica'],
+ ['acciones_operativas','SIESA · acciones operativas'],
+ ['atencion_medica','SIESA · Atención Médica'],
+ ['enfermeria','SIESA · Enfermería'],
+ ['odontologia','SIESA · Odontología'],
+ ['promocion_salud','SIESA · Promoción'],
+ ['vigilancia_epidemiologica','SIESA · Vigilancia'],
+ ['vacunacion','SIESA · Vacunación'],
+ ['vectores','SIESA · Vectores'],
+ ['salud_mental','SIESA · Salud mental'],
+ ['cecosabi','CECOSABI / saneamiento'],
+ ['bases_maestras','Bases maestras'],
+ ['necesidad','Necesidad'],
+ ['respuesta','Respuesta'],
+ ['brecha','Brecha']
+];
 var map=L.map('map',{preferCanvas:true,zoomControl:true}).setView([29.1,-110.5],7);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{maxZoom:19,attribution:'&copy; OpenStreetMap contributors'}).addTo(map);
-var stateLayer=null,agebLayer=null,blockLayer=null,metrics=null,munIndex={},selected=null,selectedAgeb=null,dsBounds=null,stateBounds=null,geoCache={};
-var statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),lensEl=document.getElementById('lens'),legendEl=document.getElementById('legend');
-function fmt(n){return Number(n||0).toLocaleString('es-MX')}
+var districtCfg=null,districtByMun={},districtData={},active=new Set(['DS05']),lensByDistrict={},stateLayer=null,stateBounds=null,agebLayer=null,blockLayer=null,selectedMun=null,selectedAgeb=null,geoCache={};
+var controls=document.getElementById('districtControls'),statusEl=document.getElementById('status'),detailEl=document.getElementById('detail'),legendEl=document.getElementById('legend');
 function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-function codeOf(f){var p=f.properties||{};return String(p.cvegeo||p.CVEGEO||'')}
+function fmt(n){return n==null?'—':Number(n).toLocaleString('es-MX')}
+function prop(p,names){for(var i=0;i<names.length;i++){if(p&&p[names[i]]!=null&&String(p[names[i]]).trim()!=='')return String(p[names[i]])}return ''}
+function codeOf(f){return String((f.properties||{}).cvegeo||(f.properties||{}).CVEGEO||'')}
 function nameOf(f){var p=f.properties||{};return p.nom_agem||p.NOM_AGEM||p.nombre||p.NOMBRE||'Municipio'}
-function mMetric(code){return munIndex[code]||null}
-function lensValue(m,lens){
- if(!m)return 0;
- if(lens==='territorio')return 1;
+function hexMix(hex,ratio){hex=hex.replace('#','');var r=parseInt(hex.slice(0,2),16),g=parseInt(hex.slice(2,4),16),b=parseInt(hex.slice(4,6),16);var q=Math.max(0,Math.min(1,ratio));r=Math.round(255-(255-r)*q);g=Math.round(255-(255-g)*q);b=Math.round(255-(255-b)*q);return '#'+[r,g,b].map(function(v){return v.toString(16).padStart(2,'0')}).join('')}
+function cfg(id){return districtCfg.districts.find(function(d){return d.id===id})}
+function districtFor(code){return districtByMun[code]||null}
+function municipalityMetric(did,code,lens){
+ var data=districtData[did]; if(!data)return null;
+ var m=(data.municipalities||[]).find(function(x){return x.cvegeo===code}); if(!m)return null;
  if(lens==='canonical_rows')return Number(m.canonical_rows||0);
- if(lens==='cecosabi')return null;
- return Number((m.modules||{})[lens]||0)
+ if(['atencion_medica','enfermeria','odontologia','promocion_salud','vigilancia_epidemiologica','vacunacion','vectores','salud_mental'].indexOf(lens)>=0)return Number((m.modules||{})[lens]||0);
+ return null
 }
-function lensLabel(l){
- return {territorio:'Territorio DS05',canonical_rows:'Filas canónicas',atencion_medica:'Atención Médica',promocion_salud:'Promoción',vigilancia_epidemiologica:'Vigilancia',enfermeria:'Enfermería',cecosabi:'CECOSABI / encalamiento'}[l]||l
+function districtMetric(did,lens){
+ var data=districtData[did];if(!data)return null;
+ if(lens==='acciones_operativas')return data.current_filter?Number(data.current_filter.discrete_operational_actions||0):null;
+ if(lens==='cecosabi')return data.cecosabi?Number(data.cecosabi.latrines_limed_total||0):null;
+ return null
 }
-function scaleColor(value,max){
- if(value===null)return COLORS.pink;
- if(max<=0)return COLORS.aqua;
- var r=value/max;
- if(r>=.75)return '#2f746e';
- if(r>=.45)return COLORS.teal;
- if(r>=.20)return COLORS.aqua;
- if(r>0)return '#b7d9d4';
- return '#e7efed'
-}
-function currentMax(){
- var l=lensEl.value;if(l==='territorio'||l==='cecosabi')return 1;
- var vals=metrics.municipalities.map(function(m){return lensValue(m,l)});return Math.max.apply(null,vals.concat([1]))
+function maxFor(did,lens){
+ var d=cfg(did),vals=(d.municipalities||[]).map(function(m){return municipalityMetric(did,'26'+m,lens)}).filter(function(v){return v!=null});
+ return vals.length?Math.max.apply(null,vals.concat([1])):1
 }
 function styleFeature(f){
- var code=codeOf(f),isDS=DS05.has(code),m=mMetric(code),l=lensEl.value,max=currentMax();
- if(!isDS)return {color:'#b8c8c5',weight:.7,fillColor:'#edf2f1',fillOpacity:.38};
- var fill=l==='territorio'?COLORS.teal:scaleColor(lensValue(m,l),max);
- return {color:selected===code?'#173a37':'#ffffff',weight:selected===code?3:1.5,fillColor:fill,fillOpacity:l==='territorio'?.68:.78}
+ var code=codeOf(f),did=districtFor(code),d=did?cfg(did):null;
+ if(!did||!active.has(did))return {color:'#bac9c6',weight:.65,fillColor:'#edf2f1',fillOpacity:.32};
+ var lens=lensByDistrict[did]||'territorio';
+ if(lens==='territorio')return {color:'#fff',weight:1.1,fillColor:d.color,fillOpacity:.62};
+ var mv=municipalityMetric(did,code,lens),dv=districtMetric(did,lens);
+ if(mv!=null){var ratio=Math.max(.16,mv/maxFor(did,lens));return {color:'#fff',weight:1.1,fillColor:hexMix(d.color,.25+.72*ratio),fillOpacity:.82}}
+ if(dv!=null)return {color:d.color,weight:1.25,dashArray:'4 3',fillColor:hexMix(d.color,.42),fillOpacity:.48};
+ return {color:d.color,weight:1.15,dashArray:'4 4',fillColor:hexMix(d.color,.22),fillOpacity:.32}
 }
-function updateStyles(){if(stateLayer)stateLayer.setStyle(styleFeature);renderLegend();if(selected)renderDetail(selected)}
+function labelLens(l){var x=LENSES.find(function(a){return a[0]===l});return x?x[1]:l}
+async function ensureDistrictData(did){
+ if(districtData[did]!==undefined)return districtData[did];
+ var d=cfg(did);if(!d||!d.dataUrl){districtData[did]=null;renderControls();return null}
+ try{var r=await fetch(d.dataUrl);if(!r.ok)throw new Error('HTTP '+r.status);districtData[did]=await r.json()}
+ catch(e){districtData[did]=null}
+ renderControls();updateMap();return districtData[did]
+}
+function renderControls(){
+ controls.innerHTML='';
+ districtCfg.districts.forEach(function(d){
+  var row=document.createElement('div');row.className='district-row'+(active.has(d.id)?' active':'');
+  var top=document.createElement('div');top.className='district-top';
+  var cb=document.createElement('input');cb.type='checkbox';cb.checked=active.has(d.id);cb.setAttribute('aria-label','Mostrar '+d.id);
+  var sw=document.createElement('span');sw.className='swatch';sw.style.background=d.color;
+  var tx=document.createElement('div');tx.innerHTML='<div class="district-name">'+d.id+' · '+esc(d.head)+'</div><div class="district-head">'+d.municipalities.length+' municipios</div>';
+  var chip=document.createElement('span');chip.className='data-chip'+(districtData[d.id]?' ready':'');chip.textContent=d.dataUrl?(districtData[d.id]?'datos cargados':'datos disponibles'):'territorio listo';
+  var sel=document.createElement('select');LENSES.forEach(function(x){var o=document.createElement('option');o.value=x[0];o.textContent=x[1];sel.appendChild(o)});sel.value=lensByDistrict[d.id]||'territorio';
+  cb.addEventListener('change',function(){if(cb.checked){active.add(d.id);ensureDistrictData(d.id)}else active.delete(d.id);clearFine();renderControls();updateMap();fitActive()});
+  sel.addEventListener('change',function(){lensByDistrict[d.id]=sel.value;ensureDistrictData(d.id);updateMap();renderLegend()});
+  top.appendChild(cb);top.appendChild(sw);top.appendChild(tx);top.appendChild(chip);row.appendChild(top);row.appendChild(sel);controls.appendChild(row)
+ });
+ renderLegend()
+}
 function renderLegend(){
- var l=lensEl.value;
- if(l==='territorio'){legendEl.innerHTML='<span class="badge"><i class="sw" style="background:'+COLORS.teal+'"></i>Distrito 05</span><span class="badge taupe"><i class="sw" style="background:#edf2f1"></i>Contexto Sonora</span>';return}
- if(l==='cecosabi'){legendEl.innerHTML='<span class="badge pink">977 encalamientos · dato distrital</span><span class="tiny">Sin reparto municipal automático.</span>';return}
- legendEl.innerHTML='<span class="badge"><i class="sw" style="background:#2f746e"></i>Mayor</span><span class="badge"><i class="sw" style="background:'+COLORS.teal+'"></i>Alta</span><span class="badge"><i class="sw" style="background:'+COLORS.aqua+'"></i>Media</span><span class="badge taupe"><i class="sw" style="background:#e7efed"></i>Sin captura canónica</span>'
+ var html=[];
+ districtCfg.districts.forEach(function(d){if(active.has(d.id))html.push('<span class="badge"><i class="swatch" style="background:'+d.color+'"></i>'+d.id+' · '+esc(labelLens(lensByDistrict[d.id]||'territorio'))+'</span>')});
+ legendEl.innerHTML=html.length?html.join(''):'<span class="tiny">Ningún distrito activo.</span>'
 }
-function renderDetail(code){
- var m=mMetric(code),l=lensEl.value;
- if(!m){detailEl.innerHTML='<div class="eyebrow">Contexto estatal</div><div class="detail-title">'+esc((stateLayer&&stateLayer._layers)?'Municipio fuera de DS05':'Municipio')+'</div><p class="tiny">Este municipio se conserva para lectura estatal. La analítica BALAM v0.1 se concentra inicialmente en el Distrito 05.</p>';return}
- var value=lensValue(m,l);
- var lensLine=l==='cecosabi'?'Acumulado distrital: '+fmt(metrics.cecosabi.latrines_limed_total)+' letrinas encaladas. Sin asignación municipal automática.':lensLabel(l)+': '+fmt(value);
- detailEl.innerHTML=
- '<div class="eyebrow">Distrito 05 · '+esc(m.code)+'</div>'+
- '<div class="detail-title">'+esc(m.name)+'</div>'+
- '<div class="metricline"><span>Población 2026</span><b>'+fmt(m.population_2026)+'</b></div>'+
- '<div class="metricline"><span>Localidades documentadas</span><b>'+fmt(m.documented_localities)+'</b></div>'+
- '<div class="metricline"><span>Filas canónicas</span><b>'+fmt(m.canonical_rows)+'</b></div>'+
- '<div class="metricline"><span>Atención Médica</span><b>'+fmt(m.modules.atencion_medica)+'</b></div>'+
- '<div class="metricline"><span>Promoción</span><b>'+fmt(m.modules.promocion_salud)+'</b></div>'+
- '<div class="metricline"><span>Vigilancia</span><b>'+fmt(m.modules.vigilancia_epidemiologica)+'</b></div>'+
- '<div class="metricline"><span>Enfermería</span><b>'+fmt(m.modules.enfermeria)+'</b></div>'+
- '<p class="tiny"><b>Lente activa:</b> '+esc(lensLine)+'</p>'+
- '<div class="control"><button id="loadAgebBtn" class="primary">Recargar AGEB de '+esc(m.name)+'</button></div>'+
- '<div class="tiny">AGEB urbanas y rurales: INEGI. Al tocar una AGEB, BALAM carga únicamente sus manzanas. La geometría no contiene nominales BALAM.</div>';
- var b=document.getElementById('loadAgebBtn');if(b)b.addEventListener('click',function(){loadAgeb(m.code,m.name)})
-}
+function updateMap(){if(stateLayer)stateLayer.setStyle(styleFeature);renderLegend()}
 function onEach(f,layer){
- var code=codeOf(f),name=nameOf(f);
- layer.bindTooltip(name+(DS05.has(code)?' · DS05':''),{sticky:true});
+ var code=codeOf(f),name=nameOf(f),did=districtFor(code),d=did?cfg(did):null;
+ layer.bindTooltip(name+(did?' · '+did:''),{sticky:true});
  layer.on('click',function(){
-   selected=code;selectedAgeb=null;updateStyles();renderDetail(code);
-   if(DS05.has(code)){
-     map.fitBounds(layer.getBounds(),{padding:[30,30],maxZoom:10});
-     loadAgeb(code.slice(2),name);
-   }
+  if(!did||!active.has(did)){statusEl.textContent='Activa '+(did||'el distrito correspondiente')+' para explorar '+name+'.';return}
+  selectedMun=code;selectedAgeb=null;renderDetail(code,name,did);map.fitBounds(layer.getBounds(),{padding:[28,28],maxZoom:10});loadAgeb(code.slice(2),name,did)
  })
 }
-function prop(p,names){for(var i=0;i<names.length;i++){if(p&&p[names[i]]!=null&&String(p[names[i]]).trim()!=='')return String(p[names[i]])}return ''}
+function renderDetail(code,name,did){
+ var d=cfg(did),lens=lensByDistrict[did]||'territorio',data=districtData[did],m=data?(data.municipalities||[]).find(function(x){return x.cvegeo===code}):null,mv=municipalityMetric(did,code,lens),dv=districtMetric(did,lens);
+ var lines='<div class="eyebrow">'+did+' · '+esc(d.head)+'</div><div class="detail-title">'+esc(name)+'</div><div class="metricline"><span>Lectura activa</span><b>'+esc(labelLens(lens))+'</b></div>';
+ if(m){lines+='<div class="metricline"><span>Población 2026</span><b>'+fmt(m.population_2026)+'</b></div><div class="metricline"><span>Filas canónicas</span><b>'+fmt(m.canonical_rows)+'</b></div><div class="metricline"><span>Localidades documentadas</span><b>'+fmt(m.documented_localities)+'</b></div>'}
+ if(mv!=null)lines+='<div class="metricline"><span>Valor municipal</span><b>'+fmt(mv)+'</b></div>';
+ else if(dv!=null)lines+='<div class="metricline"><span>Valor distrital</span><b>'+fmt(dv)+'</b></div>';
+ else if(lens!=='territorio')lines+='<p class="tiny">Esta fuente todavía no tiene un corte territorial cargado para '+did+'. BALAM no la interpreta como cero.</p>';
+ lines+='<p class="tiny">AGEB se cargará automáticamente. Toca una AGEB para bajar a manzana.</p>';
+ detailEl.innerHTML=lines
+}
 function fc(j){if(j&&j.type==='FeatureCollection'&&Array.isArray(j.features))return j;if(j&&Array.isArray(j.features))return {type:'FeatureCollection',features:j.features};return {type:'FeatureCollection',features:[]}}
-async function cachedJson(url){
- if(geoCache[url])return geoCache[url];
- var r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);
- var j=await r.json();geoCache[url]=j;return j
-}
-function clearDetail(){
- if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}
- if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
- selectedAgeb=null;
- statusEl.textContent='Detalle AGEB/manzana retirado. El núcleo estatal permanece ligero.'
-}
-async function loadAgeb(mun,name){
- clearDetail();statusEl.textContent='Cargando AGEB urbanas y rurales de '+name+'…';
+async function cachedJson(url){if(geoCache[url])return geoCache[url];var r=await fetch(url);if(!r.ok)throw new Error('HTTP '+r.status);var j=await r.json();geoCache[url]=j;return j}
+function clearFine(){if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}selectedAgeb=null}
+async function loadAgeb(mun,name,did){
+ clearFine();statusEl.textContent='Cargando AGEB de '+name+' · '+did+'…';
  try{
-  var settled=await Promise.allSettled([cachedJson(AGEBU_URL+mun),cachedJson(AGEBR_URL+mun)]);
-  var all=[];
-  if(settled[0].status==='fulfilled')fc(settled[0].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Urbana';all.push(f)});
-  if(settled[1].status==='fulfilled')fc(settled[1].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Rural';all.push(f)});
-  if(!all.length)throw new Error('INEGI no devolvió AGEB para este municipio');
+  var rs=await Promise.allSettled([cachedJson(AGEBU_URL+mun),cachedJson(AGEBR_URL+mun)]),all=[];
+  if(rs[0].status==='fulfilled')fc(rs[0].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Urbana';all.push(f)});
+  if(rs[1].status==='fulfilled')fc(rs[1].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Rural';all.push(f)});
+  if(!all.length)throw new Error('sin AGEB');
   agebLayer=L.geoJSON({type:'FeatureCollection',features:all},{
    renderer:L.canvas({padding:.5}),
-   style:function(f){
-     var p=f.properties||{},key=prop(p,['cvegeo','CVEGEO']);
-     return {color:key===selectedAgeb?'#173a37':'#409993',weight:key===selectedAgeb?3:1.25,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:.16}
-   },
-   onEachFeature:function(f,l){
-     var p=f.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']),amb=p.__ambito||'AGEB',key=prop(p,['cvegeo','CVEGEO'])||(mun+'-'+loc+'-'+ageb);
-     l.bindTooltip('AGEB '+esc(ageb)+' · '+esc(amb)+(loc?' · Loc. '+esc(loc):''),{sticky:true});
-     l.on('click',function(ev){
-       if(ev&&ev.originalEvent&&L.DomEvent)L.DomEvent.stopPropagation(ev.originalEvent);
-       selectedAgeb=key;
-       if(agebLayer)agebLayer.setStyle(function(x){var xp=x.properties||{},xk=prop(xp,['cvegeo','CVEGEO'])||(mun+'-'+prop(xp,['cve_loc','CVE_LOC'])+'-'+prop(xp,['cve_ageb','CVE_AGEB']));return {color:xk===selectedAgeb?'#173a37':'#409993',weight:xk===selectedAgeb?3:1.25,fillColor:xp.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:xk===selectedAgeb ? .28 : .16}});
-       map.fitBounds(l.getBounds(),{padding:[28,28],maxZoom:14});
-       loadBlocksForAgeb(f,mun,name)
-     })
-   }
+   style:function(f){var p=f.properties||{},key=prop(p,['cvegeo','CVEGEO']);return {color:key===selectedAgeb?'#173a37':'#409993',weight:key===selectedAgeb?3:1.15,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:key===selectedAgeb?.28:.15}},
+   onEachFeature:function(f,l){var p=f.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']),key=prop(p,['cvegeo','CVEGEO'])||(mun+'-'+loc+'-'+ageb);l.bindTooltip('AGEB '+esc(ageb)+' · '+esc(p.__ambito||'')+(loc?' · Loc. '+esc(loc):''),{sticky:true});l.on('click',function(ev){if(ev&&ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);selectedAgeb=key;if(agebLayer)agebLayer.setStyle(function(x){var xp=x.properties||{},xk=prop(xp,['cvegeo','CVEGEO'])||(mun+'-'+prop(xp,['cve_loc','CVE_LOC'])+'-'+prop(xp,['cve_ageb','CVE_AGEB']));return {color:xk===selectedAgeb?'#173a37':'#409993',weight:xk===selectedAgeb?3:1.15,fillColor:xp.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:xk===selectedAgeb?.28:.15}});map.fitBounds(l.getBounds(),{padding:[28,28],maxZoom:14});loadBlocks(f,mun,name,did)})}
   }).addTo(map);
-  statusEl.textContent=name+': '+fmt(all.length)+' AGEB activas. Rosa = rural · aqua = urbana. Toca una AGEB para ver sus manzanas.';
- }catch(e){statusEl.textContent='No fue posible cargar AGEB: '+e.message+'. El mapa municipal sigue disponible.'}
+  statusEl.textContent=name+' · '+did+': '+all.length.toLocaleString('es-MX')+' AGEB. Aqua urbana · rosa rural.';
+ }catch(e){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message}
 }
-async function loadBlocksForAgeb(agebFeature,mun,name){
+async function loadBlocks(agebFeature,mun,name,did){
  if(blockLayer){map.removeLayer(blockLayer);blockLayer=null}
- var p=agebFeature.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']),amb=p.__ambito||'';
+ var p=agebFeature.properties||{},ageb=prop(p,['cve_ageb','CVE_AGEB']),loc=prop(p,['cve_loc','CVE_LOC']);
  statusEl.textContent='Cargando manzanas de AGEB '+ageb+' · '+name+'…';
  try{
-  var url=loc?MZA_URL+mun+'/'+loc:MZA_URL+mun;
-  var j=await cachedJson(url),all=fc(j).features.filter(function(f){
-    var q=f.properties||{};
-    return prop(q,['cve_ageb','CVE_AGEB'])===ageb && (!loc || prop(q,['cve_loc','CVE_LOC'])===loc)
-  });
-  blockLayer=L.geoJSON({type:'FeatureCollection',features:all},{
-   renderer:L.canvas({padding:.5}),
-   style:{color:'#557b75',weight:.55,fillColor:'#ffffff',fillOpacity:.22},
-   onEachFeature:function(f,l){
-     var q=f.properties||{},mza=prop(q,['cve_mza','CVE_MZA']),qloc=prop(q,['cve_loc','CVE_LOC']);
-     l.bindTooltip('Manzana '+esc(mza)+' · AGEB '+esc(ageb)+(qloc?' · Loc. '+esc(qloc):''),{sticky:true})
-   }
-  }).addTo(map);
-  statusEl.textContent='AGEB '+ageb+': '+fmt(all.length)+' manzanas activas. El resto del municipio no se descargó.';
- }catch(e){statusEl.textContent='No fue posible cargar las manzanas de AGEB '+ageb+': '+e.message+'. La capa AGEB permanece activa.'}
+  var url=loc?MZA_URL+mun+'/'+loc:MZA_URL+mun,j=await cachedJson(url),all=fc(j).features.filter(function(f){var q=f.properties||{};return prop(q,['cve_ageb','CVE_AGEB'])===ageb&&(!loc||prop(q,['cve_loc','CVE_LOC'])===loc)});
+  blockLayer=L.geoJSON({type:'FeatureCollection',features:all},{renderer:L.canvas({padding:.5}),style:{color:'#557b75',weight:.55,fillColor:'#fff',fillOpacity:.22},onEachFeature:function(f,l){var q=f.properties||{};l.bindTooltip('Manzana '+esc(prop(q,['cve_mza','CVE_MZA']))+' · AGEB '+esc(ageb),{sticky:true})}}).addTo(map);
+  statusEl.textContent=did+' · '+name+' · AGEB '+ageb+': '+all.length.toLocaleString('es-MX')+' manzanas activas.';
+ }catch(e){statusEl.textContent='No fue posible cargar manzanas: '+e.message}
+}
+function fitActive(){
+ if(!stateLayer)return;var b=null;stateLayer.eachLayer(function(l){var code=codeOf(l.feature),did=districtFor(code);if(active.has(did)){var lb=l.getBounds();b=b?b.extend(lb):lb}});if(b)map.fitBounds(b,{padding:[22,22]})
 }
 async function init(){
  try{
-  metrics=await fetch('data/ds05_metrics.json').then(function(r){if(!r.ok)throw new Error('métricas HTTP '+r.status);return r.json()});
-  metrics.municipalities.forEach(function(m){munIndex[m.cvegeo]=m});
-  document.getElementById('kCases').textContent=fmt(metrics.current_filter.cases_or_attentions);
-  document.getElementById('kActions').textContent=fmt(metrics.current_filter.discrete_operational_actions);
-  document.getElementById('kLocs').textContent=fmt(metrics.current_filter.localities);
-  document.getElementById('kLatrines').textContent=fmt(metrics.current_filter.cecosabi_latrines_limed);
-  var gj=await fetch(MUN_URL).then(function(r){if(!r.ok)throw new Error('municipios HTTP '+r.status);return r.json()});
-  stateLayer=L.geoJSON(gj,{style:styleFeature,onEachFeature:onEach}).addTo(map);
-  stateBounds=stateLayer.getBounds();
-  var dsFeatures=gj.features.filter(function(f){return DS05.has(codeOf(f))});
-  var dsTemp=L.geoJSON({type:'FeatureCollection',features:dsFeatures});dsBounds=dsTemp.getBounds();
-  map.fitBounds(stateBounds,{padding:[18,18]});
-  statusEl.textContent='Sonora cargado: '+fmt(gj.features.length)+' municipios. Distrito 05 resaltado.';
-  renderLegend()
- }catch(e){statusEl.textContent='Error de carga: '+e.message+'. Verifica conexión a internet.'}
+  districtCfg=await fetch('data/districts.json').then(function(r){if(!r.ok)throw new Error('distritos '+r.status);return r.json()});
+  districtCfg.districts.forEach(function(d){lensByDistrict[d.id]='territorio';d.municipalities.forEach(function(m){districtByMun['26'+m]=d.id})});
+  lensByDistrict.DS05='canonical_rows';renderControls();await ensureDistrictData('DS05');
+  var gj=await fetch(MUN_URL).then(function(r){if(!r.ok)throw new Error('municipios '+r.status);return r.json()});
+  stateLayer=L.geoJSON(gj,{style:styleFeature,onEachFeature:onEach}).addTo(map);stateBounds=stateLayer.getBounds();map.fitBounds(stateBounds,{padding:[18,18]});
+  statusEl.textContent='Sonora listo: '+gj.features.length+' municipios · 6 distritos configurados · DS05 activo.';
+ }catch(e){statusEl.textContent='Error de inicialización: '+e.message}
 }
-lensEl.addEventListener('change',updateStyles);
-document.getElementById('fitDs').addEventListener('click',function(){if(dsBounds)map.fitBounds(dsBounds,{padding:[28,28]})});
-document.getElementById('fitSonora').addEventListener('click',function(){clearDetail();if(stateBounds)map.fitBounds(stateBounds,{padding:[18,18]})});
-document.getElementById('clearDetail').addEventListener('click',clearDetail);
+document.getElementById('fitActive').addEventListener('click',fitActive);
+document.getElementById('clearDetail').addEventListener('click',function(){clearFine();statusEl.textContent='AGEB y manzanas retiradas.'});
+document.getElementById('onlyDs05').addEventListener('click',function(){active=new Set(['DS05']);districtCfg.districts.forEach(function(d){lensByDistrict[d.id]=d.id==='DS05'?'canonical_rows':'territorio'});clearFine();renderControls();updateMap();fitActive()});
 init();
 })();
 </script>
