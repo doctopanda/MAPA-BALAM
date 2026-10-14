@@ -1,20 +1,29 @@
 # MAPA BALAM 🐆
 
-Mapa territorial del Observatorio Distrital BALAM para Sonora, con foco analítico en el Distrito de Salud 05.
+Mapa territorial del Observatorio BALAM para Sonora.
 
-## Arquitectura
-- Sonora completo como contexto territorial.
-- Distrito 05 resaltado: Álamos (003), Etchojoa (026), Huatabampo (033), Navojoa (042) y Benito Juárez (071).
-- Las manzanas se cargan bajo demanda por municipio para mantener el mapa ligero.
-- Los indicadores visibles son agregados territoriales procesados por BALAM. No se publican datos nominales.
+## v0.3 · visor estatal multi-distrito
 
-## Capas iniciales
-Territorio · Captura canónica · Atención Médica · Promoción · Vigilancia · Enfermería · CECOSABI / Encalamiento.
+- Los **6 Distritos de Salud** pueden activarse por casillas, de forma individual o simultánea.
+- Cada distrito activo tiene su **propio selector de lectura**.
+- Sonora permanece como contexto territorial completo.
+- Navegación cartográfica progresiva: **municipio → AGEB → manzana**.
+- AGEB y manzanas se cargan bajo demanda desde el servicio GeoJSON de INEGI.
+- El encabezado usa el logotipo oficial BALAM con jaguar.
+- La arquitectura acepta archivos de datos independientes por distrito (`dataUrl` en `data/districts.json`).
 
-## Fuentes cartográficas
-La geometría municipal se consume desde un GeoJSON público derivado del Marco Geoestadístico INEGI. El detalle de manzanas se solicita dinámicamente desde un servicio cartográfico público ArcGIS, únicamente al seleccionar un municipio del DS05.
+## Lecturas preparadas
+
+Territorio · SIESA/captura canónica · acciones operativas · Atención Médica · Enfermería · Odontología · Promoción · Vigilancia · Vacunación · Vectores · Salud Mental · CECOSABI/saneamiento · Bases maestras · Necesidad · Respuesta · Brecha.
+
+Actualmente el corte territorial municipal integrado corresponde a DS05. En los demás distritos, seleccionar una fuente aún no alimentada se representa como **sin corte cargado**, nunca como cero.
+
+## División territorial
+
+Las cabeceras de los seis distritos corresponden a la guía estatal vigente: Hermosillo, Caborca, Santa Ana, Cajeme, Navojoa y San Luis Río Colorado. La agrupación municipal del archivo `data/districts.json` se versiona explícitamente para poder auditar cualquier cambio de regionalización.
 
 ## Privacidad
-Este repositorio es público. Nunca deben incorporarse nombres, CURP, teléfonos, domicilios individuales, expedientes clínicos u otros identificadores personales.
 
-BALAM = inteligencia territorial sanitaria, no base nominal pública.
+Este repositorio es público. **Nunca** deben publicarse nombres, CURP, teléfonos, domicilios individuales, expedientes clínicos u otros identificadores personales.
+
+BALAM publica únicamente agregados territoriales y geometría pública.
