@@ -309,9 +309,9 @@
         },
         {
           "id": "crum",
-          "label": "CRUM · Respuesta prehospitalaria",
-          "available": false,
-          "note": "Integración Supabase BALAM pendiente de seleccionar proyecto, autorizar fuente y verificar datos. El inventario no demuestra disponibilidad operativa.",
+          "label": "CRUM · Inventario protegido en mapa",
+          "available": true,
+          "note": "La capa CRUM se consulta con inicio de sesión en el panel 🚑 del mapa y no se fusiona con SIESA. Catálogo de inventario, no disponibilidad operativa. Las tarjetas coropléticas CRUM aún no están habilitadas.",
           "programs": [
             {
               "id": "ambulancias",
@@ -319,7 +319,7 @@
               "indicators": [
                 {
                   "id": "crum_inventory",
-                  "label": "Unidades inventariadas (no equivale a disponibles)",
+                  "label": "CRUM · Puntos y unidades (usar panel CRUM)",
                   "scope": "unavailable",
                   "unit": "registros"
                 }
