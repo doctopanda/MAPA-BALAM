@@ -27,3 +27,14 @@ Las cabeceras de los seis distritos corresponden a la guía estatal vigente: Her
 Este repositorio es público. **Nunca** deben publicarse nombres, CURP, teléfonos, domicilios individuales, expedientes clínicos u otros identificadores personales.
 
 BALAM publica únicamente agregados territoriales y geometría pública.
+
+## 🚑 CRUM integrado a BALAM (octubre 2026)
+
+La vista `index.html` incorpora una capa CRUM **protegida por autenticación** desde el panel lateral, y `crum.html` ofrece un visor privado especializado. La información CRUM está en Supabase `blkvamobfcyvlimnizaf`, con 429 registros, 29 instituciones y 9 localizaciones pendientes de validación municipal. La cuenta maestra confirmada se asigna por `balam_access` (no se publican credenciales personales).
+
+- Inicio de sesión Supabase Auth para ver los puntos; la publicación estática **no contiene** inventario bruto.
+- Los seis distritos se pueden activar juntos, con filtros CRUM independientes por distrito, institución, tipo y búsqueda.
+- Todo miembro activo BALAM consulta CRUM de todo Sonora; solo `admin_maestro` puede modificar el inventario según RLS.
+- SIESA conserva independencia de origen, tratamiento y permisos. Las unidades inventariadas **no** equivalen a ambulancias disponibles, GPS vivo, tiempos de respuesta o despacho.
+- La carga inicial está completada, pero la sincronización futura con el observatorio CRUM requiere fuente/API autorizada.
+- Dependencias Leaflet 1.9.4 y supabase-js 2.57.0 cargadas desde CDNs; se requiere conexión a internet para estos recursos.
