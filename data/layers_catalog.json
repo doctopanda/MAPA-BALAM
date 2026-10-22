@@ -1,90 +1,423 @@
 {
-  "schema":"BALAM-LAYERS-0.7",
-  "generated":"2026-10-14",
-  "default":{"mode":"panorama","source":"balam","program":"resumen","indicator":"territorio","period":"available"},
-  "modes":[
+  "schema": "BALAM-LAYERS-0.7",
+  "generated": "2026-10-14",
+  "default": {
+    "mode": "panorama",
+    "source": "balam",
+    "program": "resumen",
+    "indicator": "territorio",
+    "period": "available"
+  },
+  "modes": [
     {
-      "id":"panorama","label":"Panorama","description":"Lectura general del territorio y de la información BALAM disponible.",
-      "periods":[{"id":"available","label":"Corte disponible"}],
-      "sources":[
+      "id": "panorama",
+      "label": "Panorama",
+      "description": "Lectura general del territorio y de la información BALAM disponible.",
+      "periods": [
         {
-          "id":"balam","label":"BALAM consolidado",
-          "programs":[
-            {"id":"resumen","label":"Resumen territorial","indicators":[
-              {"id":"territorio","label":"Territorio distrital","scope":"territory","unit":"territorio"},
-              {"id":"population_2026","label":"Población 2026","scope":"municipality","metric":"population_2026","unit":"personas"},
-              {"id":"documented_localities","label":"Localidades documentadas","scope":"municipality","metric":"documented_localities","unit":"localidades"},
-              {"id":"canonical_rows","label":"Filas canónicas disponibles","scope":"municipality","metric":"canonical_rows","unit":"registros"},
-              {"id":"attention_case_units_accumulated","label":"Unidades acumuladas de atención/caso","scope":"municipality","metric":"attention_case_units_accumulated","unit":"unidades"}
-            ]}
+          "id": "available",
+          "label": "Corte disponible"
+        }
+      ],
+      "sources": [
+        {
+          "id": "balam",
+          "label": "BALAM consolidado",
+          "programs": [
+            {
+              "id": "resumen",
+              "label": "Resumen territorial",
+              "indicators": [
+                {
+                  "id": "territorio",
+                  "label": "Territorio distrital",
+                  "scope": "territory",
+                  "unit": "territorio"
+                },
+                {
+                  "id": "population_2026",
+                  "label": "Población 2026",
+                  "scope": "municipality",
+                  "metric": "population_2026",
+                  "unit": "personas"
+                },
+                {
+                  "id": "documented_localities",
+                  "label": "Localidades documentadas",
+                  "scope": "municipality",
+                  "metric": "documented_localities",
+                  "unit": "localidades"
+                },
+                {
+                  "id": "canonical_rows",
+                  "label": "Filas canónicas disponibles",
+                  "scope": "municipality",
+                  "metric": "canonical_rows",
+                  "unit": "registros"
+                },
+                {
+                  "id": "attention_case_units_accumulated",
+                  "label": "Unidades acumuladas de atención/caso",
+                  "scope": "municipality",
+                  "metric": "attention_case_units_accumulated",
+                  "unit": "unidades"
+                }
+              ]
+            }
           ]
         },
         {
-          "id":"bases_maestras","label":"Bases maestras",
-          "available":false,
-          "note":"Aún no existe un corte público territorial normalizado para esta fuente.",
-          "programs":[{"id":"historico","label":"Histórico","indicators":[{"id":"sin_corte","label":"Sin corte territorial publicado","scope":"unavailable","unit":""}]}]
+          "id": "bases_maestras",
+          "label": "Bases maestras",
+          "available": false,
+          "note": "Aún no existe un corte público territorial normalizado para esta fuente.",
+          "programs": [
+            {
+              "id": "historico",
+              "label": "Histórico",
+              "indicators": [
+                {
+                  "id": "sin_corte",
+                  "label": "Sin corte territorial publicado",
+                  "scope": "unavailable",
+                  "unit": ""
+                }
+              ]
+            }
+          ]
         }
       ]
     },
     {
-      "id":"necesidad","label":"Necesidad","description":"Necesidad territorial. Se habilitará cuando exista una matriz explícita de necesidad; no se infiere sólo por población.",
-      "periods":[{"id":"available","label":"Corte disponible"}],
-      "sources":[
-        {"id":"integrado","label":"Matriz de necesidad","available":false,"note":"Pendiente de construir con variables de riesgo, vulnerabilidad y demanda.","programs":[{"id":"necesidad","label":"Necesidad","indicators":[{"id":"necesidad","label":"Índice de necesidad","scope":"unavailable","unit":"índice"}]}]},
-        {"id":"prometeo","label":"Prometeo","available":false,"note":"Riesgo ambiental aún no normalizado en este mapa público.","programs":[{"id":"riesgo","label":"Riesgo territorial","indicators":[{"id":"riesgo","label":"Riesgo","scope":"unavailable","unit":"índice"}]}]}
-      ]
-    },
-    {
-      "id":"respuesta","label":"Respuesta","description":"Actividad registrada por los programas y fuentes operativas.",
-      "periods":[{"id":"available","label":"Acumulado disponible"}],
-      "sources":[
+      "id": "necesidad",
+      "label": "Necesidad",
+      "description": "Necesidad territorial. Se habilitará cuando exista una matriz explícita de necesidad; no se infiere sólo por población.",
+      "periods": [
         {
-          "id":"siesa","label":"SIESA",
-          "programs":[
-            {"id":"atencion_medica","label":"Atención médica","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"atencion_medica","unit":"registros"}]},
-            {"id":"enfermeria","label":"Enfermería","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"enfermeria","unit":"registros"}]},
-            {"id":"odontologia","label":"Odontología","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"odontologia","unit":"registros"}]},
-            {"id":"promocion_salud","label":"Promoción de la salud","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"promocion_salud","unit":"registros"}]},
-            {"id":"vigilancia_epidemiologica","label":"Vigilancia epidemiológica","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"vigilancia_epidemiologica","unit":"registros"}]},
-            {"id":"vacunacion","label":"Vacunación","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"vacunacion","unit":"registros"}]},
-            {"id":"vectores","label":"Vectores","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"vectores","unit":"registros"}]},
-            {"id":"riesgos_sanitarios","label":"Riesgos sanitarios","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"riesgos_sanitarios","unit":"registros"}]},
-            {"id":"salud_mental","label":"Salud mental","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"salud_mental","unit":"registros"}]},
-            {"id":"seguimiento_localidad_desastre","label":"Seguimiento de localidad / desastre","indicators":[{"id":"module_rows","label":"Registros canónicos cartografiables","scope":"municipality","module":"seguimiento_localidad_desastre","unit":"registros"}]}
+          "id": "available",
+          "label": "Corte disponible"
+        }
+      ],
+      "sources": [
+        {
+          "id": "integrado",
+          "label": "Matriz de necesidad",
+          "available": false,
+          "note": "Pendiente de construir con variables de riesgo, vulnerabilidad y demanda.",
+          "programs": [
+            {
+              "id": "necesidad",
+              "label": "Necesidad",
+              "indicators": [
+                {
+                  "id": "necesidad",
+                  "label": "Índice de necesidad",
+                  "scope": "unavailable",
+                  "unit": "índice"
+                }
+              ]
+            }
           ]
         },
         {
-          "id":"cecosabi","label":"CECOSABI",
-          "programs":[
-            {"id":"saneamiento","label":"Saneamiento","indicators":[
-              {"id":"latrines_limed_total","label":"Letrinas encaladas","scope":"district","path":"cecosabi.latrines_limed_total","unit":"letrinas"}
-            ]}
+          "id": "prometeo",
+          "label": "Prometeo",
+          "available": false,
+          "note": "Riesgo ambiental aún no normalizado en este mapa público.",
+          "programs": [
+            {
+              "id": "riesgo",
+              "label": "Riesgo territorial",
+              "indicators": [
+                {
+                  "id": "riesgo",
+                  "label": "Riesgo",
+                  "scope": "unavailable",
+                  "unit": "índice"
+                }
+              ]
+            }
           ]
         }
       ]
     },
     {
-      "id":"brecha","label":"Brecha","description":"Comparación entre necesidad y respuesta. No se calcula hasta contar con una matriz de necesidad defendible.",
-      "periods":[{"id":"available","label":"Corte disponible"}],
-      "sources":[
-        {"id":"integrado","label":"Necesidad vs respuesta","available":false,"note":"Pendiente de matriz de necesidad.","programs":[{"id":"brecha","label":"Brecha","indicators":[{"id":"brecha","label":"Índice de brecha","scope":"unavailable","unit":"índice"}]}]}
+      "id": "respuesta",
+      "label": "Respuesta",
+      "description": "Actividad registrada por los programas y fuentes operativas.",
+      "periods": [
+        {
+          "id": "available",
+          "label": "Acumulado disponible"
+        }
+      ],
+      "sources": [
+        {
+          "id": "siesa",
+          "label": "SIESA",
+          "programs": [
+            {
+              "id": "atencion_medica",
+              "label": "Atención médica",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "atencion_medica",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "enfermeria",
+              "label": "Enfermería",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "enfermeria",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "odontologia",
+              "label": "Odontología",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "odontologia",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "promocion_salud",
+              "label": "Promoción de la salud",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "promocion_salud",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "vigilancia_epidemiologica",
+              "label": "Vigilancia epidemiológica",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "vigilancia_epidemiologica",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "vacunacion",
+              "label": "Vacunación",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "vacunacion",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "vectores",
+              "label": "Vectores",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "vectores",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "riesgos_sanitarios",
+              "label": "Riesgos sanitarios",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "riesgos_sanitarios",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "salud_mental",
+              "label": "Salud mental",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "salud_mental",
+                  "unit": "registros"
+                }
+              ]
+            },
+            {
+              "id": "seguimiento_localidad_desastre",
+              "label": "Seguimiento de localidad / desastre",
+              "indicators": [
+                {
+                  "id": "module_rows",
+                  "label": "Registros canónicos cartografiables",
+                  "scope": "municipality",
+                  "module": "seguimiento_localidad_desastre",
+                  "unit": "registros"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "cecosabi",
+          "label": "CECOSABI",
+          "programs": [
+            {
+              "id": "saneamiento",
+              "label": "Saneamiento",
+              "indicators": [
+                {
+                  "id": "latrines_limed_total",
+                  "label": "Letrinas encaladas",
+                  "scope": "district",
+                  "path": "cecosabi.latrines_limed_total",
+                  "unit": "letrinas"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": "crum",
+          "label": "CRUM · Respuesta prehospitalaria",
+          "available": false,
+          "note": "Integración Supabase BALAM pendiente de seleccionar proyecto, autorizar fuente y verificar datos. El inventario no demuestra disponibilidad operativa.",
+          "programs": [
+            {
+              "id": "ambulancias",
+              "label": "Inventario de recursos",
+              "indicators": [
+                {
+                  "id": "crum_inventory",
+                  "label": "Unidades inventariadas (no equivale a disponibles)",
+                  "scope": "unavailable",
+                  "unit": "registros"
+                }
+              ]
+            }
+          ]
+        }
       ]
     },
     {
-      "id":"operacion","label":"Operación","description":"Corte operativo actual de BALAM/SIESA. Estos indicadores son distritales salvo que una fuente aporte una llave territorial más fina.",
-      "periods":[{"id":"available","label":"Último corte disponible"}],
-      "sources":[
+      "id": "brecha",
+      "label": "Brecha",
+      "description": "Comparación entre necesidad y respuesta. No se calcula hasta contar con una matriz de necesidad defendible.",
+      "periods": [
         {
-          "id":"siesa","label":"SIESA / operativo",
-          "programs":[
-            {"id":"corte_actual","label":"Corte actual","indicators":[
-              {"id":"cases_or_attentions","label":"Casos / atenciones","scope":"district","path":"current_filter.cases_or_attentions","unit":"casos/atenciones"},
-              {"id":"healthcare_actions","label":"Acciones de atención","scope":"district","path":"current_filter.healthcare_actions","unit":"acciones"},
-              {"id":"discrete_operational_actions","label":"Acciones operativas discretas","scope":"district","path":"current_filter.discrete_operational_actions","unit":"acciones"},
-              {"id":"localities","label":"Localidades","scope":"district","path":"current_filter.localities","unit":"localidades"},
-              {"id":"uncanonical_siesa_snapshots","label":"Snapshots SIESA no canónicos","scope":"district","path":"current_filter.uncanonical_siesa_snapshots","unit":"evidencias"}
-            ]}
+          "id": "available",
+          "label": "Corte disponible"
+        }
+      ],
+      "sources": [
+        {
+          "id": "integrado",
+          "label": "Necesidad vs respuesta",
+          "available": false,
+          "note": "Pendiente de matriz de necesidad.",
+          "programs": [
+            {
+              "id": "brecha",
+              "label": "Brecha",
+              "indicators": [
+                {
+                  "id": "brecha",
+                  "label": "Índice de brecha",
+                  "scope": "unavailable",
+                  "unit": "índice"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "operacion",
+      "label": "Operación",
+      "description": "Corte operativo actual de BALAM/SIESA. Estos indicadores son distritales salvo que una fuente aporte una llave territorial más fina.",
+      "periods": [
+        {
+          "id": "available",
+          "label": "Último corte disponible"
+        }
+      ],
+      "sources": [
+        {
+          "id": "siesa",
+          "label": "SIESA / operativo",
+          "programs": [
+            {
+              "id": "corte_actual",
+              "label": "Corte actual",
+              "indicators": [
+                {
+                  "id": "cases_or_attentions",
+                  "label": "Casos / atenciones",
+                  "scope": "district",
+                  "path": "current_filter.cases_or_attentions",
+                  "unit": "casos/atenciones"
+                },
+                {
+                  "id": "healthcare_actions",
+                  "label": "Acciones de atención",
+                  "scope": "district",
+                  "path": "current_filter.healthcare_actions",
+                  "unit": "acciones"
+                },
+                {
+                  "id": "discrete_operational_actions",
+                  "label": "Acciones operativas discretas",
+                  "scope": "district",
+                  "path": "current_filter.discrete_operational_actions",
+                  "unit": "acciones"
+                },
+                {
+                  "id": "localities",
+                  "label": "Localidades",
+                  "scope": "district",
+                  "path": "current_filter.localities",
+                  "unit": "localidades"
+                },
+                {
+                  "id": "uncanonical_siesa_snapshots",
+                  "label": "Snapshots SIESA no canónicos",
+                  "scope": "district",
+                  "path": "current_filter.uncanonical_siesa_snapshots",
+                  "unit": "evidencias"
+                }
+              ]
+            }
           ]
         }
       ]
