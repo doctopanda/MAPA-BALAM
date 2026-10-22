@@ -1,10 +1,13 @@
 {
-  "schema": "BALAM-CRUM-SOURCE-0.1",
-  "status": "not_connected",
-  "enabled": false,
-  "source_type": "authorized_CSV_or_API",
-  "supabase_project_confirmed": false,
-  "public_feed_url": null,
+  "schema": "BALAM-CRUM-SOURCE-0.2",
+  "status": "connected_with_auth",
+  "enabled": true,
+  "source_type": "private_Supabase_postgres",
+  "supabase_project_id": "blkvamobfcyvlimnizaf",
+  "last_verified_date": "2026-10-22",
+  "source_total": 429,
+  "georeferenced_records": 429,
+  "unassigned_municipality_records": 9,
   "coverage": [
     "DS01",
     "DS02",
@@ -13,6 +16,8 @@
     "DS05",
     "DS06"
   ],
-  "privacy": "private_operational_data_never_in_GitHub_Pages",
-  "notes": "El inventario de origen no confirma disponibilidad ni GPS vivo."
+  "access": "Supabase Auth y RLS: balam_access miembro activo ve CRUM; admin_maestro edita",
+  "sync": "Carga inicial completada; actualización automática del portal CRUM pendiente de API/exportación autorizada",
+  "privacy": "El cliente contiene exclusivamente clave publicable. Coordenadas solo bajo sesión autenticada y RLS; jamás agregar el CSV a GitHub Pages.",
+  "notes": "Puntos de inventario de base/referencia, NO geolocalización en vivo ni unidades disponibles."
 }
