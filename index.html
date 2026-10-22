@@ -34,7 +34,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .ageb-manager{margin-top:10px;border-top:1px solid var(--line);padding-top:9px}.ageb-toolbar{display:flex;gap:5px;flex-wrap:wrap;margin:6px 0}.ageb-toolbar .btn{min-height:30px;padding:5px 7px;font-size:9px}.ageb-summary{font-size:9.5px;color:var(--muted);margin:5px 0}.ageb-list{display:grid;gap:4px;max-height:240px;overflow:auto;padding-right:3px}.ageb-item{display:grid;grid-template-columns:auto 1fr auto auto;gap:6px;align-items:center;border:1px solid #dce8e5;border-radius:8px;padding:5px 6px;background:#fbfdfc}.ageb-item.active{background:#eef8f6;border-color:#8fc4bd}.ageb-item input{width:16px;height:16px}.ageb-name{font-size:10px;font-weight:850}.ageb-meta{font-size:8.5px;color:var(--muted)}.ageb-state{font-size:8px;font-weight:900;color:#2f746e}.ageb-focus{min-height:27px;border:1px solid #bfd4d0;border-radius:7px;background:#fff;color:#285f58;padding:3px 6px;font-size:8.5px;font-weight:900;cursor:pointer}
 @media(max-width:900px){.shell{grid-template-columns:1fr;grid-template-rows:auto 72vh}.header-meta{display:none}.brand-logo{width:225px;height:50px}aside{border-right:0;border-bottom:1px solid var(--line)}main{min-height:72vh}.mode-tabs{grid-template-columns:repeat(3,1fr)}}
 </style>
-</head>
+<link rel="stylesheet" href="assets/crum-layer.css"></head>
 <body>
 <header>
 <img class="brand-logo" src="data:image/webp;base64,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" alt="BALAM">
@@ -85,12 +85,39 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
     <h3>Regla BALAM</h3>
     <div class="tiny"><b>Personas ≠ casos ≠ atenciones ≠ acciones ≠ registros.</b> El mapa conserva la unidad real del indicador. Ausencia de captura tampoco significa cero actividad. Sólo se colorea una geografía cuando existe una llave territorial defendible.</div>
   </div>
-</aside>
+
+<section id="crum-panel" aria-label="Catálogo CRUM protegido">
+ <h3>🚑 CRUM | Respuesta prehospitalaria</h3>
+ <p>Inventario independiente de SIESA. Los puntos son ubicaciones de referencia, no GPS ni disponibilidad.</p>
+ <div id="crum-login"><form id="crum-signin">
+  <label for="crum-email">Correo BALAM</label><input id="crum-email" type="email" autocomplete="username" required placeholder="Correo de acceso">
+  <label for="crum-password">Contraseña</label><input id="crum-password" type="password" autocomplete="current-password" required>
+  <button type="submit">Entrar y visualizar CRUM</button>
+ </form></div>
+ <div id="crum-private" hidden>
+  <div class="crum-labelrow"><span id="crum-role" class="crum-muted"></span><button id="crum-signout" type="button" class="crum-light">Cerrar sesión</button></div>
+  <div class="crum-metrics"><span><strong id="crum-count">0</strong>registros</span><span id="crum-places">0 ubicaciones</span></div>
+  <label class="crum-toggle-label"><input id="crum-toggle" type="checkbox" checked> Mostrar puntos CRUM</label>
+  <label for="crum-scope">Territorio</label><select id="crum-scope"><option value="all">Todo Sonora</option><option value="active">Solo distritos BALAM activos</option></select>
+  <label for="crum-district">Distrito</label><select id="crum-district"><option value="">Los seis distritos</option><option>DS01</option><option>DS02</option><option>DS03</option><option>DS04</option><option>DS05</option><option>DS06</option></select>
+  <label for="crum-institution">Institución</label><select id="crum-institution"><option value="">Todas</option></select>
+  <label for="crum-type">Tipo de recurso</label><select id="crum-type"><option value="">Todos</option></select>
+  <label for="crum-search">Buscar unidad / localidad</label><input id="crum-search" type="search" placeholder="Folio o localidad">
+  <button id="crum-show-all-districts" type="button">Activar 6 distritos</button>
+  <button id="crum-zoom" type="button" class="crum-light">Zoom CRUM</button>
+  <button id="crum-refresh" type="button" class="crum-light">Actualizar</button>
+  <p id="crum-summary" class="crum-muted"></p>
+  <div class="crum-tablebox"><table><thead><tr><th>Unidad</th><th>Institución</th><th>Tipo</th><th>Distrito</th></tr></thead><tbody id="crum-results"></tbody></table></div>
+  <p id="crum-result-note" class="crum-muted"></p>
+  <a href="crum.html" target="_blank" rel="noopener noreferrer">Abrir visor CRUM independiente ↗</a>
+ </div>
+ <p id="crum-status" role="status" aria-live="polite">Conectando…</p>
+</section></aside>
 
 <main>
   <div id="map" class="map"></div>
   <div class="map-actions"><button id="quickClear">Limpiar capas</button><button id="quickReset">Restaurar</button></div>
-  <div class="map-float" id="mapFloat"><b>🐆 Centro de Capas</b><div class="float-path">Preparando lectura…</div></div>
+  <div id="crum-floating" hidden><strong>🚑 CRUM | BALAM</strong><span id="crum-float-count">Preparando…</span><button id="crum-float-toggle" type="button">Mostrar / ocultar</button></div><div class="map-float" id="mapFloat"><b>🐆 Centro de Capas</b><div class="float-path">Preparando lectura…</div></div>
 </main>
 </div>
 
@@ -502,8 +529,18 @@ document.getElementById('quickClear').addEventListener('click',cleanMap);
 document.getElementById('quickReset').addEventListener('click',resetMap);
 document.getElementById('onlyDs05').addEventListener('click',function(){active=new Set(['DS05']);clearFine();renderDistrictControls();renderEmptyDetail();updateMap();fitActive();ensureDistrictData('DS05')});
 
+window.BALAM_CrumMap = {
+ map: map,
+ getActiveDistricts: function(){return Array.from(active);},
+ activateAllDistricts: function(){
+  if(!districtCfg || !districtCfg.districts)return;
+  active = new Set(districtCfg.districts.map(function(d){return d.id;}));
+  renderDistrictControls();updateMap();
+  window.dispatchEvent(new Event('balam:districts-changed'));
+ }
+};
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script type="module" src="assets/crum-layer.js"></script></body>
 </html>
