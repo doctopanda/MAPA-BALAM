@@ -1,0 +1,18 @@
+{
+  "schema": "BALAM-CRUM-SOURCE-0.1",
+  "status": "not_connected",
+  "enabled": false,
+  "source_type": "authorized_CSV_or_API",
+  "supabase_project_confirmed": false,
+  "public_feed_url": null,
+  "coverage": [
+    "DS01",
+    "DS02",
+    "DS03",
+    "DS04",
+    "DS05",
+    "DS06"
+  ],
+  "privacy": "private_operational_data_never_in_GitHub_Pages",
+  "notes": "El inventario de origen no confirma disponibilidad ni GPS vivo."
+}
