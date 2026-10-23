@@ -43,6 +43,13 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .district-focus-item p{margin:6px 0;}
 .basemap-opt{padding:7px 10px;background:#f7fffafa;border:1px solid #b9d7c9;border-radius:8px;font:600 11px system-ui;color:#245f50;display:inline-flex;align-items:center;gap:7px;}
 .basemap-opt input{accent-color:#168c70;}
+</style><style id="balam-osm-hybrid-v07">
+#map{background:#e8f1ed!important}
+.basemap-opt{white-space:nowrap}
+.basemap-opt input[type="range"]{width:100px;accent-color:#23765c;cursor:pointer}
+.basemap-status{display:inline-flex;align-items:center;color:#43685c;font:600 11px system-ui;background:#f7fbf8ed;border:1px solid #c2dcd0;border-radius:9px;padding:8px 10px}
+.leaflet-control-attribution{font:11px system-ui!important;background:rgba(255,255,255,.88)!important;opacity:1!important}
+@media(max-width:760px){.basemap-status{width:100%}.basemap-opt input[type="range"]{width:85px}}
 </style></head>
 <body>
 <header>
@@ -125,7 +132,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 
 <main>
   <div id="map" class="map"></div>
-  <div class="map-actions"><button id="quickClear">Limpiar capas</button><button id="quickReset">Restaurar · sin selección</button><label class="basemap-opt"><input id="baseTiles" type="checkbox"> Mapa base opcional</label></div>
+  <div class="map-actions"><button id="quickClear">Limpiar capas</button><button id="quickReset">Restaurar · sin selección</button><label class="basemap-opt"><input id="baseTiles" type="checkbox" checked> 🌍 Calles OpenStreetMap</label><label class="basemap-opt" for="districtTint">Color distrital <input id="districtTint" type="range" min="12" max="70" step="2" value="34" aria-label="Opacidad del color distrital"><span id="districtTintLabel">34%</span></label><span id="basemapStatus" class="basemap-status" role="status">Calles y caminos OSM bajo polígonos BALAM</span></div>
   <div id="crum-floating" hidden><strong>🚑 CRUM | BALAM</strong><span id="crum-float-count">Preparando…</span><button id="crum-float-toggle" type="button">Mostrar / ocultar</button></div><div class="map-float" id="mapFloat"><b>🐆 Centro de Capas</b><div class="float-path">Preparando lectura…</div></div>
 </main>
 </div>
@@ -143,17 +150,35 @@ var MZA_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/mza/26/';
 var map=L.map('map',{preferCanvas:true,zoomControl:true}).setView([29.1,-110.5],7);
 var tileLayer=null, tileFailures=0;
 function toggleBaseTiles(enable){
-  if(!enable){if(tileLayer)map.removeLayer(tileLayer);tileLayer=null;return;}
-  if(tileLayer)return;
+  var checkbox=document.getElementById('baseTiles'),note=document.getElementById('basemapStatus');
+  if(checkbox)checkbox.checked=!!enable;
+  if(tileLayer){map.removeLayer(tileLayer);tileLayer=null}
+  if(!enable){
+    if(note)note.textContent='Vista poligonal BALAM · sin calles';
+    if(stateLayer)updateMap();
+    return
+  }
   tileFailures=0;
-  tileLayer=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{
-    maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>'
+  // Servicio oficial OSM. No descargar teselas masivamente ni eliminar atribucion.
+  var candidate=L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{
+    maxZoom:19,attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap contributors</a>',
+    updateWhenIdle:true,keepBuffer:2
   });
-  tileLayer.on('tileerror',function(){
-    if(++tileFailures>=2){toggleBaseTiles(false);var c=document.getElementById('baseTiles');if(c)c.checked=false;
-      statusEl.textContent='Proveedor de teselas no disponible (403). Se conserva el mapa poligonal BALAM sin mapa base.';}
+  tileLayer=candidate;
+  if(note)note.textContent='Cargando calles OpenStreetMap…';
+  candidate.on('tileload',function(){
+    if(candidate===tileLayer&&note)note.textContent='OpenStreetMap + polígonos territoriales BALAM'
   });
-  tileLayer.addTo(map);
+  candidate.on('tileerror',function(){
+    if(candidate!==tileLayer)return;
+    if(++tileFailures>=2){
+      toggleBaseTiles(false);
+      if(note)note.textContent='No se pudieron cargar las calles (bloqueo o conexión). Se conservan los polígonos.';
+      if(statusEl)statusEl.textContent='Mapa base no disponible. Puedes seguir usando los polígonos de BALAM o volver a intentar activar Calles OpenStreetMap.'
+    }
+  });
+  candidate.addTo(map);
+  if(stateLayer)updateMap()
 }
 map.createPane('blocksPane');map.getPane('blocksPane').style.zIndex=420;map.getPane('blocksPane').style.pointerEvents='none';
 map.createPane('agebPane');map.getPane('agebPane').style.zIndex=430;map.getPane('agebPane').style.pointerEvents='auto';
@@ -218,7 +243,7 @@ function currentAvailability(){
  if(src.available===false||ind.scope==='unavailable')return false;
  return true
 }
-function styleFeature(f){
+function basePolygonStyle(f){
  var code=codeOf(f),did=districtFor(code),d=did?cfg(did):null;
  if(!did||!active.has(did))return {color:'#a7c0b4',weight:.85,fillColor:'#d7e9df',fillOpacity:.78};
  var ind=indicatorCfg();
@@ -236,6 +261,23 @@ function styleFeature(f){
    return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.35,dashArray:'3 3',fillColor:d.color,fillOpacity:.32}
  }
  return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14}
+}
+function styleFeature(f){
+  var s=basePolygonStyle(f);
+  if(tileLayer && map.hasLayer(tileLayer)){
+    var code=codeOf(f),did=districtFor(code),selected=did&&active.has(did);
+    var intensity=document.getElementById('districtTint'),tint=intensity?Number(intensity.value)/100:.34;
+    // La red vial y las localidades siguen visibles bajo el color geográfico.
+    if(!selected){
+      s.fillOpacity=.04;
+      s.weight=.75;
+      s.color='#659789'
+    }else{
+      s.fillOpacity=Math.max(.08,Math.min(tint,s.fillOpacity));
+      s.weight=Math.max(1.5,s.weight||1);
+    }
+  }
+  return s
 }
 function tooltipText(f){
  var code=codeOf(f),name=nameOf(f),did=districtFor(code),ind=indicatorCfg();
@@ -566,6 +608,10 @@ document.getElementById('quickClear').addEventListener('click',cleanMap);
 document.getElementById('quickReset').addEventListener('click',resetMap);
 window.addEventListener('balam:crum-updated',updateDistrictFocus);
 document.getElementById('baseTiles').addEventListener('change',function(e){toggleBaseTiles(e.target.checked)});
+document.getElementById('districtTint').addEventListener('input',function(e){
+  document.getElementById('districtTintLabel').textContent=e.target.value+'%';
+  if(stateLayer)updateMap()
+});
 document.getElementById('onlyDs05').addEventListener('click',function(){active=new Set(['DS05']);clearFine();renderDistrictControls();renderEmptyDetail();updateMap();fitActive();ensureDistrictData('DS05')});
 
 window.BALAM_CrumMap = {
@@ -578,6 +624,7 @@ window.BALAM_CrumMap = {
   window.dispatchEvent(new Event('balam:districts-changed'));
  }
 };
+toggleBaseTiles(true);
 init();
 })();
 </script>
