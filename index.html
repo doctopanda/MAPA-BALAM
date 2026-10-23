@@ -107,7 +107,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
   <div class="crum-labelrow"><span id="crum-role" class="crum-muted"></span><button id="crum-signout" type="button" class="crum-light">Cerrar sesión</button></div>
   <div class="crum-metrics"><span><strong id="crum-count">0</strong>registros</span><span id="crum-places">0 ubicaciones</span></div>
   <label class="crum-toggle-label"><input id="crum-toggle" type="checkbox" checked> Mostrar puntos CRUM</label>
-  <label for="crum-scope">Territorio</label><select id="crum-scope"><option value="all">Todo Sonora</option><option value="active">Solo distritos BALAM activos</option></select>
+  <label for="crum-scope">Territorio</label><select id="crum-scope"><option value="active" selected>Solo distritos BALAM activos</option><option value="all">Todo Sonora (exploración explícita)</option></select>
   <label for="crum-district">Distrito</label><select id="crum-district"><option value="">Los seis distritos</option><option>DS01</option><option>DS02</option><option>DS03</option><option>DS04</option><option>DS05</option><option>DS06</option></select>
   <label for="crum-institution">Institución</label><select id="crum-institution"><option value="">Todas</option></select>
   <label for="crum-type">Tipo de recurso</label><select id="crum-type"><option value="">Todos</option></select>
@@ -257,9 +257,9 @@ function updateDistrictFocus(){
  if(!active.size){districtFocus.innerHTML='<strong>Sonora completo · 0 de 6 distritos</strong><p>Selecciona un distrito. SIESA y CRUM son catálogos separados y un distrito sin corte no significa cero actividad.</p>';return;}
  districtFocus.innerHTML=Array.from(active).map(function(did){
    var d=cfg(did),cut=districtData[did],label=cut?'SIESA: corte '+esc(cut.cut||'disponible'):'SIESA: sin corte distrital cargado';
-   var val=cut&&cut.current_filter&&cut.current_filter.discrete_operational_actions;
+   var val=cut&&cut.current_filter&&cut.current_filter.discrete_operational_actions; var totalCRUM=window.BALAM_CrumStats&&window.BALAM_CrumStats[did];
    var metric=val!=null?'<p>Acciones operativas documentadas: '+fmt(val)+' (fuente SIESA del corte, no personas).</p>':'';
-   return '<div class="district-focus-item" style="border-left:5px solid '+d.color+'"><b>'+did+' · '+esc(d.head)+'</b><small>'+esc(d.landscape||'')+'</small><p>'+esc(label)+'</p>'+metric+'<small>CRUM: consultar capa protegida tras iniciar sesión. Sin disponibilidad operativa.</small></div>';
+   return '<div class="district-focus-item" style="border-left:5px solid '+d.color+'"><b>'+did+' · '+esc(d.head)+'</b><small>'+esc(d.landscape||'')+'</small><p>'+esc(label)+'</p>'+metric+'<small>CRUM: '+(typeof totalCRUM==='number'?fmt(totalCRUM)+' registros inventariados':'consultar al autenticarte')+'. Sin disponibilidad operativa.</small></div>';
  }).join('');
 }
 function updateMap(){
@@ -564,6 +564,7 @@ document.getElementById('clearDetail').addEventListener('click',cleanMap);
 document.getElementById('resetMap').addEventListener('click',resetMap);
 document.getElementById('quickClear').addEventListener('click',cleanMap);
 document.getElementById('quickReset').addEventListener('click',resetMap);
+window.addEventListener('balam:crum-updated',updateDistrictFocus);
 document.getElementById('baseTiles').addEventListener('change',function(e){toggleBaseTiles(e.target.checked)});
 document.getElementById('onlyDs05').addEventListener('click',function(){active=new Set(['DS05']);clearFine();renderDistrictControls();renderEmptyDetail();updateMap();fitActive();ensureDistrictData('DS05')});
 
