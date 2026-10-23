@@ -27,13 +27,13 @@ async function load(){
  const {data:member,error:er}=await s.from('balam_access').select('role,is_enabled').eq('user_id',user.id).maybeSingle();
  if(er||!member?.is_enabled){controls(false);status('La cuenta no tiene acceso habilitado en BALAM');return}
  let all=[];for(let i=0;i<10000;i+=500){let {data,error}=await s.from('balam_crum_assets').select('asset_key,unit_label,locality_label,institution,type_original,type_class,district_id,lat,lon').eq('present_in_latest_import',true).order('asset_key').range(i,i+499);if(error){status('Error de lectura: '+error.message);return}all.push(...data);if(data.length<500)break}
- records=all;controls(true);active=true;g('crum-toggle').checked=true;g('crum-role').textContent=member.role==='admin_maestro'?'Administrador Maestro':member.role.replaceAll('_',' ');
+ records=all;window.BALAM_CrumStats=Object.fromEntries(['DS01','DS02','DS03','DS04','DS05','DS06'].map(d=>[d,records.filter(r=>r.district_id===d).length]));window.dispatchEvent(new Event('balam:crum-updated'));controls(true);active=true;g('crum-toggle').checked=true;g('crum-role').textContent=member.role==='admin_maestro'?'Administrador Maestro':member.role.replaceAll('_',' ');
  let inst=g('crum-institution');inst.replaceChildren(new Option('Todas las instituciones',''));[...new Set(records.map(x=>x.institution))].sort().forEach(v=>inst.add(new Option(v,v)));
  let ty=g('crum-type');ty.replaceChildren(new Option('Todos los tipos',''));[...new Set(records.map(x=>x.type_class))].sort().forEach(v=>ty.add(new Option(v.replaceAll('_',' '),v)));
  draw();status('Conectado a Supabase · '+records.length+' unidades inventariadas');
 }
 g('crum-signin').addEventListener('submit',async e=>{e.preventDefault();status('Validando credenciales…');let {error}=await s.auth.signInWithPassword({email:g('crum-email').value.trim(),password:g('crum-password').value});g('crum-password').value='';if(error){status(error.message);return}await load()});
-g('crum-signout').addEventListener('click',async()=>{await s.auth.signOut();records=[];active=false;out.clearLayers();controls(false);status('Sesión cerrada')});
+g('crum-signout').addEventListener('click',async()=>{await s.auth.signOut();records=[];active=false;out.clearLayers();window.BALAM_CrumStats=null;window.dispatchEvent(new Event('balam:crum-updated'));controls(false);status('Sesión cerrada')});
 g('crum-refresh').addEventListener('click',load);
 g('crum-toggle').addEventListener('change',e=>{active=e.target.checked;draw()});
 g('crum-float-toggle').addEventListener('click',()=>{active=!active;g('crum-toggle').checked=active;draw()});
