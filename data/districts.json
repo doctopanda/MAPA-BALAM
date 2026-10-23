@@ -1,13 +1,13 @@
 {
-  "schema": "BALAM-DISTRICTS-0.3",
-  "generated": "2026-10-14",
+  "schema": "BALAM-DISTRICTS-0.4",
+  "generated": "2026-10-23",
   "source_note": "Cabeceras distritales vigentes según Guía de Distritos de Salud Sonora 2026. Agrupación municipal base según Anuario Estadístico del Sistema Estatal de Salud 2023 (distribución distrital 2022), conservando DS05 validado en BALAM.",
   "districts": [
     {
       "id": "DS01",
       "name": "Distrito de Salud 01",
       "head": "Hermosillo",
-      "color": "#409993",
+      "color": "#318775",
       "municipalities": [
         "001",
         "005",
@@ -41,13 +41,18 @@
         "066",
         "067",
         "068"
-      ]
+      ],
+      "identity": "Corredor central, valle del río Sonora, mezquital y desierto cálido",
+      "landscape": "Palo fierro y Río Sonora",
+      "climate": "Cálido, muy seco y semiseco",
+      "color_name": "Jade de mezquite",
+      "data_status": "sin_corte_siesa_distrital"
     },
     {
       "id": "DS02",
       "name": "Distrito de Salud 02",
       "head": "Caborca",
-      "color": "#EC889B",
+      "color": "#C7818C",
       "municipalities": [
         "004",
         "007",
@@ -56,13 +61,18 @@
         "047",
         "060",
         "065"
-      ]
+      ],
+      "identity": "Oasis y desierto del noroeste, paisaje de dunas y ocaso",
+      "landscape": "Desierto de Altar y dunas",
+      "climate": "Desértico extremo",
+      "color_name": "Rosa arcilla del desierto",
+      "data_status": "sin_corte_siesa_distrital"
     },
     {
       "id": "DS03",
       "name": "Distrito de Salud 03",
       "head": "Santa Ana",
-      "color": "#5E9569",
+      "color": "#648968",
       "municipalities": [
         "002",
         "006",
@@ -81,13 +91,18 @@
         "058",
         "059",
         "064"
-      ]
+      ],
+      "identity": "Sierra alta, frontera y corredores de montaña",
+      "landscape": "Sierras y frontera norte",
+      "climate": "Sierra, contraste térmico y valles secos",
+      "color_name": "Verde pino serrano",
+      "data_status": "sin_corte_siesa_distrital"
     },
     {
       "id": "DS04",
       "name": "Distrito de Salud 04",
       "head": "Cajeme",
-      "color": "#7BB7B7",
+      "color": "#3B9EA8",
       "municipalities": [
         "012",
         "018",
@@ -97,13 +112,18 @@
         "051",
         "069",
         "072"
-      ]
+      ],
+      "identity": "Agricultura de riego del Yaqui, costa y puerto",
+      "landscape": "Valle del Yaqui y Mar de Cortés",
+      "climate": "Valles cálidos, litoral y sierra baja",
+      "color_name": "Turquesa Yaqui y Golfo",
+      "data_status": "sin_corte_siesa_distrital"
     },
     {
       "id": "DS05",
       "name": "Distrito de Salud 05",
       "head": "Navojoa",
-      "color": "#817060",
+      "color": "#AA796A",
       "municipalities": [
         "003",
         "026",
@@ -111,18 +131,29 @@
         "042",
         "071"
       ],
-      "dataUrl": "data/ds05_metrics.json"
+      "dataUrl": "data/ds05_metrics.json",
+      "identity": "Cultura yoreme-mayo, río Mayo y transición serrana",
+      "landscape": "Valle del Mayo y Álamos",
+      "climate": "Valle cálido y serranía al oriente",
+      "color_name": "Cobre del Mayo",
+      "data_status": "corte_siesa_municipal_disponible"
     },
     {
       "id": "DS06",
       "name": "Distrito de Salud 06",
       "head": "San Luis Río Colorado",
-      "color": "#2F746E",
+      "color": "#6686AA",
       "municipalities": [
         "048",
         "055",
         "070"
-      ]
+      ],
+      "identity": "Delta del Colorado, salinas, dunas y alto golfo",
+      "landscape": "Alto Golfo y Río Colorado",
+      "climate": "Gran desierto, costa y ambiente hiperárido",
+      "color_name": "Azul delta del Colorado",
+      "data_status": "sin_corte_siesa_distrital"
     }
-  ]
+  ],
+  "palette_reference": "BALAM original · interpretación cromática del paisaje; valores HEX propios, no códigos Pantone oficiales"
 }
