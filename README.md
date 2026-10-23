@@ -56,3 +56,12 @@ La vista `index.html` incorpora una capa CRUM **protegida por autenticación** d
 - Colores territoriales por distrito persistentes, con deslizador de 12–70% de opacidad máxima cuando OSM está activo.
 - Vista poligonal sin teselas disponible mediante la casilla superior o automáticamente cuando el proveedor no responde.
 - El sitio no almacena ni precarga teselas; únicamente realiza consultas interactivas de la extensión visible, conforme a la política OSM. No usa CARTO Voyager sin clave, porque ese proveedor requiere API key.
+
+## v0.8 · Sidebar plegable y capas AGEB/manzanas independientes (23/10/2026)
+
+- Se quitó el botón específico **«Elegir DS05»**. La lista de seis distritos y el **selector rápido** ahora son los controles principales; ninguno se selecciona automáticamente salvo enlace `?ds=DSxx` explícito.
+- El panel lateral es plegable: herramientas, lectura analítica, distritos, ficha de municipio, reglas, AGEB/manzanas y catálogo CRUM. Se ofrecen opciones para desplegar o comprimir todo.
+- Las capas **AGEB activas** (seleccionadas para análisis) y **AGEB inactivas** (no seleccionadas) pueden mostrarse u ocultarse de manera independiente. *«Activa» no se refiere al estado sanitario de una AGEB.*
+- **Manzanas** es una capa independiente que comienza apagada. Seleccionar AGEB no desencadena consultas de manzanas hasta activarla. Al apagarla se retiran las manzanas; solicitudes pendientes no pueden volver a dibujarlas. El sistema consulta INEGI por municipio/AGEB según demanda.
+- La versión privada **BALAM SIESA v5.3.1** incorpora en el menú MAPAS un selector que abre el distrito elegido en este visor. El cambio no modifica el corte local SIESA ni crea información para otros distritos.
+- El mapa mantiene su estilo OpenStreetMap, los seis colores regionales, las políticas RLS y el inventario CRUM privado.
