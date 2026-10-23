@@ -220,7 +220,7 @@ function currentAvailability(){
 }
 function styleFeature(f){
  var code=codeOf(f),did=districtFor(code),d=did?cfg(did):null;
- if(!did||!active.has(did))return {color:'#bdcac8',weight:.65,fillColor:'#edf2f1',fillOpacity:.30};
+ if(!did||!active.has(did))return {color:'#a7c0b4',weight:.85,fillColor:'#d7e9df',fillOpacity:.78};
  var ind=indicatorCfg();
  if(ind.scope==='territory')return {color:selectedContext&&selectedContext.code===code?'#173a37':d.color,weight:selectedContext&&selectedContext.code===code?3:1.6,fillColor:d.color,fillOpacity:.68};
  if(!currentAvailability())return {color:d.color,weight:2,dashArray:'5 4',fillColor:d.color,fillOpacity:.14};
@@ -254,7 +254,7 @@ function tooltipText(f){
 }
 function updateDistrictFocus(){
  if(!districtFocus)return;
- if(!active.size){districtFocus.innerHTML='<strong>Sonora completo · 0 de 6 distritos</strong><p>Selecciona un distrito. SIESA y CRUM son catálogos separados y un distrito sin corte no significa cero actividad.</p>';return;}
+ if(!active.size){districtFocus.innerHTML='<strong>Sonora completo · 0 de 6 distritos</strong><p>El mapa poligonal queda visible como contexto geográfico. Selecciona un distrito para colorearlo y cargar sus datos. Sin corte SIESA no equivale a cero actividad.</p>';return;}
  districtFocus.innerHTML=Array.from(active).map(function(did){
    var d=cfg(did),cut=districtData[did],label=cut?'SIESA: corte '+esc(cut.cut||'disponible'):'SIESA: sin corte distrital cargado';
    var val=cut&&cut.current_filter&&cut.current_filter.discrete_operational_actions; var totalCRUM=window.BALAM_CrumStats&&window.BALAM_CrumStats[did];
