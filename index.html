@@ -50,6 +50,25 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .basemap-status{display:inline-flex;align-items:center;color:#43685c;font:600 11px system-ui;background:#f7fbf8ed;border:1px solid #c2dcd0;border-radius:9px;padding:8px 10px}
 .leaflet-control-attribution{font:11px system-ui!important;background:rgba(255,255,255,.88)!important;opacity:1!important}
 @media(max-width:760px){.basemap-status{width:100%}.basemap-opt input[type="range"]{width:85px}}
+</style><style id="balam-collapsible-v080">
+.shell aside{scrollbar-width:thin}
+.balam-fold{border:1px solid #d2e4de;border-radius:13px;background:#fff;margin:0 0 9px;overflow:hidden;box-shadow:0 2px 9px rgba(25,86,65,.04)}
+.balam-fold>summary{list-style:none;cursor:pointer;position:relative;padding:12px 37px 12px 13px;font-size:12px;font-weight:900;color:#235c4e;background:linear-gradient(90deg,#eef8f4,#fafffc)}
+.balam-fold>summary::-webkit-details-marker{display:none}
+.balam-fold>summary:after{content:"⌄";position:absolute;right:13px;font-size:18px;top:8px;color:#328a74;transform:rotate(-90deg)}
+.balam-fold[open]>summary:after{transform:rotate(0)}
+.balam-fold>summary:focus-visible{outline:2px solid #23795f;outline-offset:-2px}
+.balam-fold>.card,.balam-fold>#crum-panel{margin:0;border:0;box-shadow:none;border-radius:0;padding:12px}
+.fold-actions{display:flex;align-items:center;gap:7px;flex-wrap:wrap;padding:8px 4px 12px}
+.fold-actions>b{flex:1;font-size:13px;color:#17634d}
+.fold-actions button{border:1px solid #c5ddd4;background:#eff9f4;color:#185745;border-radius:9px;padding:6px 9px;font-size:10px;font-weight:850;cursor:pointer}
+.district-quick-label{display:block;font-size:11px;font-weight:850;color:#236453;margin:7px 0 5px}
+.district-quick-select{width:100%;min-height:39px;border:1px solid #a4cfc0;border-radius:11px;background:#fff;color:#134b3b;font-size:13px;padding:7px 9px;font-weight:700}
+.geo-layer-option{display:flex;gap:9px;align-items:center;background:#f7fcf9;border:1px solid #d8e9df;border-radius:10px;margin:7px 0;padding:9px;cursor:pointer}
+.geo-layer-option input{width:19px;height:19px;accent-color:#237e62;flex:0 0 auto}
+.geo-layer-option b{display:block;color:#185644;font-size:11px}
+.geo-layer-option small{display:block;margin:3px 0 0;font-size:10px;color:#607b71}
+#geoLayerStatus{padding:7px 8px;background:#eef9f3;border-radius:8px}
 </style></head>
 <body>
 <header>
@@ -60,12 +79,15 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.7.3</div>
+    <div class="eyebrow">MAPA BALAM · v0.8.0</div>
     <h2>Centro de Capas</h2>
-    <p class="lead">Activa uno o varios distritos y construye una sola lectura comparable: modo, fuente, programa, indicador y periodo.</p>
+    <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
+    <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
+    <select id="quickDistrict" class="district-quick-select"><option value="">Seleccionar distrito…</option></select>
+    <p class="tiny" style="margin:5px 0 11px">Para comparar varios distritos utiliza las casillas del apartado <b>Distritos visibles</b>.</p>
     <div class="row">
       <button class="btn primary" id="fitActive">Enfocar activos</button>
-      <button class="btn" id="onlyDs05">Elegir DS05</button>
+      
       <button class="btn pink" id="clearDetail">Limpiar capas</button>
       <button class="btn" id="resetMap">Restaurar</button>
     </div>
@@ -102,6 +124,14 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
     <div class="tiny"><b>Personas ≠ casos ≠ atenciones ≠ acciones ≠ registros.</b> El mapa conserva la unidad real del indicador. Ausencia de captura tampoco significa cero actividad. Sólo se colorea una geografía cuando existe una llave territorial defendible.</div>
   </div>
 
+  <div class="card" id="geoLayerPanel">
+    <h3>Capas de detalle · AGEB y manzanas</h3>
+    <p class="tiny">Elige un municipio para obtener sus AGEB. “Activa” significa seleccionada para análisis, no condición sanitaria.</p>
+    <label class="geo-layer-option"><input id="showActiveAgebs" type="checkbox" checked><span><b>AGEB activas</b><small>Mostrar las seleccionadas en el mapa</small></span></label>
+    <label class="geo-layer-option"><input id="showInactiveAgebs" type="checkbox" checked><span><b>AGEB inactivas</b><small>Mostrar las que no has seleccionado</small></span></label>
+    <label class="geo-layer-option"><input id="showBlocks" type="checkbox"><span><b>Manzanas</b><small>Cargar únicamente dentro de AGEB seleccionadas</small></span></label>
+    <div id="geoLayerStatus" class="tiny" role="status">Manzanas apagadas; no se solicitarán hasta activar la capa.</div>
+  </div>
 <section id="crum-panel" aria-label="Catálogo CRUM protegido">
  <h3>🚑 CRUM | Respuesta prehospitalaria</h3>
  <p>Inventario independiente de SIESA. Los puntos son ubicaciones de referencia, no GPS ni disponibilidad.</p>
@@ -141,6 +171,26 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <script>
 (function(){
 'use strict';
+function makeSidebarAccordion(){
+  var aside=document.querySelector('.shell aside');
+  if(!aside||aside.dataset.foldsReady)return;
+  aside.dataset.foldsReady='1';
+  var sections=[['Herramientas del mapa',true],['Lectura analítica',false],['Distritos y selección',true],['Ficha de municipio',false],['Reglas BALAM',false],['AGEB y manzanas',true],['Catálogo CRUM',false]];
+  var contents=Array.from(aside.children).filter(function(e){return e.matches('.card, #crum-panel')});
+  contents.forEach(function(node,i){
+    var fold=document.createElement('details');fold.className='balam-fold';
+    fold.open=!!(sections[i]&&sections[i][1]);
+    var heading=document.createElement('summary');
+    heading.textContent=(sections[i]&&sections[i][0])||'Información BALAM';
+    node.parentNode.insertBefore(fold,node);fold.appendChild(heading);fold.appendChild(node);
+  });
+  var strip=document.createElement('div');strip.className='fold-actions';
+  strip.innerHTML='<b>🐆 Panel territorial</b><button type="button" id="foldShowAll">Desplegar</button><button type="button" id="foldHideAll">Comprimir</button>';
+  aside.insertBefore(strip,aside.firstChild);
+  document.getElementById('foldShowAll').addEventListener('click',function(){aside.querySelectorAll('.balam-fold').forEach(function(x){x.open=true})});
+  document.getElementById('foldHideAll').addEventListener('click',function(){aside.querySelectorAll('.balam-fold').forEach(function(x){x.open=false})});
+}
+makeSidebarAccordion();
 
 var MUN_URL='https://raw.githubusercontent.com/MacWilliXD/INEGI-geojson/main/geojson_descargas/AGEM_26.geojson';
 var AGEBU_URL='https://gaia.inegi.org.mx/wscatgeo/v2/geo/agebu/26/';
@@ -188,6 +238,7 @@ var active=new Set();
 var stateLayer=null,stateBounds=null,agebLayer=null,geoCache={};
 var agebIndex=new Map(),selectedAgebs=new Set(),blockLayers=new Map(),currentFine=null;
 var selectedContext=null;
+var showActiveAgebs=true,showInactiveAgebs=true,showBlocks=false;
 var analysis={mode:'panorama',source:'balam',program:'resumen',indicator:'territorio',period:'available'};
 
 var controls=document.getElementById('districtControls');
@@ -375,6 +426,8 @@ function refreshDistrictControl(did){
  }
 }
 function renderDistrictControls(){
+ var quick=document.getElementById('quickDistrict');
+ if(quick)quick.value=active.size===1?Array.from(active)[0]:'';
  controls.innerHTML='';
  districtCfg.districts.forEach(function(d){
    var row=document.createElement('div');row.id='districtRow_'+d.id;row.className='district-row'+(active.has(d.id)?' active':'');
@@ -447,7 +500,8 @@ function onEach(f,layer){
    selectedContext={code:code,name:name,did:did};
    updateMap();
    var b=layer.getBounds();map.fitBounds(b,{padding:[28,28],maxZoom:10});
-   loadAgeb(code.slice(2),name,did,b)
+   if(showActiveAgebs||showInactiveAgebs||showBlocks)loadAgeb(code.slice(2),name,did,b);
+   else statusEl.textContent='Municipio seleccionado. Activa una capa AGEB para cargar el detalle.'
  })
 }
 function renderDetail(code,name,did){
@@ -486,7 +540,32 @@ function agebInfo(f,mun){var p=f.properties||{};return {key:agebKey(f,mun),ageb:
 function clearBlockLayers(){blockLayers.forEach(function(layer){if(map.hasLayer(layer))map.removeLayer(layer)});map.eachLayer(function(layer){if(layer&&layer.options&&layer.options.pane==='blocksPane'&&map.hasLayer(layer))map.removeLayer(layer)});blockLayers.clear()}
 function clearFine(){if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}map.eachLayer(function(layer){if(layer&&layer.options&&layer.options.pane==='agebPane'&&map.hasLayer(layer))map.removeLayer(layer)});clearBlockLayers();agebIndex.clear();selectedAgebs.clear();currentFine=null}
 function agebStyle(f){var info=agebInfo(f,currentFine?currentFine.mun:'');var on=selectedAgebs.has(info.key),p=f.properties||{};return {pane:'agebPane',color:on?'#173a37':'#409993',weight:on?3:1.15,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:on?.24:.12}}
-function syncAgebStyles(){if(agebLayer)agebLayer.setStyle(agebStyle)}
+function syncAgebStyles(){
+ if(!agebLayer)return;
+ agebIndex.forEach(function(info){
+   var visible=selectedAgebs.has(info.key)?showActiveAgebs:showInactiveAgebs;
+   if(visible&&!agebLayer.hasLayer(info.layer))agebLayer.addLayer(info.layer);
+   if(!visible&&agebLayer.hasLayer(info.layer))agebLayer.removeLayer(info.layer);
+ });
+ agebLayer.setStyle(agebStyle);
+}
+function updateGeoLayerStatus(){
+ var node=document.getElementById('geoLayerStatus');
+ if(!node)return;
+ node.textContent=(showActiveAgebs?'AGEB seleccionadas visibles':'AGEB seleccionadas ocultas')+' · '+(showInactiveAgebs?'AGEB no seleccionadas visibles':'AGEB no seleccionadas ocultas')+' · '+(showBlocks?'Manzanas habilitadas':'Manzanas apagadas, sin descargas');
+}
+async function syncBlockVisibility(){
+ if(!showBlocks){clearBlockLayers();updateAgebManager();updateGeoLayerStatus();return;}
+ if(!currentFine||!selectedAgebs.size){updateGeoLayerStatus();return;}
+ var atStart=currentFine;
+ var keys=Array.from(selectedAgebs);
+ statusEl.textContent='Cargando manzanas de '+fmt(keys.length)+' AGEB seleccionadas…';
+ for(var i=0;i<keys.length&&showBlocks&&currentFine===atStart;i++){
+   if(selectedAgebs.has(keys[i]))await ensureBlockLayer(agebIndex.get(keys[i]),true);
+ }
+ if(currentFine===atStart)statusEl.textContent='Manzanas activas en '+fmt(blockLayers.size)+' AGEB de '+atStart.name+'.';
+ updateAgebManager();updateGeoLayerStatus();
+}
 function focusMunicipality(){if(currentFine&&currentFine.bounds)map.fitBounds(currentFine.bounds,{padding:[28,28],maxZoom:10})}
 function focusAgeb(key){var info=agebIndex.get(key);if(info&&info.layer)map.fitBounds(info.layer.getBounds(),{padding:[28,28],maxZoom:14})}
 function focusSelectedAgebs(){var b=null;selectedAgebs.forEach(function(key){var info=agebIndex.get(key);if(info&&info.layer){var lb=info.layer.getBounds();b=b?b.extend(lb):lb}});if(b)map.fitBounds(b,{padding:[28,28],maxZoom:13});else focusMunicipality()}
@@ -496,9 +575,9 @@ function updateAgebManager(){
  var items=Array.from(agebIndex.values()).sort(function(a,b){return (a.ageb+a.loc).localeCompare(b.ageb+b.loc)});
  var activeCount=selectedAgebs.size,loadedCount=0;selectedAgebs.forEach(function(k){if(blockLayers.has(k))loadedCount++});
  root.innerHTML='<div class="eyebrow">AGEB / manzanas</div>'+
- '<div class="ageb-summary"><b>'+fmt(items.length)+'</b> AGEB visibles · <b>'+fmt(activeCount)+'</b> seleccionadas · <b>'+fmt(loadedCount)+'</b> con manzanas</div>'+
+ '<div class="ageb-summary"><b>'+fmt(items.length)+'</b> AGEB cargadas · <b>'+fmt(activeCount)+'</b> seleccionadas · <b>'+fmt(loadedCount)+'</b> con manzanas visibles</div>'+
  '<div class="ageb-toolbar"><button class="btn" type="button" id="agebMunicipio">Municipio</button><button class="btn" type="button" id="agebSelection">Selección</button><button class="btn" type="button" id="agebAll">Todas</button><button class="btn" type="button" id="agebNone">Ninguna</button><button class="btn" type="button" id="agebInvert">Invertir</button></div>'+
- '<div class="ageb-list" id="agebList"></div><div class="tiny" style="margin-top:6px">Las AGEB permanecen visibles. Cada casilla controla únicamente sus manzanas.</div>';
+ '<div class="ageb-list" id="agebList"></div><div class="tiny" style="margin-top:6px">Seleccionar AGEB permite analizarlas. Las manzanas solo se cargan si activas su capa en el panel lateral.</div>';
  var list=document.getElementById('agebList');
  items.forEach(function(info){
    var row=document.createElement('label');row.className='ageb-item'+(selectedAgebs.has(info.key)?' active':'');
@@ -520,33 +599,33 @@ async function setAgebSelected(key,on){
  var info=agebIndex.get(key);if(!info)return;
  if(on)selectedAgebs.add(key);else selectedAgebs.delete(key);
  syncAgebStyles();updateAgebManager();
- if(on)await ensureBlockLayer(info);else removeBlockLayer(key);
+ if(on&&showBlocks)await ensureBlockLayer(info);else removeBlockLayer(key);
  syncAgebStyles();updateAgebManager()
 }
 async function setAllAgebs(on){
  var keys=Array.from(agebIndex.keys());
- if(!on){selectedAgebs.clear();clearBlockLayers();syncAgebStyles();updateAgebManager();statusEl.textContent='AGEB visibles; manzanas desactivadas.';return}
+ if(!on){selectedAgebs.clear();clearBlockLayers();syncAgebStyles();updateAgebManager();statusEl.textContent='Ninguna AGEB seleccionada. No se cargan manzanas.';return}
  keys.forEach(function(k){selectedAgebs.add(k)});syncAgebStyles();updateAgebManager();
- statusEl.textContent='Cargando manzanas de '+fmt(keys.length)+' AGEB en progresivo…';
- for(var i=0;i<keys.length;i++){if(selectedAgebs.has(keys[i]))await ensureBlockLayer(agebIndex.get(keys[i]),true)}
+ statusEl.textContent=showBlocks?'Cargando manzanas de AGEB seleccionadas en progresivo…':'AGEB seleccionadas · manzanas apagadas.';
+ if(showBlocks)for(var i=0;i<keys.length&&showBlocks;i++){if(selectedAgebs.has(keys[i]))await ensureBlockLayer(agebIndex.get(keys[i]),true)}
  statusEl.textContent=currentFine.name+' · '+currentFine.did+': manzanas activas en '+fmt(selectedAgebs.size)+' AGEB.';updateAgebManager()
 }
 async function invertAgebs(){
  var keys=Array.from(agebIndex.keys()),target=[];
  keys.forEach(function(k){if(selectedAgebs.has(k)){selectedAgebs.delete(k);removeBlockLayer(k)}else{selectedAgebs.add(k);target.push(k)}});
  syncAgebStyles();updateAgebManager();
- for(var i=0;i<target.length;i++)await ensureBlockLayer(agebIndex.get(target[i]),true);
+ if(showBlocks)for(var i=0;i<target.length&&showBlocks;i++)await ensureBlockLayer(agebIndex.get(target[i]),true);
  statusEl.textContent='Selección invertida · '+fmt(selectedAgebs.size)+' AGEB activas.';updateAgebManager()
 }
 function removeBlockLayer(key){var layer=blockLayers.get(key);if(layer&&map.hasLayer(layer))map.removeLayer(layer);map.eachLayer(function(x){if(x&&x.__balamAgebKey===key&&map.hasLayer(x))map.removeLayer(x)});blockLayers.delete(key)}
 async function ensureBlockLayer(info,silent){
- if(!info||blockLayers.has(info.key))return;
+ if(!info||!showBlocks||blockLayers.has(info.key)||!currentFine)return;
  var mun=currentFine.mun,name=currentFine.name,did=currentFine.did;
  if(!silent)statusEl.textContent='Cargando manzanas de AGEB '+info.ageb+' · '+name+'…';
  try{
    var url=info.loc?MZA_URL+mun+'/'+info.loc:MZA_URL+mun;
    var j=await cachedJson(url),all=fc(j).features.filter(function(f){var q=f.properties||{};return prop(q,['cve_ageb','CVE_AGEB'])===info.ageb&&(!info.loc||prop(q,['cve_loc','CVE_LOC'])===info.loc)});
-   if(!selectedAgebs.has(info.key))return;
+   if(!showBlocks||!selectedAgebs.has(info.key)||!currentFine||currentFine.mun!==mun)return;
    var layer=L.geoJSON({type:'FeatureCollection',features:all},{pane:'blocksPane',renderer:L.canvas({padding:.5,pane:'blocksPane'}),interactive:false,style:{color:'#557b75',weight:.5,fillColor:'#fff',fillOpacity:.23}}).addTo(map);
    layer.__balamAgebKey=info.key;blockLayers.set(info.key,layer);if(agebLayer)agebLayer.bringToFront();
    if(!silent)statusEl.textContent=did+' · '+name+' · AGEB '+info.ageb+': '+fmt(all.length)+' manzanas activas.'
@@ -565,7 +644,7 @@ async function loadAgeb(mun,name,did,municipalityBounds){
      l.bindTooltip('AGEB '+esc(info.ageb)+' · '+esc(info.amb)+(info.loc?' · Loc. '+esc(info.loc):''),{sticky:true});
      l.on('click',function(ev){if(ev&&ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);setAgebSelected(info.key,!selectedAgebs.has(info.key))})
    }}).addTo(map);
-   statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' AGEB visibles. Activa una, varias o todas sus manzanas.';updateAgebManager()
+   syncAgebStyles();statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' AGEB disponibles. Selecciona las necesarias; manzanas '+(showBlocks?'activadas.':'apagadas.');updateAgebManager()
  }catch(e){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message}
 }
 
@@ -593,7 +672,11 @@ async function init(){
    var qs=new URLSearchParams(window.location.search);
    var requested=(qs.get('ds')||'').toUpperCase().split(',').map(function(v){return v.trim()});
    active=new Set(requested.filter(function(id){return districtCfg.districts.some(function(d){return d.id===id})}));
-   renderLayerControls();renderDistrictControls();/* Sin distrito preseleccionado: carga SIESA DS05 bajo demanda. */
+   var dq=document.getElementById('quickDistrict');
+   dq.replaceChildren(new Option('Ningún distrito seleccionado',''));
+   districtCfg.districts.forEach(function(d){dq.add(new Option(d.id+' · '+d.head,d.id))});
+   dq.value=active.size===1?Array.from(active)[0]:'';
+   renderLayerControls();renderDistrictControls();/* Datos SIESA por distrito se cargan bajo demanda. */
    var gj=await fetch(MUN_URL).then(function(r){if(!r.ok)throw new Error('municipios '+r.status);return r.json()});
    stateLayer=L.geoJSON(gj,{style:styleFeature,onEachFeature:onEach}).addTo(map);
    stateBounds=stateLayer.getBounds();map.fitBounds(stateBounds,{padding:[18,18]});updateMap();
@@ -612,7 +695,27 @@ document.getElementById('districtTint').addEventListener('input',function(e){
   document.getElementById('districtTintLabel').textContent=e.target.value+'%';
   if(stateLayer)updateMap()
 });
-document.getElementById('onlyDs05').addEventListener('click',function(){active=new Set(['DS05']);clearFine();renderDistrictControls();renderEmptyDetail();updateMap();fitActive();ensureDistrictData('DS05')});
+document.getElementById('quickDistrict').addEventListener('change',function(ev){
+ var id=ev.target.value;
+ clearFine();active=id?new Set([id]):new Set();
+ renderDistrictControls();renderEmptyDetail();updateMap();fitActive();
+ if(id)ensureDistrictData(id);
+ statusEl.textContent=id?'Distrito '+id+' seleccionado desde el acceso rápido.':'Sin distritos seleccionados.';
+ window.dispatchEvent(new Event('balam:districts-changed'));
+});
+[['showActiveAgebs','active'],['showInactiveAgebs','inactive'],['showBlocks','blocks']].forEach(function(item){
+ document.getElementById(item[0]).addEventListener('change',function(ev){
+  if(item[1]==='active')showActiveAgebs=ev.target.checked;
+  if(item[1]==='inactive')showInactiveAgebs=ev.target.checked;
+  if(item[1]==='blocks')showBlocks=ev.target.checked;
+  updateGeoLayerStatus();
+  if(item[1]==='blocks')syncBlockVisibility();else if(currentFine){
+   if(!agebLayer&&(showActiveAgebs||showInactiveAgebs||showBlocks))loadAgeb(currentFine.mun,currentFine.name,currentFine.did,currentFine.bounds);
+   else{syncAgebStyles();updateAgebManager();}
+  }
+ });
+});
+updateGeoLayerStatus();
 
 window.BALAM_CrumMap = {
  map: map,
