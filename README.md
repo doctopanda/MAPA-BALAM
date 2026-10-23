@@ -45,7 +45,14 @@ La vista `index.html` incorpora una capa CRUM **protegida por autenticación** d
 - **Inicio con 0 distritos activos.** El usuario selecciona uno o varios de los seis; `?ds=DS01` (también `?ds=DS01,DS04`) preselecciona solo cuando el vínculo lo solicita explícitamente.
 - **Restaurar** limpia todas las selecciones y regresa a Sonora. **Elegir DS05** queda como atajo optativo, no automático.
 - Seis tonalidades propias de BALAM (HEX de diseño, no códigos oficiales Pantone): DS01 mezquite `#318775`, DS02 arcilla `#C7818C`, DS03 pino `#648968`, DS04 Yaqui/Golfo `#3B9EA8`, DS05 cobre del Mayo `#AA796A`, DS06 delta del Colorado `#6686AA`.
-- Geometría pública: municipios INEGI y detalle progresivo AGEB/manzana bajo demanda. **Teselas OSM desactivadas por defecto** para evitar bloqueos 403. La casilla *Mapa base opcional* permite solicitarlas; si el servidor bloquea la carga, el visor conserva sus polígonos sin error visual 403.
+- Geometría pública: municipios INEGI y detalle progresivo AGEB/manzana bajo demanda. **Calles OpenStreetMap activadas por defecto**, con polígonos distritales BALAM semitransparentes y control para ajustar su color. Se usa el servidor OSM oficial con atribución; si falla la descarga de teselas (403/red), el mapa regresa automáticamente a polígonos solamente. La casilla *Calles OpenStreetMap* permite alternar vistas sin perder distritos.
 - SIESA: el único corte municipal con procedencia verificada en el visor público sigue siendo **DS05, corte 12/10/2026**. DS01, DS02, DS03, DS04 y DS06 muestran **«sin corte SIESA cargado»** y no se rellena un cero ficticio.
 - CRUM: los usuarios autenticados y autorizados ven inventario por distrito bajo RLS, sin publicar el archivo de coordenadas en GitHub. Los puntos CRUM se filtran inicialmente por los distritos seleccionados, no por todo Sonora.
 - La versión anterior con mapa poligonal DS05 interno permanece guardada exclusivamente como respaldo privado; **no se subió a este repositorio**.
+
+## v0.7 · Cartografía híbrida BALAM + OpenStreetMap
+
+- Visor por defecto: carreteras, ciudades, localidades y relieve esquemático del estilo OpenStreetMap estándar, debajo de la capa poligonal BALAM.
+- Colores territoriales por distrito persistentes, con deslizador de 12–70% de opacidad máxima cuando OSM está activo.
+- Vista poligonal sin teselas disponible mediante la casilla superior o automáticamente cuando el proveedor no responde.
+- El sitio no almacena ni precarga teselas; únicamente realiza consultas interactivas de la extensión visible, conforme a la política OSM. No usa CARTO Voyager sin clave, porque ese proveedor requiere API key.
