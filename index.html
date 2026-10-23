@@ -419,6 +419,8 @@ function refreshDistrictControl(did){
  var row=document.getElementById('districtRow_'+did),cb=document.getElementById('districtCb_'+did),chip=document.getElementById('districtChip_'+did);
  if(row)row.classList.toggle('active',active.has(did));
  if(cb)cb.checked=active.has(did);
+ var quick=document.getElementById('quickDistrict');
+ if(quick)quick.value=active.size===1?Array.from(active)[0]:'';
  if(chip){
    var d=cfg(did);
    chip.className='data-chip'+(districtData[did]?' ready':'');
@@ -501,7 +503,7 @@ function onEach(f,layer){
    updateMap();
    var b=layer.getBounds();map.fitBounds(b,{padding:[28,28],maxZoom:10});
    if(showActiveAgebs||showInactiveAgebs||showBlocks)loadAgeb(code.slice(2),name,did,b);
-   else statusEl.textContent='Municipio seleccionado. Activa una capa AGEB para cargar el detalle.'
+   else {clearFine();currentFine={mun:code.slice(2),name:name,did:did,bounds:b};statusEl.textContent='Municipio seleccionado. Activa una capa AGEB para cargar el detalle.'}
  })
 }
 function renderDetail(code,name,did){
