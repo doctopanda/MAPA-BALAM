@@ -103,8 +103,8 @@ assert(new Set(rnc.plazas.map(p=>p.id)).size===15,'Duplicados de casetas geográ
 assert(rnc.plazas.every(p=>p.points.every(x=>Number.isFinite(x.lon)&&Number.isFinite(x.lat)&&x.lat>=26&&x.lat<=33.5&&x.lon>=-115.5&&x.lon<=-108)),'Puntos fuera del marco geográfico de Sonora');
 const rncIds=rnc.plazas.flatMap(p=>p.points.map(x=>x.rnc_id));
 assert(new Set(rncIds).size===26,'IDs RNC duplicados, posible cobro doble');
-const fund=rnc.plazas.find(p=>p.id==='fundicion');
-assert(fund.capufe_tariff_id==='fundicion'&&fund.points.length===2&&Math.abs(fund.points[0].lon-(-109.719823478))<1e-6,'Caseta Fundición no concuerda con punto oficial');
+const fundRnc=rnc.plazas.find(p=>p.id==='fundicion');
+assert(fundRnc.capufe_tariff_id==='fundicion'&&fundRnc.points.length===2&&Math.abs(fundRnc.points[0].lon-(-109.719823478))<1e-6,'Caseta Fundición no concuerda con punto oficial');
 assert(rnc.plazas.find(x=>x.id==='obregon_esperanza_hornos').capufe_tariff_id===null,'No vincular tarifa LICO a plaza sin correspondencia inequívoca');
 for(const p of rnc.plazas)assert(!p.capufe_tariff_id||tariff.plazas.some(t=>t.id===p.capufe_tariff_id),'Tarifa vinculada sin ficha oficial CAPUFE');
 const tollCode=fs.readFileSync('assets/toll-route-detection.js','utf8');
