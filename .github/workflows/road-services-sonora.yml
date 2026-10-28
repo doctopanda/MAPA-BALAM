@@ -43,6 +43,9 @@ jobs:
             -o /tmp/balam-roads/services.osm.pbf --overwrite
           osmium export /tmp/balam-roads/services.osm.pbf \
             -f geojsonseq -o /tmp/balam-roads/services.geojsonseq --overwrite
+          echo 'EXPORT_STATS:'
+          wc -l /tmp/balam-roads/services.geojsonseq
+          head -n 2 /tmp/balam-roads/services.geojsonseq | cut -c1-1000
       - name: Geofence points and build compact snapshot
         run: |
           python3 scripts/build_road_support_sonora.py \
