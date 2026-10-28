@@ -80,6 +80,7 @@ async function routeReturn(){
   if(!e('logistics-show-return').checked)map.removeLayer(routeModel.returnLine);
   e('logistics-return-status').textContent='↩️ Regreso enrutado por separado: '+num(result.distance/1000,2)+' km; trazo azul discontinuo. Motor de demostración sin cierres ni tráfico.';
   present();
+  window.dispatchEvent(new Event('balam:logistics-return-ready'));
  }catch(err){if(token===returnGeneration)e('logistics-return-status').textContent='Retorno no disponible ('+String(err.message).slice(0,110)+'). Se mantiene cálculo estimado como 2 × ida.'}
  finally{clearTimeout(timer);if(returnAbort===controller)returnAbort=null}
 }

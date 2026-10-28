@@ -1,0 +1,15 @@
+{
+  "schema": "balam-denue-sonora-route-v1",
+  "status": "awaiting_official_source",
+  "source": "INEGI DENUE · edición 05/2026",
+  "source_url": "https://www.inegi.org.mx/app/descarga/?ti=6",
+  "source_cut": "2026-05",
+  "extracted_at": null,
+  "counts": {
+    "fuel": 0,
+    "tire": 0,
+    "repair": 0
+  },
+  "facilities": [],
+  "disclaimer": "Aún no se importó exportación oficial DENUE de Sonora. No representar estos ceros como ausencia de negocios. OpenStreetMap sigue como alternativa independiente."
+}

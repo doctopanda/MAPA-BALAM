@@ -198,6 +198,37 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .support-badge{display:inline-block;background:#d4f3d9;color:#116d34;padding:3px 7px;border-radius:7px;font-size:10px;font-weight:800}
 .support-site-icon{background:transparent;border:0}
 .support-site-icon>div{background:white;border:3px solid #278f70;border-radius:50%;display:flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:18px;box-shadow:0 1px 9px #0004}
+</style><style id="balam-travel-budget-v014">
+.balam-budget-panel{background:#fffefa;border:1px solid #e4cf9d;border-radius:12px;padding:11px;margin:12px 0}
+.balam-budget-panel>summary{cursor:pointer;font:850 12px/1.5 system-ui;color:#845514}
+.balam-budget-panel p{line-height:1.5}
+.budget-field{display:grid;gap:5px;margin:9px 0;font:750 10px system-ui;color:#645439}
+.budget-field select,.budget-field input{box-sizing:border-box;min-width:0;width:100%;border:1px solid #dec895;border-radius:7px;background:white;padding:8px;font:11px system-ui;color:#4e442d}
+.budget-toll-list{display:grid;gap:6px;max-height:330px;overflow:auto;margin:8px 0}
+.budget-toll-row{display:grid;grid-template-columns:minmax(0,1fr) 54px 54px;gap:5px;align-items:center;border-radius:9px;background:#fcf8ed;border:1px solid #eadfc1;padding:8px}
+.budget-toll-name{min-width:0}
+.budget-toll-name>b{display:block;color:#50472c;font:800 10px/1.3 system-ui}
+.budget-toll-name small{display:block;font:10px/1.3 system-ui;color:#817355}
+.budget-toll-row label{font:700 10px/1.4 system-ui;color:#6d5a39;text-align:center}
+.budget-toll-row select{width:100%;border:1px solid #e3d4b0;border-radius:7px;background:white;padding:6px 1px;text-align:center}
+.budget-viaticos-section{border-top:1px solid #ead6aa;margin-top:12px;padding-top:9px}
+.budget-check{display:flex;align-items:center;gap:6px;font:800 11px/1.4 system-ui;color:#72512a}
+.budget-check input{width:18px;height:18px;accent-color:#ad771f}
+.budget-result{background:white;border:1px solid #e2d7c3;border-radius:10px;padding:10px;margin:9px 0;font-size:11px}
+.budget-cost-row{display:flex;justify-content:space-between;gap:8px;border-bottom:1px solid #f0e6d6;padding:7px 0}
+.budget-cost-row span{font-weight:600;color:#5b5748}
+.budget-cost-row small{display:block;color:#8b8070;font-size:10px;line-height:1.4}
+.budget-cost-row strong{white-space:nowrap;color:#3b5347;font-variant-numeric:tabular-nums}
+.budget-grand-total{background:#e7f5e9;border:1px solid #c0e3c8;border-radius:9px;padding:12px;margin-top:9px}
+.budget-grand-total span{display:block;font-size:11px;color:#386e4b}
+.budget-grand-total b{display:block;font-size:clamp(19px,2vw,25px);color:#157447;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+</style><style id="balam-denue-014">
+.balam-denue{background:#f5fbfd;border:1px solid #bfdde9;border-radius:10px;padding:10px;margin:10px 0}
+.balam-denue>summary{cursor:pointer;font:850 11px/1.45 system-ui;color:#176a85}
+.balam-denue>p{font-size:10px;color:#4a6875}
+.balam-denue .budget-check{font-size:11px;color:#23667b}
+.balam-denue .budget-check input{accent-color:#2e86ad}
+.denue-icon{border-color:#2685ac!important}
 </style></head>
 <body>
 <header>
@@ -208,7 +239,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.13.0</div>
+    <div class="eyebrow">MAPA BALAM · v0.14.0</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
@@ -327,7 +358,51 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
   </div>
   <p id="logistics-return-status" class="tiny">Sin retorno consultado. Por ahora se estima como doble del recorrido de ida.</p>
   <div id="logistics-output" class="logistics-output" role="status" aria-live="polite">Sin ruta calculada.</div>
-  <div class="logistics-service-title">Servicios próximos a la ruta</div>
+  <details id="budget-panel" class="balam-budget-panel" open>
+ <summary>🧾 Presupuesto total: combustible + casetas + viáticos</summary>
+ <p class="tiny">Selecciona únicamente las casetas efectivamente atravesadas, una por sentido de circulación. Tarifas oficiales CAPUFE de 2026; no se identifica automáticamente si una ruta cruza determinada plaza.</p>
+ <label class="budget-field">Clase tarifaria del vehículo (confirmar con CAPUFE)
+  <select id="budget-vehicle-class">
+   <option value="">Elegir categoría de peaje…</option>
+   <option value="A">A · Automóvil, panel, pickup o van</option>
+   <option value="B2">B2 · Autobús de 2 ejes</option>
+   <option value="C2">C2 · Camión de 2 ejes</option>
+  </select>
+ </label>
+ <p class="tiny">El tipo de ambulancia NO determina automáticamente la clase de caseta. Confirma la categoría aplicable y cualquier exención directamente con la autoridad.</p>
+ <p class="tiny" id="budget-capufe-status" role="status">Consultando fuente oficial de tarifas…</p>
+ <div id="budget-toll-list" class="budget-toll-list"></div>
+ <p class="tiny"><a href="https://pot.capufe.mx/gobmx/transparencia/Doc/TransparenciaF/Tarifas/Vigentes/2026/Tarifas-vigentes-2026.pdf" target="_blank" rel="noopener noreferrer">Consultar tarifas originales de CAPUFE 2026 (PDF) ↗</a></p>
+ <div class="budget-viaticos-section">
+  <label class="budget-check"><input type="checkbox" id="budget-viaticos-enabled"> 🍽️ Incluir viáticos manuales en el costo del traslado</label>
+  <div id="budget-viaticos-fields" hidden>
+   <label class="budget-field">Alimentación (MXN, importe total)<input id="budget-food" type="number" min="0" max="100000" step=".01" value="0"></label>
+   <label class="budget-field">Hospedaje (MXN, importe total)<input id="budget-lodging" type="number" min="0" max="100000" step=".01" value="0"></label>
+   <label class="budget-field">Otros viáticos autorizados (MXN)<input id="budget-other" type="number" min="0" max="100000" step=".01" value="0"></label>
+   <p class="tiny">Captura importes manuales consolidados por traslado. En esta versión no existe integración con Finanzas, tabulador de personal ni autorización automática de viáticos.</p>
+  </div>
+ </div>
+ <p id="budget-status" class="tiny" role="status"></p>
+ <div id="budget-result" class="budget-result" aria-live="polite">Traza una ruta para calcular el presupuesto.</div>
+ <button type="button" class="btn primary" id="budget-download" disabled>📊 Exportar presupuesto CSV</button>
+ <p class="tiny"><b>Uso orientativo.</b> La ruta es un servicio de demostración; tarifas CAPUFE corresponden a la clase seleccionada. Verifica casetas, exenciones, consumo real y viáticos autorizados antes de presupuestar o facturar.</p>
+</details>
+<details id="denue-panel" class="balam-denue">
+  <summary>📍 DENUE INEGI · directorio de servicios en ruta</summary>
+  <p class="tiny">Fuente oficial de negocios georreferenciados, independiente de los resultados colaborativos OpenStreetMap. Se necesita importar primero la exportación oficial de Sonora.</p>
+  <label class="budget-check"><input id="denue-visible" type="checkbox" disabled> Mostrar establecimientos DENUE próximos a la ruta</label>
+  <div class="logistics-service-toggles">
+    <label><input type="checkbox" id="denue-fuel" checked> ⛽ Gasolineras</label>
+    <label><input type="checkbox" id="denue-tire" checked> 🛞 Llanteras</label>
+    <label><input type="checkbox" id="denue-repair" checked> 🔧 Talleres</label>
+  </div>
+  <p id="denue-status" class="tiny" role="status">Comprobando disponibilidad del catálogo oficial…</p>
+  <p id="denue-near-count" class="tiny">Sin ruta o catálogo.</p>
+  <div id="denue-near-list" class="logistics-spot-list"></div>
+  <button class="btn" id="denue-reload" type="button">Actualizar lectura DENUE</button>
+  <p class="tiny"><a href="https://www.inegi.org.mx/app/descarga/?ti=6" target="_blank" rel="noopener noreferrer">Descarga oficial DENUE INEGI ↗</a>. Los resultados no indican que el taller esté abierto ni que una estación acepte vales institucionales.</p>
+</details>
+<div class="logistics-service-title">Servicios próximos a la ruta</div>
   <p class="tiny">Consulta manual a OpenStreetMap: gasolineras, llanteras y talleres. Unidades CLUES cercanas como referencias geográficas de apoyo, no como garantía de atención de urgencias.</p>
   <div class="logistics-service-toggles">
    <label><input type="checkbox" id="logistics-fuel" checked> ⛽ Gasolineras</label>
@@ -1000,5 +1075,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script defer src="assets/denue-services.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
 </html>

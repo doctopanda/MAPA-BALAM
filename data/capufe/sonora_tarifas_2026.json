@@ -1,0 +1,74 @@
+{
+  "schema": "balam-capufe-sonora-v1",
+  "status": "verified_official_tariff_extract",
+  "source": "CAPUFE · Red FONADIN tarifas vigentes 2026 (con IVA)",
+  "source_url": "https://pot.capufe.mx/gobmx/transparencia/Doc/TransparenciaF/Tarifas/Vigentes/2026/Tarifas-vigentes-2026.pdf",
+  "source_page": 3,
+  "valid_from": "2026-04-13",
+  "verified_date": "2026-10-28",
+  "currency": "MXN",
+  "vehicle_classes": {
+    "A": "Autos, panel, pickup, vans (confirmar clasificación de ambulancia en plaza)",
+    "B2": "Autobús 2 ejes (si corresponde según plaza)",
+    "C2": "Camión 2 ejes (si corresponde según plaza)"
+  },
+  "caution": "Precios extraídos de tabla oficial PDF 2026, no detección automática de casetas. No sumar tarifa agregada Estación Don–Nogales con plazas individuales. Confirmar clase aplicable, exenciones y tarifas antes de operar.",
+  "plazas": [
+    {
+      "id": "estacion_don",
+      "name": "Estación Don",
+      "segment": "Estación Don – Navojoa",
+      "A": 114,
+      "B2": 194,
+      "C2": 191
+    },
+    {
+      "id": "fundicion",
+      "name": "Fundición",
+      "segment": "Navojoa – Ciudad Obregón",
+      "A": 114,
+      "B2": 194,
+      "C2": 191
+    },
+    {
+      "id": "esperanza",
+      "name": "Esperanza",
+      "segment": "Ciudad Obregón – Guaymas",
+      "A": 114,
+      "B2": 194,
+      "C2": 190
+    },
+    {
+      "id": "guaymas",
+      "name": "Guaymas",
+      "segment": "Libramiento Guaymas",
+      "A": 48,
+      "B2": 106,
+      "C2": 107
+    },
+    {
+      "id": "hermosillo",
+      "name": "Hermosillo",
+      "segment": "Hermosillo – Magdalena de Kino",
+      "A": 114,
+      "B2": 195,
+      "C2": 191
+    },
+    {
+      "id": "magdalena",
+      "name": "Magdalena",
+      "segment": "Libramiento Magdalena de Kino",
+      "A": 38,
+      "B2": 64,
+      "C2": 64
+    },
+    {
+      "id": "lico",
+      "name": "Libramiento Cd. Obregón (LICO)",
+      "segment": "Ciudad Obregón – Guaymas",
+      "A": 105,
+      "B2": 176,
+      "C2": 172
+    }
+  ]
+}
