@@ -1,6 +1,6 @@
 /* BALAM 0.10 smoke validation: no browser, no external deps. */
-const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const files=['assets/smn-layer.js','assets/municipality-profile.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
+const fs=require('fs'),vm=require('vm'),assert=require('assert'),zlib=require('zlib');
+const files=['assets/smn-layer.js','assets/conapo-layer.js','assets/municipality-profile.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
 for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/ig)].entries()){
  if(!/\bsrc=/.test(script[1]))new vm.Script(script[2],{filename:'index inline '+i});
@@ -10,6 +10,23 @@ for(const id of ['smn-panel','smn-sonora-summary','smnDroughtInfo','drought-visi
  if(id==='smnDroughtInfo')assert(fs.readFileSync('assets/smn-layer.js','utf8').includes(id),'missing dynamic '+id);else if(id==='smnMunicipalInfo')assert(html.includes(id),'missing dynamic '+id);
  else assert(html.includes('id="'+id+'"'),'missing '+id);
 }
+const conapoRaw=fs.readFileSync('data/conapo/sonora_municipios_2015_2030.b64','utf8').trim();
+const conapo=JSON.parse(zlib.inflateSync(Buffer.from(conapoRaw,'base64')).toString('utf8'));
+assert(conapo.schema==='balam-conapo-municipal-v1'&&conapo.profiles.length===72,'Falta cobertura CONAPO 72 municipios');
+assert(conapo.ageSnapshotYear===2026&&conapo.years[0]===2015&&conapo.years.at(-1)===2030&&conapo.ageGroups.length===14,'Desglose temporal/quinquenal CONAPO incorrecto');
+for(const [code,trend,male,female] of conapo.profiles){
+ assert(/^26\d{3}$/.test(code)&&trend.length===16&&male.length===14&&female.length===14,'Municipio CONAPO inválido: '+code);
+ assert([...trend,...male,...female].every(Number.isSafeInteger),'Proyecciones CONAPO no enteras');
+ assert(male.reduce((a,b)=>a+b,0)+female.reduce((a,b)=>a+b,0)===trend[11],'Total 2026 diferente de grupos por sexo para '+code);
+}
+const conapoTotal2026=conapo.profiles.reduce((s,row)=>s+row[1][11],0);
+const hmo=conapo.profiles.find(row=>row[0]==='26030');
+const nav=conapo.profiles.find(row=>row[0]==='26042');
+assert(conapoTotal2026===3283941&&hmo[1][11]===1009068&&nav[1][11]===189562,'Control demográfico 2026 no coincide con archivo municipal');
+assert(html.includes('selectMunicipality:selectMunicipalityByCode')&&html.includes('id="showActiveAgebs" type="checkbox"')&&html.includes('id="showInactiveAgebs" type="checkbox"'),'Navegación de municipios no reparada');
+assert(html.includes('assets/conapo-layer.js')&&html.includes('assets/municipality-profile.js'),'Fuentes demográficas no cargadas');
+assert(fs.readFileSync('assets/conapo-layer.js','utf8').includes("new DecompressionStream('deflate')"),'Falta decodificador de proyecciones');
+console.log('BALAM CONAPO QA PASS',JSON.stringify({municipios:conapo.profiles.length,poblacionSonora2026:conapoTotal2026,hermosillo:hmo[1][11],navojoa:nav[1][11]}));
 const municipalJs=fs.readFileSync('assets/municipality-profile.js','utf8');
 for(const id of ['municipalTerritory','municipalRisk'])assert(html.includes('id="'+id+'"'),'No existe destino municipal '+id);
 assert(html.includes('BALAM_Municipal?.select(code,name)')&&html.includes("fold.scrollIntoView"),'El clic sobre municipio no abre la ficha');

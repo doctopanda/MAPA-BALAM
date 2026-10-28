@@ -55,26 +55,90 @@ function agePyramid(groups){
   return '<div class="municipal-pyr-row"><div class="municipal-pyr-side left" title="Hombres '+fmt(m)+'"><span style="width:'+(100*m/max)+'%"></span></div><b>'+esc(g.age)+'</b><div class="municipal-pyr-side right" title="Mujeres '+fmt(f)+'"><span style="width:'+(100*f/max)+'%"></span></div></div>';
  }).join('')+'</div><div class="municipal-legend"><span>● Hombres</span><span>● Mujeres</span></div>';
 }
+
+function municipalSelector(code){
+ const features=window.BALAM_SmnMap?.getMunicipalityFeatures?.()||[];
+ const entries=[...new Map(features.map(f=>{
+  const p=f.properties||{},id=String(p.cvegeo||p.CVEGEO||''),name=String(p.nom_agem||p.NOM_AGEM||p.nombre||p.NOMBRE||id);
+  return [id,{id,name}];
+ })).values()].filter(x=>/^26\d{3}$/.test(x.id)).sort((a,b)=>a.name.localeCompare(b.name,'es'));
+ return '<label class="municipal-selector" for="municipalGoto">🔁 Cambiar de municipio'+
+ '<select id="municipalGoto" aria-label="Seleccionar municipio de Sonora">'+
+ entries.map(x=>'<option value="'+esc(x.id)+'"'+(x.id===code?' selected':'')+'>'+esc(x.name)+'</option>').join('')+
+ '</select></label>';
+}
+function seriesLine(values,opt={}){
+ const a=values.map(Number),vmin=0,vmax=Math.max(1,...a),height=83,left=25,right=284;
+ const pts=a.map((v,i)=>[left+(right-left)*i/(a.length-1),98-height*(v-vmin)/(vmax-vmin)]);
+ const path=pts.map(p=>p.map(x=>x.toFixed(1)).join(',')).join(' ');
+ const col=opt.color||'#318775';
+ return '<polyline points="'+path+'" fill="none" stroke="'+col+'" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>';
+}
+function trendChart(row){
+ const vals=row.trend,year2026=vals[2026-2015],top=Math.max(...vals);
+ let html='<div class="municipal-chart-title">Evolución poblacional proyectada · 2015–2030</div>'+
+ '<svg class="municipal-curve" viewBox="0 0 305 124" role="img" aria-label="Proyección anual de población municipal de 2015 a 2030">'+
+ '<line x1="25" y1="100" x2="284" y2="100" stroke="#c8ddd7" stroke-width="1"/>'+
+ '<line x1="25" y1="14" x2="25" y2="100" stroke="#c8ddd7" stroke-width="1"/>'+
+ seriesLine(vals)+
+ '<text x="3" y="18" font-size="9" fill="#477266">'+esc(fmt(top))+'</text>'+
+ '<text x="25" y="116" font-size="10" fill="#477266">2015</text>'+
+ '<text x="191" y="116" font-size="10" fill="#477266">2026</text>'+
+ '<text x="259" y="116" font-size="10" fill="#477266">2030</text>'+
+ '</svg>'+
+ '<div class="municipal-trend-summary"><span>2026: <b>'+fmt(year2026)+'</b></span><span>2030: <b>'+fmt(vals.at(-1))+'</b></span></div>';
+ return html;
+}
+function ageCurve(groups){
+ const male=groups.map(x=>x.male),female=groups.map(x=>x.female);
+ const ymax=Math.max(1,...male,...female),left=25,right=284,ht=74;
+ const points=vals=>vals.map((v,i)=>[
+  left+(right-left)*i/(vals.length-1),92-ht*v/ymax
+ ]).map(p=>p.map(x=>x.toFixed(1)).join(',')).join(' ');
+ return '<div class="municipal-chart-title">Curva poblacional por edad y sexo · 2026</div>'+
+ '<svg class="municipal-curve" viewBox="0 0 305 120" role="img" aria-label="Curva quinquenal masculina y femenina de población 2026">'+
+ '<line x1="25" x2="284" y1="94" y2="94" stroke="#c8ddd7"/>'+
+ '<polyline points="'+points(male)+'" fill="none" stroke="#438c98" stroke-width="2.7"/>'+
+ '<polyline points="'+points(female)+'" fill="none" stroke="#be7699" stroke-width="2.7"/>'+
+ '<text x="0" y="15" font-size="9" fill="#53766e">'+esc(fmt(ymax))+'</text>'+
+ groups.map((g,i)=>i%3===0||i===groups.length-1?'<text x="'+(25+(259)*i/(groups.length-1)).toFixed(0)+'" y="108" text-anchor="middle" font-size="8" fill="#52756c">'+esc(g.age)+'</text>':'').join('')+
+ '</svg><div class="municipal-legend"><span>● Mujeres</span><span>● Hombres</span></div>';
+}
+function conapoGroups(row){
+ const ages=window.BALAM_CONAPO?.getAgeGroups?.()||[];
+ return ages.map((age,i)=>({age,year:'2026',male:row.male[i],female:row.female[i]}));
+}
 function render(){
  const root=currentContext();if(!root)return;
  const code=selected.code,c=census.get(code),loc=localities.get(code),a=agebs.get(code);
- const demo=window.BALAM_MunicipalAgeSex?.[code];
- let html='<div class="municipal-section-title">🧭 Radiografía territorial</div>'+
+ const conapo=window.BALAM_CONAPO?.getMunicipality?.(code);
+ const projection=conapo?conapo.trend[2026-2015]:null;
+ let html=municipalSelector(code)+
+ '<div class="municipal-section-title">🧭 Radiografía territorial</div>'+
  '<div class="municipal-stats">'+
- showMetric('Población censada',c?.population,'INEGI · 2020')+
+ showMetric('Población proyectada 2026',projection,'CONAPO · municipal · proyección')+
+ showMetric('Población censada 2020',c?.population,'INEGI · Censo 2020')+
  showMetric('Localidades geoestadísticas',loc,'Catálogo INEGI · consulta en línea')+
  showMetric('AGEB identificadas',a?.total,a?('Urb. '+fmt(a.urban)+' · rur. '+fmt(a.rural)+(a.partial?' · carga parcial':'')):(errors.has('ageb:'+code)?'Servicio de polígonos no disponible':'Se cuentan al cargar la capa'))+
  '</div>';
- if(c){
-  html+=ageSexChart(c);
+ if(conapo){
+  const groups=conapoGroups(conapo);
+  const male=conapo.male.reduce((sum,v)=>sum+v,0),female=conapo.female.reduce((sum,v)=>sum+v,0);
+  html+='<p class="tiny"><b>CONAPO 2026:</b> mujeres '+fmt(female)+' · hombres '+fmt(male)+'. Total '+fmt(male+female)+' (la suma coincide con la serie anual).</p>';
+  html+=trendChart(conapo)+ageCurve(groups)+agePyramid([...groups].reverse());
  }else{
-  html+='<p class="tiny">'+(errors.has('census:'+code)?'No se pudo consultar la población INEGI en este momento.':'Población y desglose por sexo pendientes de respuesta del servicio INEGI.')+' No se estiman a partir de otra geografía.</p>';
+  const st=window.BALAM_CONAPO?.getStatus?.();
+  html+='<div class="municipal-pending"><b>📊 Proyecciones por edad y sexo</b><p>'+
+   esc(st?.error?'No se pudo cargar la base local CONAPO: '+st.error:'Cargando proyecciones CONAPO municipales 2015–2030…')+'</p></div>';
  }
- html+=demo?.length?agePyramid(demo):
-  '<div class="municipal-pending"><b>👥 Pirámide por grupos de edad y sexo</b><p>Se habilitará al importar el desglose quinquenal municipal de INEGI/CONAPO. La población total por sexo no permite reconstruir edades reales.</p>'+
-  link(sources.age,'Censo 2020 · estructura por edad')+'</div>';
- html+='<p class="tiny">Fuentes: '+link(sources.census,'INEGI · catálogo geoestadístico')+'. Las localidades son registros del catálogo, no las localidades documentadas por SIESA. Los datos censales 2020 no son proyecciones 2026.'+(errors.has('localities:'+code)?' La consulta de localidades no respondió; el número permanece sin dato.':'')+'</p>';
+ if(c){html+=ageSexChart(c);}
+ else html+='<p class="tiny">'+(errors.has('census:'+code)?'No se pudo consultar la población censal INEGI.':'Población censal INEGI pendiente de consulta.')+' La proyección CONAPO permanece identificada por separado.</p>';
+ html+='<p class="tiny"><b>Procedencia CONAPO:</b> archivo municipal aportado «Sonora.ProyeccionesPoblacionMunicipales2015-2030». Proyección por grupos quinquenales, 65 años y más como grupo abierto. No confundir con censo ni con datos de regiones. '+
+  link(sources.census,'Catálogo geográfico INEGI')+'. Localidades son registros geoestadísticos, no localidades documentadas por SIESA.'+
+  (errors.has('localities:'+code)?' La consulta de localidades no respondió.':'')+'</p>';
  root.innerHTML=html;
+ const selector=root.querySelector('#municipalGoto');
+ if(selector)selector.addEventListener('change',ev=>window.BALAM_SmnMap?.selectMunicipality?.(ev.target.value));
  renderRisk();
 }
 function renderRisk(){
@@ -139,4 +203,5 @@ window.BALAM_Municipal={
  _test:{parseCensus,countLocalities}
 };
 window.addEventListener('balam:smn-updated',renderRisk);
+window.addEventListener('balam:conapo-ready',render);
 })();
