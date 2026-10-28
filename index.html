@@ -172,6 +172,10 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .logistics-spot:hover{background:#e7f7ee}
 .logistics-service-marker{border:0;background:transparent}
 .logistics-service-marker>div{width:30px;height:30px;border-radius:100%;background:white;border:3px solid var(--service-color);box-shadow:0 2px 9px #0004;display:flex;align-items:center;justify-content:center;font-size:17px}
+.logistics-return-actions{display:flex;gap:8px;flex-wrap:wrap;align-items:center;padding:7px 0}
+.logistics-return-actions button{flex:1;min-width:145px}
+.logistics-return-actions label{display:flex;gap:4px;align-items:center;font-size:10px;font-weight:700;color:#31665a}
+#logistics-return-status{color:#386f62;padding:6px 8px;background:#eef8f2;border-radius:8px}
 </style></head>
 <body>
 <header>
@@ -182,7 +186,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.12.0</div>
+    <div class="eyebrow">MAPA BALAM · v0.13.0</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
@@ -295,6 +299,11 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
    <label for="logistics-reserve">Reserva operativa (%)<input type="number" id="logistics-reserve" min="0" max="100" step="5" value="15"></label>
   </div>
   <p class="tiny">Los valores precargados son solo ilustrativos. Ajusta rendimiento real y precio autorizado antes de utilizar la estimación.</p>
+  <div class="logistics-return-actions">
+    <button type="button" class="btn" id="logistics-return" disabled>↩️ Calcular ruta de regreso real</button>
+    <label><input id="logistics-show-return" type="checkbox" checked> Ver recorrido de regreso</label>
+  </div>
+  <p id="logistics-return-status" class="tiny">Sin retorno consultado. Por ahora se estima como doble del recorrido de ida.</p>
   <div id="logistics-output" class="logistics-output" role="status" aria-live="polite">Sin ruta calculada.</div>
   <div class="logistics-service-title">Servicios próximos a la ruta</div>
   <p class="tiny">Consulta manual a OpenStreetMap: gasolineras, llanteras y talleres. Unidades CLUES cercanas como referencias geográficas de apoyo, no como garantía de atención de urgencias.</p>
