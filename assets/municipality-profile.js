@@ -3,7 +3,7 @@
 'use strict';
 const esc=x=>String(x??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const fmt=x=>typeof x==='number'&&Number.isFinite(x)?x.toLocaleString('es-MX'):'Sin dato';
-const census=new Map(),localities=new Map(),agebs=new Map(),inFlight=new Map();
+const census=new Map(),localities=new Map(),agebs=new Map(),inFlight=new Map(),errors=new Map();
 let selected=null;
 const sources={
  census:'https://www.inegi.org.mx/servicios/catalogounico/',
@@ -63,17 +63,17 @@ function render(){
  '<div class="municipal-stats">'+
  showMetric('Población censada',c?.population,'INEGI · 2020')+
  showMetric('Localidades geoestadísticas',loc,'Catálogo INEGI · consulta en línea')+
- showMetric('AGEB identificadas',a?.total,a?'Urb. '+fmt(a.urban)+' · rur. '+fmt(a.rural):'Se cuentan al cargar la capa')+
+ showMetric('AGEB identificadas',a?.total,a?('Urb. '+fmt(a.urban)+' · rur. '+fmt(a.rural)+(a.partial?' · carga parcial':'')):(errors.has('ageb:'+code)?'Servicio de polígonos no disponible':'Se cuentan al cargar la capa'))+
  '</div>';
  if(c){
   html+=ageSexChart(c);
  }else{
-  html+='<p class="tiny">Población y desglose por sexo pendientes de respuesta del servicio INEGI. No se estiman a partir de otra geografía.</p>';
+  html+='<p class="tiny">'+(errors.has('census:'+code)?'No se pudo consultar la población INEGI en este momento.':'Población y desglose por sexo pendientes de respuesta del servicio INEGI.')+' No se estiman a partir de otra geografía.</p>';
  }
  html+=demo?.length?agePyramid(demo):
   '<div class="municipal-pending"><b>👥 Pirámide por grupos de edad y sexo</b><p>Se habilitará al importar el desglose quinquenal municipal de INEGI/CONAPO. La población total por sexo no permite reconstruir edades reales.</p>'+
   link(sources.age,'Censo 2020 · estructura por edad')+'</div>';
- html+='<p class="tiny">Fuentes: '+link(sources.census,'INEGI · catálogo geoestadístico')+'. Las localidades son registros del catálogo, no las localidades documentadas por SIESA. Los datos censales 2020 no son proyecciones 2026.</p>';
+ html+='<p class="tiny">Fuentes: '+link(sources.census,'INEGI · catálogo geoestadístico')+'. Las localidades son registros del catálogo, no las localidades documentadas por SIESA. Los datos censales 2020 no son proyecciones 2026.'+(errors.has('localities:'+code)?' La consulta de localidades no respondió; el número permanece sin dato.':'')+'</p>';
  root.innerHTML=html;
  renderRisk();
 }
@@ -106,8 +106,9 @@ async function fetchOnce(key,url,cache,parse){
    try{r=await fetch(url,{signal:controller.signal,cache:'force-cache'});}finally{clearTimeout(timeout)}
    if(!r.ok)throw Error('HTTP '+r.status);
    const value=parse(await r.json());
-   if(value!==null)cache.set(key,value);
-  }catch(err){/* Falla transparente: la interfaz conserva Sin dato. */}
+   if(value!==null){cache.set(key,value);errors.delete((cache===census?'census:':'localities:')+key)}
+   else errors.set((cache===census?'census:':'localities:')+key,'Respuesta no válida');
+  }catch(err){errors.set((cache===census?'census:':'localities:')+key,String(err.message||'Sin respuesta'));}
   finally{inFlight.delete(url);render()}
  })();
  inFlight.set(url,job);
@@ -124,15 +125,16 @@ function select(code,name){
  fetchOnce(code,'https://gaia.inegi.org.mx/wscatgeo/v2/mgem/26/'+mun,census,parseCensus);
  fetchOnce(code,'https://gaia.inegi.org.mx/wscatgeo/v2/localidades/26/'+mun,localities,countLocalities);
 }
-function setAgeb(code,total,urban,rural){
+function setAgeb(code,total,urban,rural,partial=false){
  if(!/^26\d{3}$/.test(String(code)))return;
  const values=[total,urban,rural];
  if(!values.every(x=>Number.isSafeInteger(x)&&x>=0))return;
- agebs.set(String(code),{total,urban,rural});
+ agebs.set(String(code),{total,urban,rural,partial:!!partial});errors.delete('ageb:'+code);
  render();
 }
+function setAgebError(code){errors.set('ageb:'+String(code),'Sin respuesta');render()}
 window.BALAM_Municipal={
- select,render,renderRisk,setAgeb,
+ select,render,renderRisk,setAgeb,setAgebError,
  getCensus:code=>census.get(String(code))||null,
  _test:{parseCensus,countLocalities}
 };
