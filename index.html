@@ -143,10 +143,9 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .crum-ambulance-icon{background:transparent;border:0}
 .crum-vehicle-symbol{position:relative;display:block;filter:drop-shadow(0 2px 3px rgba(8,52,60,.65));transform:translate(4px,-2px)}
 .crum-vehicle-count{position:absolute;top:-7px;right:-7px;border:2px solid #fff;border-radius:99px;min-width:17px;height:17px;background:#194a54;color:#fff;font:800 10px/17px system-ui;text-align:center;padding:0 2px}
-.balam-moving-jaguar{background:transparent;border:0}
-.balam-jaguar-clip{position:relative;width:60px;height:56px;overflow:hidden;border:3px solid #fff;border-radius:16px;background:linear-gradient(120deg,#087f76,#1d6b58);box-shadow:0 3px 12px rgba(0,0,0,.45)}
-.balam-jaguar-clip img{position:absolute;top:0;left:0;width:auto;height:51px;max-width:none;object-fit:contain}
-.balam-jaguar-direction{position:absolute;right:-10px;top:31px;color:#ff6e3a;background:#fff;border:1px solid #e9a27a;border-radius:100%;font:bold 17px/23px system-ui;text-align:center;width:23px;height:23px;transform-origin:center;box-shadow:0 2px 6px #0005}
+.balam-moving-jaguar{background:transparent!important;border:0!important;overflow:visible!important;pointer-events:none}
+.balam-jaguar-pin{display:block;width:82px;height:86px;max-width:none;object-fit:contain;object-position:center center;pointer-events:none;user-select:none;filter:drop-shadow(0 3px 4px rgba(0,47,46,.55))}
+@media(max-width:540px){.balam-jaguar-pin{filter:drop-shadow(0 2px 3px rgba(0,47,46,.45))}}
 @media(prefers-reduced-motion:reduce){.health-house-icon.health-eligible .health-house-symbol{animation:none!important}}
 </style></head>
 <body>
@@ -158,7 +157,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.11.0</div>
+    <div class="eyebrow">MAPA BALAM · v0.11.1</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>

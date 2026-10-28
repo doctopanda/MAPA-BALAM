@@ -164,11 +164,13 @@ function onDestinationSelect(){
  else{destination=null;clearRoute();summary();paint();}
 }
 function jaguarIcon(){
- const source=document.querySelector('img.brand-logo')?.src||'';
- const safeSource=source.startsWith('data:image/')?source:'';
- return L.divIcon({className:'balam-moving-jaguar',html:'<div class="balam-jaguar-clip" aria-label="Sello BALAM recorriendo ruta">'+
-   (safeSource?'<img alt="" src="'+safeSource+'">':'<span>🐆</span>')+'</div><span class="balam-jaguar-direction">➤</span>',
-   iconSize:[66,61],iconAnchor:[33,32]});
+ // Marcador oficial aportado para las rutas: silueta completa, fondo transparente.
+ // El ancla coincide con la punta del pin para que el jaguar siga las carreteras.
+ return L.divIcon({
+   className:'balam-moving-jaguar',
+   html:'<img class="balam-jaguar-pin" src="assets/brand/jaguar-pin-ruta-balam.webp" alt="Pin del jaguar BALAM" draggable="false">',
+   iconSize:[82,86], iconAnchor:[41,79], popupAnchor:[0,-72]
+ });
 }
 function animate(coords){
  if(anim)cancelAnimationFrame(anim);
@@ -186,9 +188,6 @@ function animate(coords){
   const prior=i?lengths[i-1]:0,t=(pos-prior)/(lengths[i]-prior||1);
   const a=points[i],b=points[i+1],lat=a.lat+(b.lat-a.lat)*t,lng=a.lng+(b.lng-a.lng)*t;
   jaguar.setLatLng([lat,lng]);
-  const dx=b.lng-a.lng,dy=b.lat-a.lat;
-  const arrow=jaguar.getElement()?.querySelector('.balam-jaguar-direction');
-  if(arrow)arrow.style.transform='rotate('+(-Math.atan2(dy,dx)*180/Math.PI)+'deg)';
   anim=requestAnimationFrame(frame);
  }
  anim=requestAnimationFrame(frame);
