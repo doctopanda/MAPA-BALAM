@@ -72,6 +72,13 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 </style><style id="smn-styles-v1">
 #smn-panel{margin:0;background:#f8fffb;border:0;padding:12px;color:#275546}
 #smn-panel h3{font-size:14px;margin:0 0 8px;color:#155d50}
+.drought-box{margin:10px 0;padding:9px;background:#f4f6e8;border:1px solid #d7d6af;border-radius:10px}
+.drought-box>label{font-size:11px;display:block;margin:6px 0}
+.drought-box .smn-switchrow{display:flex;gap:8px;align-items:center}
+.drought-box input{accent-color:#b27b37;width:17px;height:17px}
+.drought-box p{font-size:10px}
+#smnDroughtInfo p{margin:3px 0}
+#smnDroughtInfo strong{font-size:12px;color:#805b23}
 #smn-legend{background:#f6faf8;border:1px solid #d5e7dd;padding:8px;border-radius:9px;line-height:1.6}
 #smn-panel p{font-size:11px;line-height:1.5}
 #smn-panel label{font-size:11px;font-weight:750;display:block;margin:9px 0 5px}
@@ -194,7 +201,16 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <select id="smn-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
  <p id="smn-status" class="smn-status" role="status">Buscando el último corte validado…</p>
  <p id="smn-source" class="tiny"></p>
- <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><div id="smn-sonora-summary" class="smn-summary" aria-live="polite">Cargando análisis meteorológico de Sonora…</div><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
+ <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><div id="smn-sonora-summary" class="smn-summary" aria-live="polite">Cargando análisis meteorológico de Sonora…</div>
+ <div class="drought-box">
+  <label class="smn-switchrow" for="drought-visible"><input id="drought-visible" type="checkbox" disabled> <b>🌵 Monitor de sequía por municipio (D0–D4)</b></label>
+  <label for="drought-scope">Territorio sequía</label><select id="drought-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
+  <p id="drought-sonora-summary" class="tiny" aria-live="polite">Cargando monitor quincenal…</p>
+  <p id="drought-status" class="tiny" role="status"></p>
+  <p id="drought-count" class="tiny">Capa apagada</p>
+  <p class="tiny">D0 anormalmente seco; D1–D4 sequía. <strong>Corte quincenal distinto del pronóstico inmediato.</strong></p>
+  <button id="drought-refresh" type="button" class="btn">Actualizar sequía</button>
+ </div><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
  <button id="smn-reload" class="btn" type="button">Actualizar lectura</button>
  <div class="smn-links"><a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico SMN ↗</a>
  <a href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico" target="_blank" rel="noopener noreferrer">Ciclones Pacífico ↗</a>
@@ -826,6 +842,7 @@ window.BALAM_SmnMap = {
  map:map,
  getActiveDistricts:function(){return Array.from(active);},
  getMunicipalityFeatures:function(){var a=[];if(stateLayer)stateLayer.eachLayer(function(l){if(l.feature)a.push(l.feature)});return a;},
+ getDistrictForMunicipality:function(code){return districtFor(String(code));},
  refreshSelectedMunicipality:function(){if(selectedContext)renderDetail(selectedContext.code,selectedContext.name,selectedContext.did)}
 };
 window.BALAM_CrumMap = {
@@ -842,5 +859,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/health-network.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
 </html>
