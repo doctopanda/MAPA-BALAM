@@ -57,7 +57,7 @@ def main():
     docs={};errors={'outside_municipal_boundaries':0,'invalid':0}
     with a.geojsonseq.open(encoding='utf-8',errors='replace') as fd:
         for line in fd:
-            try:f=json.loads(line)
+            try:f=json.loads(line.lstrip('\x1e\ufeff').strip())
             except ValueError:continue
             tags=f.get('properties') or {}
             cat='fuel' if tags.get('amenity')=='fuel' else 'tire' if tags.get('shop')=='tyres' else 'repair' if tags.get('shop')=='car_repair' else None
