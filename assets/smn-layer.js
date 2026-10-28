@@ -35,11 +35,22 @@ function color(r){
  return null;
 }
 function clearOverlay(){if(layer){bridge.map.removeLayer(layer);layer=null;}}
+function renderLegend(){
+ const metric=el('smn-metric').value;
+ const items={
+  heat:'<span>🟦 &lt;25°C · 🟨 25–29.9°C · 🟧 30–39.9°C · 🟥 ≥40°C</span>',
+  rain:'<span>⬜ Sin lluvia · 🟦 0.1–9.9 mm · 🔵 10–29.9 mm · 🔷 ≥30 mm</span>',
+  wind:'<span>⬜ &lt;20 km/h · 🟪 20–39.9 km/h · 💜 40–59.9 km/h · 🟣 ≥60 km/h</span>',
+  watch:'<span>🟨 Una señal interna · 🟥 Dos o más · sin color = ninguna activada</span>'
+ };
+ el('smn-legend').innerHTML=items[metric]+'<small style="display:block;margin-top:5px">Bandas de visualización BALAM; no avisos oficiales.</small>';
+}
 function paint(){
+ renderLegend();
  if(fresh&&!freshEnough(dataset)){fresh=false;enabled=false;el('smn-visible').checked=false;el('smn-visible').disabled=true;status('El corte SMN superó 12 horas; se ocultó la capa automáticamente. Actualiza la lectura.');}
  clearOverlay();
  const choose=el('smn-visible');
- if(!fresh||!enabled||!choose.checked){return;}
+ if(!fresh||!enabled||!choose.checked){el('smn-overlay-count').textContent='0 municipios resaltados';return;}
  const scope=el('smn-scope').value,selected=new Set(bridge.getActiveDistricts());
  const features=bridge.getMunicipalityFeatures();
  const filtered=features.filter(f=>{
