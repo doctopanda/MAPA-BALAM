@@ -23,7 +23,7 @@ function freshEnough(data){
  const age=Date.now()-Date.parse(data.fetched_at);
  return Number.isFinite(age)&&age>=-900000&&age<=12*60*60*1000;
 }
-function getData(code){return fresh?rows.get(String(code)):null}
+function getData(code){return freshEnough(dataset)?rows.get(String(code)):null}
 function getSignals(forecast){return Array.isArray(forecast?.signals)?forecast.signals.filter(s=>Object.hasOwn(WATCH,s)):[]}
 function color(r){
  const f=currentDay(r),metric=el('smn-metric').value;
@@ -36,6 +36,7 @@ function color(r){
 }
 function clearOverlay(){if(layer){bridge.map.removeLayer(layer);layer=null;}}
 function paint(){
+ if(fresh&&!freshEnough(dataset)){fresh=false;enabled=false;el('smn-visible').checked=false;el('smn-visible').disabled=true;status('El corte SMN superó 12 horas; se ocultó la capa automáticamente. Actualiza la lectura.');}
  clearOverlay();
  const choose=el('smn-visible');
  if(!fresh||!enabled||!choose.checked){return;}
