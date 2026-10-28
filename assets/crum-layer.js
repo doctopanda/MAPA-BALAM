@@ -14,7 +14,7 @@ function draw(){
  let geo=new Map(); for(const r of rows){if(!Number.isFinite(r.lat)||!Number.isFinite(r.lon))continue;let k=r.lat.toFixed(5)+','+r.lon.toFixed(5);if(!geo.has(k))geo.set(k,[]);geo.get(k).push(r);}
  if(active){if(!core.map.hasLayer(out))out.addTo(core.map);for(const ar of geo.values()){
   const a=ar[0],popup='<strong>🚑 '+ar.length+' recursos inventariados</strong><p>'+esc(a.locality_label)+'</p><ul>'+ar.slice(0,12).map(x=>'<li>'+esc(x.unit_label)+' · '+esc(x.institution)+'</li>').join('')+'</ul><small>No informa disponibilidad operativa ni GPS en vivo.</small>';
-  L.circleMarker([a.lat,a.lon],{radius:Math.min(20,5+Math.sqrt(ar.length)*2.4),color:'#fff',weight:1.5,fillColor:ar.length>1?'#164a3e':'#07836d',fillOpacity:.88}).bindPopup(popup,{maxWidth:300}).addTo(out);
+  L.circleMarker([a.lat,a.lon],{pane:'markerPane',radius:Math.min(20,5+Math.sqrt(ar.length)*2.4),color:'#fff',weight:1.5,fillColor:ar.length>1?'#164a3e':'#07836d',fillOpacity:.88}).bindPopup(popup,{maxWidth:300}).addTo(out);
  }}else core.map.removeLayer(out);
  g('crum-count').textContent=rows.length.toLocaleString('es-MX');
  g('crum-places').textContent=geo.size+' ubicaciones';
