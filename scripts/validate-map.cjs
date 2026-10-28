@@ -15,7 +15,7 @@ const conapo=JSON.parse(zlib.inflateSync(Buffer.from(conapoRaw,'base64')).toStri
 assert(conapo.schema==='balam-conapo-municipal-v1'&&conapo.profiles.length===72,'Falta cobertura CONAPO 72 municipios');
 assert(conapo.ageSnapshotYear===2026&&conapo.years[0]===2015&&conapo.years.at(-1)===2030&&conapo.ageGroups.length===14,'Desglose temporal/quinquenal CONAPO incorrecto');
 for(const [code,trend,male,female] of conapo.profiles){
- assert(/^26\\d{3}$/.test(code)&&trend.length===16&&male.length===14&&female.length===14,'Municipio CONAPO inválido: '+code);
+ assert(/^26\d{3}$/.test(code)&&trend.length===16&&male.length===14&&female.length===14,'Municipio CONAPO inválido: '+code);
  assert([...trend,...male,...female].every(Number.isSafeInteger),'Proyecciones CONAPO no enteras');
  assert(male.reduce((a,b)=>a+b,0)+female.reduce((a,b)=>a+b,0)===trend[11],'Total 2026 diferente de grupos por sexo para '+code);
 }
