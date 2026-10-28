@@ -89,7 +89,7 @@ function addSource(){
     ctrl.setAttribute('aria-label',plaza.name+' cruces '+label);
     for(const n of [0,1,2])ctrl.add(new Option(String(n),String(n)));
     if(previous.has(ctrl.id))ctrl.value=previous.get(ctrl.id);
-    ctrl.addEventListener('change',render);
+    ctrl.addEventListener('change',()=>{render();window.dispatchEvent(new Event('balam:budget-tolls-updated'))});
     wrap.append(ctrl);div.append(wrap);
   }
   box.append(div);
