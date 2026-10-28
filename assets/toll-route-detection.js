@@ -51,21 +51,23 @@ function tariffData(p){return p.capufe_tariff_id?window.BALAM_TravelBudget?.getT
 function makeButton(text,onClick,disabled=false){
  const b=document.createElement('button');b.type='button';b.className='toll-map-action';b.textContent=text;b.disabled=disabled;b.onclick=onClick;return b;
 }
+function crossingCount(p,dir){
+ return Number(p.capufe_tariff_id?window.BALAM_TravelBudget?.getCount(p.capufe_tariff_id,dir):window.BALAM_TravelBudget?.getGeoCount(p.id,dir))||0;
+}
 function confirm(x,dir){
  const r=routeNow();if(!r)return;
  const match=dir==='out'?x.out:x.back;
- if(!match||confidence(match.km)!=='posible_cruce')return;
- const p=x.plaza,tariff=tariffData(p);
- if(!tariff){
-  e('toll-route-status').textContent='No hay tarifa CAPUFE verificable para '+p.name+' y la clase seleccionada. No se agregó un cobro.';
-  return;
- }
- const existing=Number(window.BALAM_TravelBudget?.getCount(p.capufe_tariff_id,dir)||0);
- const next=existing?0:1;
- const done=window.BALAM_TravelBudget?.setCrossing(p.capufe_tariff_id,dir,next);
+ if(!match||match.km>.65)return;
+ const p=x.plaza,tariff=tariffData(p),next=crossingCount(p,dir)?0:1;
+ const done=tariff?
+  window.BALAM_TravelBudget?.setCrossing(p.capufe_tariff_id,dir,next):
+  window.BALAM_TravelBudget?.setGeoCrossing(p.id,dir,next,p.name);
  if(!done)return;
  if(next){confirmed.set(p.id+':'+dir,true)}else confirmed.delete(p.id+':'+dir);
- e('toll-route-status').textContent=(next?'Añadida':'Retirada')+' '+p.name+' del presupuesto '+(dir==='out'?'de ida':'de regreso')+'. La selección sigue sujeta a confirmar cruce real.';
+ const needsPrice=!tariff&&window.BALAM_TravelBudget?.getGeoTariff(p.id)===null;
+ e('toll-route-status').textContent=(next?'Añadida':'Retirada')+' '+p.name+' '+(dir==='out'?'de ida':'de regreso')+'. '+
+  (next&&needsPrice?'Tarifa manual pendiente: ingrésala en la tarjeta. ':'')+
+  (match.km>.23?'Caseta cercana, confirma paso real.':'Verifica el cruce real.');
  refresh();
 }
 function popup(x){
@@ -75,12 +77,14 @@ function popup(x){
  const distance=document.createElement('p');distance.textContent=
   'Ida: '+(x.out?fmt(x.out.km*1000)+' m del itinerario':'sin ruta')+
   ' · Regreso: '+(x.back?fmt(x.back.km*1000)+' m':'sin ruta');box.append(distance);
- const price=tariffData(p);
+ const price=tariffData(p),manual=window.BALAM_TravelBudget?.getGeoTariff(p.id);
  const priceEl=document.createElement('p');priceEl.textContent=price?
-  'Tarifa CAPUFE 2026 '+rup(price.amount)+' por cruce ('+window.BALAM_TravelBudget.getVehicleClass()+'), pendiente de confirmación.':
-  'Tarifa CAPUFE para esta plaza/clase no disponible o sin vinculación inequívoca.';box.append(priceEl);
- if(x.out?.km<=.23)box.append(makeButton('Confirmar ida / retirar',()=>confirm(x,'out'),!price));
- if(x.back?.km<=.23)box.append(makeButton('Confirmar regreso / retirar',()=>confirm(x,'back'),!price));
+  'Tarifa CAPUFE 2026 '+rup(price.amount)+' por cruce ('+window.BALAM_TravelBudget.getVehicleClass()+').':
+  (manual!==null?'Tarifa manual de '+rup(manual)+' por cruce, pendiente de verificación.':
+   'Sin tarifa oficial vinculada. Confirma el paso y captura el precio manual en la lista.');
+ box.append(priceEl);
+ if(x.out?.km<=.65)box.append(makeButton(crossingCount(p,'out')?'✓ Ida incluida · quitar':'Confirmar ida',()=>confirm(x,'out')));
+ if(x.back?.km<=.65)box.append(makeButton(crossingCount(p,'back')?'✓ Regreso incluido · quitar':'Confirmar regreso',()=>confirm(x,'back')));
  const foot=document.createElement('p');foot.className='tiny';foot.textContent='La proximidad al trazado NO confirma paso o cobro. Revisar el itinerario, sentido y posibles libramientos paralelos.';box.append(foot);
  return box;
 }
@@ -104,7 +108,7 @@ function render(){
  const shown=e('toll-route-visible').checked;
  for(const x of nearCache){
   const p=x.plaza,possible=roleOf(x)==='posible',near=roleOf(x)!=='fuera';
-  const tariff=tariffData(p);
+  const tariff=tariffData(p),manual=window.BALAM_TravelBudget?.getGeoTariff(p.id);
   if(shown){
    const loc=p.points.reduce((acc,pt)=>({lon:acc.lon+pt.lon/p.points.length,lat:acc.lat+pt.lat/p.points.length}),{lon:0,lat:0});
    const icon=getIcon(possible,!!tariff);
@@ -115,24 +119,41 @@ function render(){
   const b=document.createElement('b');b.textContent='🛣️ '+p.name;card.append(b);
   const line=document.createElement('small');
   line.textContent=(possible?'POSIBLE CRUCE':'CERCANA, NO CONFIRMADA')+
-   ' · '+p.section+' · '+(tariff?'CAPUFE '+rup(tariff.amount)+' por cruce':'Sin tarifa CAPUFE vinculada');card.append(line);
+   ' · '+p.section+' · '+(tariff?'CAPUFE '+rup(tariff.amount)+' por cruce':manual!==null?'Tarifa manual '+rup(manual)+' por cruce (sin verificar)':'Tarifa pendiente · captura manual');card.append(line);
   const dist=document.createElement('small');dist.textContent=
    'Ida: '+(x.out?fmt(x.out.km*1000)+' m':'sin ruta')+
    ' · Regreso: '+(x.back?fmt(x.back.km*1000)+' m':'sin ruta de retorno');card.append(dist);
   const actions=document.createElement('div');actions.className='toll-route-actions';
   for(const [dir,label] of [['out','Ida'],['back','Regreso']]){
    const found=dir==='out'?x.out:x.back;
-   const matched=found?.km<=.23;
-   const n=tariff&&Number(window.BALAM_TravelBudget?.getCount(p.capufe_tariff_id,dir)||0);
-   const button=makeButton(n?'✓ '+label+' incluida':'Confirmar '+label,()=>confirm(x,dir),!matched||!tariff);
+   const matched=found?.km<=.65;
+   const n=crossingCount(p,dir);
+   const button=makeButton(n?'✓ '+label+' incluida · quitar':'Confirmar '+label,()=>confirm(x,dir),!matched);
    actions.append(button);
   }
-  card.append(actions);list.append(card);
+  card.append(actions);
+  if(!tariff){
+   const priceLabel=document.createElement('label');priceLabel.className='toll-price-label';
+   priceLabel.textContent='Tarifa por cruce (MXN) · captura manual no verificada';
+   const input=document.createElement('input');input.type='number';input.min='0';input.max='100000';
+   input.step='.01';input.inputMode='decimal';input.placeholder='Ej. 150.00';
+   input.value=manual===null?'':String(manual);
+   input.disabled=!['A','B2','C2'].includes(window.BALAM_TravelBudget?.getVehicleClass?.());
+   input.setAttribute('aria-label','Tarifa manual '+p.name);
+   input.addEventListener('change',()=>{
+    const raw=input.value.trim(),amount=raw===''?null:Number(raw);
+    if(!window.BALAM_TravelBudget?.setGeoTariff(p.id,amount,p.name))
+     e('toll-route-status').textContent='Tarifa inválida. Selecciona clase vehicular y captura un monto no negativo para '+p.name+'.';
+   });
+   priceLabel.append(input);card.append(priceLabel);
+   const hint=document.createElement('small');hint.textContent='No es tarifa oficial CAPUFE. Verificar con concesionaria antes de autorizar traslado.';card.append(hint);
+  }
+  list.append(card);
  }
  if(!r){
   e('toll-route-status').textContent='Casetas INEGI cargadas. Dibuja una ruta para identificar posibles cruces; no se agregan peajes sin confirmación.';
  }else{
-  e('toll-route-status').textContent='Geolocalización RNC: '+active.length+' posibles cruces. Revisa las casetas resaltadas y confirma ida y regreso por separado. '+(r.returnRoute?'Retorno enrutado.':'Falta calcular el regreso independiente.')+
+  e('toll-route-status').textContent='Geolocalización RNC: '+active.length+' posibles cruces. Puedes seleccionar varias casetas de ida y regreso, cada una independientemente. Las próximas hasta 650 m requieren confirmar el cruce real. '+(r.returnRoute?'Retorno enrutado.':'Falta calcular el regreso independiente.')+
   ' Si no aparecen, verifica que tu ruta pase por una carretera de cuota.';
  }
  if(r&&!list.children.length)list.textContent='No hay plazas RNC cerca de la ruta calculada. Esto no demuestra ausencia de peajes: puede ser un libramiento, un tramo sin caseta registrada o un catálogo incompleto.';
