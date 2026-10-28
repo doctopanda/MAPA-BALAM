@@ -1,0 +1,12 @@
+{
+  "schema": "balam-clues-sonora-v1",
+  "status": "not_loaded",
+  "source": "DGIS CLUES 2026-09",
+  "source_url": "https://gobi.salud.gob.mx/historico_clues/ESTABLECIMIENTO_SALUD_202609.xlsx",
+  "source_cut": "2026-09",
+  "created_at": null,
+  "facility_count": 0,
+  "unclassified_level_count": 0,
+  "disclaimer": "Catálogo aún no validado ni publicado en BALAM. No representa ausencia de unidades de salud.",
+  "facilities": []
+}
