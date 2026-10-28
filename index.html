@@ -176,6 +176,28 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .logistics-return-actions button{flex:1;min-width:145px}
 .logistics-return-actions label{display:flex;gap:4px;align-items:center;font-size:10px;font-weight:700;color:#31665a}
 #logistics-return-status{color:#386f62;padding:6px 8px;background:#eef8f2;border-radius:8px}
+</style><style id="balam-support-catalog-v013">
+.balam-support-catalog{margin:13px 0;background:#f4f9fb;border:1px solid #b6d9dc;border-radius:11px;padding:11px}
+.balam-support-catalog>summary{cursor:pointer;font:850 11px/1.5 system-ui;color:#155e66}
+.balam-support-catalog p{font-size:10px;line-height:1.5}
+.balam-support-catalog .health-switch{font:700 10px system-ui;display:flex;align-items:center;gap:6px}
+.balam-support-catalog input[type=checkbox]{accent-color:#137e71}
+.support-master-tools{margin-top:11px;border:1px solid #bcdad1;border-radius:9px;background:#eff9f4;padding:9px}
+.support-master-tools>summary{font:800 11px/1.4 system-ui;color:#255d46;cursor:pointer}
+.support-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:9px 0}
+.support-form label{display:grid;grid-column:1/-1;gap:4px;color:#31675a;font-size:10px;font-weight:750}
+.support-form label:has(#support-f-lat),.support-form label:has(#support-f-lon){grid-column:span 1}
+.support-form input,.support-form select,.support-form textarea{width:100%;min-width:0;box-sizing:border-box;padding:7px 8px;border:1px solid #b6d6cb;border-radius:7px;font:11px system-ui;color:#1a4d41;background:white}
+.support-form .support-active{display:flex;align-items:center}
+.support-form .support-active input{width:17px;height:17px}
+.support-form .logistics-service-buttons,.support-form #support-form-message{grid-column:1/-1}
+.support-card{font:11px/1.4 system-ui;border:1px solid #c9e6dc;border-radius:9px;background:white;margin:5px 0;padding:9px;color:#255a48}
+.support-card b{display:block;margin-bottom:3px}
+.support-card small{display:block;color:#647d72}
+.support-card button{margin:6px 0 0;border:1px solid #a5cdbc;padding:5px 9px;border-radius:7px;background:#eaf7f1;color:#18634e;font-size:10px;cursor:pointer}
+.support-badge{display:inline-block;background:#d4f3d9;color:#116d34;padding:3px 7px;border-radius:7px;font-size:10px;font-weight:800}
+.support-site-icon{background:transparent;border:0}
+.support-site-icon>div{background:white;border:3px solid #278f70;border-radius:50%;display:flex;align-items:center;justify-content:center;width:32px;height:32px;font-size:18px;box-shadow:0 1px 9px #0004}
 </style></head>
 <body>
 <header>
@@ -320,7 +342,42 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
   <p id="logistics-status" class="tiny" role="status">Dibuja una ruta vial para habilitar la consulta.</p>
   <p id="logistics-summary" class="tiny">Sin servicios consultados.</p>
   <div id="logistics-list" class="logistics-spot-list"></div>
-  <p class="tiny"><b>Gasolineras con ticket o convenio:</b> aún sin catálogo institucional verificado. Las estaciones OSM no se clasifican como aceptantes de vales, tickets o facturación autorizada.</p>
+  <details id="support-catalog" class="balam-support-catalog">
+    <summary>✅ Catálogo institucional validado · tickets y auxilio</summary>
+    <p class="tiny">El catálogo se consulta únicamente con sesión BALAM autorizada. OSM no acredita convenios, teléfonos ni disponibilidad real.</p>
+    <label class="health-switch"><input type="checkbox" id="support-visible" checked> Mostrar puntos institucionales verificados cerca de la ruta</label>
+    <p id="support-status" class="tiny" role="status">Inicia sesión en CRUM/BALAM para consultar el catálogo.</p>
+    <p id="support-near-summary" class="tiny">Sin ruta seleccionada.</p>
+    <div id="support-near-list" class="logistics-spot-list"></div>
+    <div id="support-saved-list" class="logistics-spot-list"></div>
+    <button type="button" class="btn" id="support-refresh">Recargar catálogo autorizado</button>
+    <details id="support-admin" class="support-master-tools" hidden>
+      <summary>🔐 Administrador Maestro · validar y editar proveedores</summary>
+      <p class="tiny">Sin fichas precargadas. Valida coordenadas, evidencia, fecha y convenio antes de publicar. No ingresar datos personales ni contratos confidenciales.</p>
+      <form id="support-form" class="support-form">
+        <input id="support-f-id" type="hidden">
+        <label>Tipo de servicio<select id="support-f-kind" required><option value="fuel">⛽ Gasolinera</option><option value="tire">🛞 Llantera</option><option value="repair">🔧 Taller</option><option value="roadside_assistance">🛟 Auxilio carretero</option></select></label>
+        <label>Nombre institucional<input id="support-f-name" maxlength="180" required placeholder="Nombre que aparece en la evidencia"></label>
+        <label>Latitud<input id="support-f-lat" type="number" step="0.000001" min="26" max="33.5" required></label>
+        <label>Longitud<input id="support-f-lon" type="number" step="0.000001" min="-115.5" max="-108" required></label>
+        <label>Distrito<select id="support-f-district"><option value="">Por validar</option><option>DS01</option><option>DS02</option><option>DS03</option><option>DS04</option><option>DS05</option><option>DS06</option></select></label>
+        <label>Municipio (clave INEGI 26xxx)<input id="support-f-municipality" pattern="26[0-9]{3}" maxlength="5" placeholder="Ej. 26030"></label>
+        <label>Dirección de servicio<input id="support-f-address" maxlength="280"></label>
+        <label>Teléfono institucional<input id="support-f-phone" maxlength="75" placeholder="Solo línea empresarial/auxilio"></label>
+        <label>Horario reportado<input id="support-f-hours" maxlength="200"></label>
+        <label>Servicios/observaciones<textarea id="support-f-details" rows="2" maxlength="900"></textarea></label>
+        <label>Ticket/vale<select id="support-f-ticket"><option value="unverified">Sin validación de ticket</option><option value="accepted">Aceptado y comprobado</option><option value="not_accepted">No aceptado, confirmado</option></select></label>
+        <label>Programa de ticket/convenio<input id="support-f-program" maxlength="200" placeholder="Requerido si acepta ticket"></label>
+        <label>Vigencia del convenio/ticket<input id="support-f-ticket-until" type="date"></label>
+        <label>Estado de validación<select id="support-f-status"><option value="draft">Borrador no visible</option><option value="verified">Validado y visible para usuarios BALAM</option><option value="suspended">Suspendido y oculto</option></select></label>
+        <label>Referencia de validación (sin información confidencial)<textarea id="support-f-evidence" maxlength="900" rows="2" placeholder="Documento institucional o evidencia verificable; requerido para publicar"></textarea></label>
+        <label class="support-active"><input id="support-f-active" type="checkbox" checked> Ficha activa</label>
+        <div class="logistics-service-buttons"><button class="btn primary" type="submit" id="support-save">Guardar con auditoría</button><button class="btn" type="button" id="support-new">Nueva ficha</button></div>
+        <p class="tiny" id="support-form-message" role="status"></p>
+      </form>
+    </details>
+  </details>
+  <p class="tiny"><b>Tickets:</b> solamente las fichas institucionales verificadas y con convenio vigente se identificarán como aceptantes. Una gasolinera OSM sigue siendo general aunque figure cerca de la ruta.</p>
   <p class="tiny">Cercanía al trazado ≠ accesibilidad vial, horario, disponibilidad ni capacidad de respuesta. Verificar servicios antes de un traslado real.</p>
 </details>
    <p class="tiny">El sello oficial BALAM se desplaza por la geometría de la ruta. Los destinos resaltados cumplen solo la regla exploratoria 1°→2° o 2°→3°, no representan elegibilidad clínica, derechohabiencia, cupo ni aceptación de referencia. La ruta NO es un traslado real ni un cálculo apto para despacho.</p>
@@ -943,5 +1000,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
 </html>
