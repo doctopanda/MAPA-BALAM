@@ -11,7 +11,37 @@ const serviceColors={fuel:'#e89824',tire:'#b8518f',repair:'#5769c1',health:'#288
 const routeModel={route:null,returnRoute:null,returnLine:null};
 let lastReturnRequest=0,returnAbort=null,returnGeneration=0;
 let osmServiceLayer=L.layerGroup().addTo(map),poiList=[],lookupTime=0,abort=null,version=0;
-let cached={key:null,items:null};
+const SNAPSHOT='data/road-services/sonora_osm_latest.json';
+let roadCatalog=[],roadMeta=null,roadLoaded=false,roadPromise=null;
+const catalogInfo=t=>{const n=e('logistics-catalog-status');if(n)n.textContent=t};
+async function loadRoadCatalog(){
+ if(roadPromise)return roadPromise;
+ roadPromise=(async()=>{
+  try{
+   const response=await fetch(SNAPSHOT,{cache:'no-cache'});
+   if(!response.ok)throw Error('HTTP '+response.status);
+   const d=await response.json();
+   if(d.schema!=='balam-road-support-osm-v1'||d.status!=='validated_public_snapshot'||!Array.isArray(d.facilities)||d.facilities.length<30)throw Error('Corte estático aún no publicado');
+   const rows=d.facilities.filter(x=>Number.isFinite(x.lat)&&Number.isFinite(x.lon)&&['fuel','tire','repair'].includes(x.category));
+   if(rows.length!==d.record_count)throw Error('Datos OSM incompletos');
+   roadCatalog=rows;roadMeta=d;roadLoaded=true;
+   catalogInfo('Catálogo offline: ⛽ '+d.counts.fuel+' · 🛞 '+d.counts.tire+' · 🔧 '+d.counts.repair+' (OSM / Geofabrik, '+new Date(d.generated_at).toLocaleDateString('es-MX')+'). Ya no requiere Overpass.');
+  }catch(err){
+   roadLoaded=false;roadCatalog=[];roadMeta=null;
+   catalogInfo('Todavía no hay catálogo offline validado: '+String(err.message).slice(0,80)+'. Se intentará consulta OSM bajo demanda.');
+  }
+  return roadLoaded;
+ })();
+ return roadPromise;
+}
+function pointsFromCatalog(coords){
+ if(!roadLoaded||!coords?.length)return [];
+ const xs=coords.map(x=>x[0]),ys=coords.map(x=>x[1]);
+ const lo=Math.min(...xs)-.055,hi=Math.max(...xs)+.055,low=Math.min(...ys)-.055,high=Math.max(...ys)+.055;
+ return roadCatalog.filter(p=>p.lon>=lo&&p.lon<=hi&&p.lat>=low&&p.lat<=high)
+ .map(p=>({...p,nearKm:nearestKm(p.lat,p.lon,coords),label:'OSM/Geofabrik · corte guardado'+(p.opening_hours?' · horario registrado '+p.opening_hours:' · horario sin verificar')}))
+ .filter(p=>p.nearKm<=2.5).sort((a,b)=>a.nearKm-b.nearKm);
+}
 const say=(t)=>{e('logistics-status').textContent=t};
 function safeFinite(id,min,max){const v=Number(e(id)?.value);return Number.isFinite(v)&&v>=min&&v<=max?v:null;}
 function compute(km,kmPerLiter,price,reserve){
@@ -135,8 +165,10 @@ function renderPoints(){
  osmServiceLayer.clearLayers();e('logistics-list').replaceChildren();
  const selected=checkedCats();
  const sorted=poiList.filter(x=>selected.has(x.category)).sort((a,b)=>a.nearKm-b.nearKm);
+ const limits={fuel:35,tire:25,repair:30,health:20};
+ const displayed=['fuel','tire','repair','health'].flatMap(cat=>sorted.filter(x=>x.category===cat).slice(0,limits[cat]));
  const counts={fuel:0,tire:0,repair:0,health:0};
- for(const poi of sorted.slice(0,60)){
+ for(const poi of displayed){
   counts[poi.category]++;
   const icon=pointIcon(poi.category);
   const pop='<b>'+esc(poi.name)+'</b><p>'+esc(poi.label)+' · aprox. '+num(poi.nearKm,2)+' km en línea recta del trazado.</p>'+
@@ -189,12 +221,20 @@ function overpassQuery(coords){
 async function search(){
  const route=routeModel.route;if(!route){say('Dibuja primero una ruta');return}
  const now=Date.now();
- if(now-lookupTime<45000){say('Para cuidar el servicio público, espera 45 segundos entre consultas. Puedes cambiar filtros sin consultar de nuevo.');return}
+ if(!roadLoaded&&now-lookupTime<45000){say('Sin caché publicada: espera 45 segundos antes de volver a consultar Overpass.');return}
  const current=++version;lookupTime=now;
  clearLookups();const expected=version;
  const coords=route.coords;
- say('Consultando establecimientos y servicios cercanos al trazado; puede tardar y el servidor público puede rechazar la consulta…');
+ say('Buscando establecimientos en el catálogo descargado y CLUES…');
  let results=addHealth(coords);
+ const staticOk=await loadRoadCatalog();
+ if(version!==expected)return;
+ if(staticOk){
+  const matches=pointsFromCatalog(coords);
+  poiList=results.concat(matches);renderPoints();
+  say('Catálogo local OSM: '+matches.length+' establecimientos encontrados en el corredor; CLUES separadas. No se requiere Overpass. Fuente y corte visibles arriba.');
+  return;
+ }
  const q=overpassQuery(coords);
  const providers=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
  let failure=null,done=false;
@@ -221,7 +261,7 @@ async function search(){
   }finally{clearTimeout(timeout);if(abort===requestAbort)abort=null}
  }
  if(version!==expected)return;
- if(!done)say('Overpass no disponible ('+String(failure?.message||'error desconocido').slice(0,80)+'). Mostrando unidades CLUES; las casetas INEGI se consultan por su catálogo independiente.');
+ if(!done)say('Aún no se dispone de catálogo estático y Overpass falló ('+String(failure?.message||'error desconocido').slice(0,80)+'). Únicamente CLUES hasta completar el primer corte OSM.');
  poiList=results;renderPoints();
 }
 for(const id of ['logistics-efficiency','logistics-price','logistics-reserve'])e(id).addEventListener('input',present);
@@ -231,6 +271,7 @@ e('logistics-show-return').addEventListener('change',ev=>{if(!routeModel.returnL
 e('logistics-query').addEventListener('click',search);
 e('logistics-clear').addEventListener('click',()=>{clearLookups();say('Servicios ocultados; la ruta y el cálculo de combustible permanecen.')});
 e('logistics-query').disabled=true;
-window.BALAM_Logistics={onRoute,reset,compute,getRoute:()=>routeModel.route?{...routeModel.route,returnRoute:routeModel.returnRoute}:null,_test:{nearestKm,haversine,sampleCoords,overpassQuery}};
+window.BALAM_Logistics={onRoute,reset,compute,getRoute:()=>routeModel.route?{...routeModel.route,returnRoute:routeModel.returnRoute}:null,_test:{nearestKm,haversine,sampleCoords,overpassQuery,pointsFromCatalog}};
+loadRoadCatalog();
 present();
 })();

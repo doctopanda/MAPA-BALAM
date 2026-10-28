@@ -120,3 +120,17 @@ assert(testPoint.km<1e-9,'Caseta RNC exacta no cayó sobre la polilínea');
 const offPoint=vm.runInNewContext(nameOfFn[0]+"\nmeasurePoint([-113,29],[[-109.8,27.3],[-109.719823478,27.320597333],[-109.6,27.36]])");
 assert(offPoint.km>1,'Caseta lejana no se discrimina');
 console.log('BALAM 0.15 GEO-TOLLS QA PASS',{rncFeatures:rnc.record_count,groupedPlazas:rnc.plaza_count,priced:rnc.plazas.filter(p=>p.capufe_tariff_id).length});
+
+
+const road=JSON.parse(fs.readFileSync('data/road-services/sonora_osm_latest.json','utf8'));
+assert(road.schema==='balam-road-support-osm-v1','Esquema de apoyos carreteros incorrecto');
+assert(['awaiting_public_snapshot','validated_public_snapshot'].includes(road.status),'Estado de catálogo offline no explícito');
+if(road.status==='validated_public_snapshot'){
+ assert(road.record_count===road.facilities.length&&road.record_count>=30,'Corte OSM incompleto');
+ assert(road.counts.fuel>=8&&road.counts.repair>=3,'Faltan clases mínimas de servicios');
+ assert(road.facilities.every(x=>/^26\d{3}$/.test(x.municipality_code)&&['fuel','tire','repair'].includes(x.category)&&x.lat>26&&x.lat<33.5&&x.lon> -115.5&&x.lon< -108),'Establecimientos fuera de Sonora o categorías inválidas');
+}
+assert(logistics.includes('sonora_osm_latest.json')&&logistics.includes('pointsFromCatalog(coords)'),'No se consultan servicios en catálogo local');
+assert(logistics.includes("['fuel','tire','repair','health'].flatMap"),'CLUES podrían ocultar gasolineras');
+assert(html.includes('id="logistics-catalog-status"'),'Falta estado visible de catálogo offline');
+console.log('BALAM 0.16 ROAD CACHE QA PASS',JSON.stringify({status:road.status,count:road.record_count}));

@@ -1,0 +1,67 @@
+name: BALAM - Catalogo carretero offline Sonora
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '17 12 * * 1'
+  push:
+    paths:
+      - 'scripts/build_road_support_sonora.py'
+      - '.github/workflows/road-services-sonora.yml'
+permissions:
+  contents: write
+concurrency:
+  group: balam-road-support-update
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 26
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - name: Install osmium CLI
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq osmium-tool
+      - name: Fetch Mexico OSM and Sonora municipalities
+        run: |
+          mkdir -p /tmp/balam-roads
+          curl -fLsS --retry 3 --retry-delay 5 --connect-timeout 25 --max-time 1000 \
+            -o /tmp/balam-roads/mexico.osm.pbf \
+            https://download.geofabrik.de/north-america/mexico-latest.osm.pbf
+          curl -fLsS --retry 3 --retry-delay 5 --max-time 100 \
+            -o /tmp/balam-roads/AGEM_26.geojson \
+            https://raw.githubusercontent.com/MacWilliXD/INEGI-geojson/main/geojson_descargas/AGEM_26.geojson
+      - name: Reduce to northwest Mexico and road support
+        run: |
+          osmium extract --bbox=-115.5,26.0,-108.0,33.5 \
+            /tmp/balam-roads/mexico.osm.pbf \
+            -o /tmp/balam-roads/region.osm.pbf --overwrite --strategy=complete_ways
+          osmium tags-filter /tmp/balam-roads/region.osm.pbf \
+            nwr/amenity=fuel nwr/shop=tyres nwr/shop=car_repair \
+            -o /tmp/balam-roads/services.osm.pbf --overwrite
+          osmium export /tmp/balam-roads/services.osm.pbf \
+            -f geojsonseq -u type_id -x print_record_separator=false \
+            -o /tmp/balam-roads/services.geojsonseq --overwrite
+          echo 'EXPORT_STATS:'
+          wc -l /tmp/balam-roads/services.geojsonseq
+          head -n 2 /tmp/balam-roads/services.geojsonseq | cut -c1-1000
+      - name: Geofence points and build compact snapshot
+        run: |
+          python3 scripts/build_road_support_sonora.py \
+            --geojsonseq /tmp/balam-roads/services.geojsonseq \
+            --municipios /tmp/balam-roads/AGEM_26.geojson
+          node scripts/validate-map.cjs
+      - name: Commit vetted snapshot
+        run: |
+          if git diff --quiet -- data/road-services/sonora_osm_latest.json; then
+            echo "Source unchanged."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/road-services/sonora_osm_latest.json
+          git commit -m "data(road): public OSM service snapshots for Sonora"
+          git pull --rebase origin "$GITHUB_REF_NAME"
+          git push origin "HEAD:$GITHUB_REF_NAME"

@@ -8,6 +8,9 @@ on:
       - 'scripts/validate-map.cjs'
       - 'scripts/import_denue_sonora.py'
       - 'scripts/test_denue_import.py'
+      - 'scripts/build_road_support_sonora.py'
+      - 'scripts/test_road_support_sonora.py'
+      - 'data/road-services/**'
       - 'data/denue/**'
       - 'data/capufe/**'
       - 'data/health/**'
@@ -29,3 +32,4 @@ jobs:
         with:
           python-version: '3.12'
       - run: python scripts/test_denue_import.py
+      - run: python scripts/test_road_support_sonora.py
