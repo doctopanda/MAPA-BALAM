@@ -6,6 +6,10 @@ on:
       - 'index.html'
       - 'assets/**'
       - 'scripts/validate-map.cjs'
+      - 'scripts/import_denue_sonora.py'
+      - 'scripts/test_denue_import.py'
+      - 'data/denue/**'
+      - 'data/capufe/**'
       - 'data/health/**'
       - 'data/smn/**'
       - '.github/workflows/qa-map.yml'
@@ -21,3 +25,7 @@ jobs:
         with:
           node-version: '22'
       - run: node scripts/validate-map.cjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python scripts/test_denue_import.py
