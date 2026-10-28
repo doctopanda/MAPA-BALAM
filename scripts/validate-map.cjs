@@ -1,6 +1,6 @@
 /* BALAM 0.10 smoke validation: no browser, no external deps. */
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/crum-layer.js'];
+const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/denue-services.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
 for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/ig)].entries()){
  if(!/\bsrc=/.test(script[1]))new vm.Script(script[2],{filename:'index inline '+i});
@@ -63,3 +63,33 @@ assert(forecast.status==='ok'&&forecast.municipalities.length===72);
 assert(!html.includes('sb_secret_')&&!html.includes('service_role'));
 const stats={clues:clues.facility_count,clues_levels:clues.facilities.reduce((o,x)=>(o[x.level||'pending']=(o[x.level||'pending']||0)+1,o),{}),drought_cut:drought.source_cut,drought_categories:drought.categories,forecast_municipalities:forecast.municipalities.length};
 console.log('BALAM 0.12 QA PASS',JSON.stringify(stats));
+
+const tariff=JSON.parse(fs.readFileSync('data/capufe/sonora_tarifas_2026.json','utf8'));
+assert(tariff.schema==='balam-capufe-sonora-v1'&&tariff.status==='verified_official_tariff_extract');
+assert(tariff.valid_from==='2026-04-13'&&tariff.plazas.length===7,'Fuente oficial CAPUFE incompleta');
+assert(new Set(tariff.plazas.map(x=>x.id)).size===7,'Duplicación de casetas');
+const fund=tariff.plazas.find(x=>x.id==='fundicion');
+const esperanza=tariff.plazas.find(x=>x.id==='esperanza');
+assert(fund.A===114&&fund.B2===194&&fund.C2===191,'Tarifa Fundición 2026 incorrecta');
+assert(esperanza.A===114&&esperanza.C2===190,'Tarifa Esperanza 2026 incorrecta');
+for(const p of tariff.plazas)assert(['A','B2','C2'].every(k=>Number.isFinite(p[k])&&p[k]>0),'Tarifas incompletas '+p.name);
+const denue=JSON.parse(fs.readFileSync('data/denue/sonora_route_services.json','utf8'));
+assert(denue.schema==='balam-denue-sonora-route-v1','Esquema DENUE incompatible');
+assert(['awaiting_official_source','validated_official_import'].includes(denue.status),'Estado DENUE inválido');
+assert(denue.status!=='awaiting_official_source'||denue.facilities.length===0,'DENUE no debe inventar filas');
+const budgetJs=fs.readFileSync('assets/travel-budget.js','utf8'),denueJs=fs.readFileSync('assets/denue-services.js','utf8');
+for(const id of ['budget-panel','budget-vehicle-class','budget-viaticos-enabled','budget-food','budget-lodging','budget-other','budget-toll-list','budget-result','budget-download','denue-panel','denue-status','denue-visible'])
+ assert(html.includes('id="'+id+'"'),'Control BALAM 0.14 faltante: '+id);
+assert(budgetJs.includes('data/capufe/sonora_tarifas_2026.json')&&budgetJs.includes("val('budget-out-'"),'Toll inputs must not be auto-assigned');
+assert(budgetJs.includes('includeViaticos?food+lodging+other:0'),'Viáticos opcionales no condicionados');
+assert(budgetJs.includes('balam:logistics-return-ready')&&src.includes('balam:logistics-return-ready'),'Ruta de regreso no actualiza presupuesto');
+assert(denueJs.includes("doc.status!=='validated_official_import'"),'Falta bloquear DENUE sin fuente oficial');
+const fn=budgetJs.match(/function sumBudget\([\s\S]*?\n\}/);
+assert(fn,'No se encontró función pura de presupuesto');
+const demo=vm.runInNewContext(fn[0]+"\nsumBudget({outKm:120,returnKm:117,kmPerLiter:8,price:25,reserve:15,tollOut:114,tollBack:114,includeViaticos:true,food:220,lodging:0,other:70})",{});
+assert(demo.kmTotal===237&&demo.tolls===228&&demo.viatics===290,'Presupuesto desglosado incorrecto');
+assert(Math.abs(demo.fuel-851.71875)<0.0001,'Combustible de ruta real incorrecto');
+assert(Math.abs(demo.total-1369.71875)<0.0001,'Presupuesto total incorrecto');
+const noViatics=vm.runInNewContext(fn[0]+"\nsumBudget({outKm:120,returnKm:117,kmPerLiter:8,price:25,reserve:15,tollOut:114,tollBack:114,includeViaticos:false,food:220,lodging:0,other:70})",{});
+assert(noViatics.viatics===0&&Math.abs(noViatics.total-1079.71875)<0.0001,'Toggle de viáticos incorrecto');
+console.log('BALAM 0.14 QA PASS CAPUFE tarifas oficiales y viáticos',JSON.stringify({fundicion:fund.A,retornoKm:237,viaticos:290,total:demo.total}));
