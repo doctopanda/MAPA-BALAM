@@ -253,7 +253,29 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .toll-map-popup{font:11px/1.5 system-ui;max-width:310px}
 .toll-map-popup>p{margin:5px 0}
 .toll-map-popup button{margin:4px}
-</style></head>
+</style><style id="balam-municipal-profile-v016">
+#detail{scroll-margin-top:12px}#detail .detail-title{font-size:19px;line-height:1.3;margin:2px 0 6px}
+.municipal-section-title{font:850 12px/1.4 system-ui;color:#195d50;margin:13px 0 8px;border-top:1px solid #dceae6;padding-top:11px}
+.municipal-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.municipal-stat{background:#f1f9f6;border:1px solid #cee3db;border-radius:10px;padding:9px 8px;display:grid;gap:4px}
+.municipal-stat span{font-size:10px;color:#456e63;font-weight:750}.municipal-stat strong{font:900 19px system-ui;color:#164f43;overflow-wrap:anywhere}
+.municipal-stat small{font-size:9px;color:#577d71;line-height:1.3}
+.municipal-chart-title{font:850 11px system-ui;color:#2b6156;margin:12px 0 7px}
+.municipal-sexbar{display:flex;height:19px;border-radius:7px;overflow:hidden;background:#dae9e2}
+.municipal-sex-female{background:#be7699}.municipal-sex-male{background:#438c98}
+.municipal-legend{display:flex;justify-content:space-between;gap:8px;font:700 10px system-ui;margin:7px 0 12px;color:#556f69}
+.municipal-legend span:first-child{color:#ac517f}.municipal-legend span:last-child{color:#326e7d}
+.municipal-pending{border:1px dashed #b7d3ca;background:#fafcf9;border-radius:11px;padding:10px;color:#526e66;font:10px/1.55 system-ui}
+.municipal-pending p{margin:5px 0}.municipal-pending a,.municipal-riskline a{color:#156d67;font-weight:750}
+.municipal-riskline{display:grid;gap:6px;padding:9px;border:1px solid #dce7e1;border-radius:9px;background:#fbfdfa;margin:7px 0;font:10px/1.5 system-ui}
+.municipal-riskline b{font-size:10.5px;color:#28594b}.municipal-riskline span{color:#526d65}
+.municipal-riskpill{display:inline-block;padding:4px 7px;margin:2px;border-radius:7px;background:#fff2dc;border:1px solid #ecc68e;color:#945e1d}
+.municipal-pyramid{display:grid;gap:2px}.municipal-pyr-row{display:grid;grid-template-columns:1fr 52px 1fr;gap:4px;align-items:center;height:16px}
+.municipal-pyr-row>b{text-align:center;font:800 9px system-ui}.municipal-pyr-side{height:12px;display:flex}.municipal-pyr-side.left{justify-content:flex-end}
+.municipal-pyr-side span{height:100%;background:#438c98;border-radius:3px 0 0 3px}.municipal-pyr-side.right span{background:#be7699;border-radius:0 3px 3px 0}
+@media(max-width:430px){.municipal-stat strong{font-size:16px}}
+</style>
+</head>
 <body>
 <header>
 <img class="brand-logo" src="data:image/webp;base64,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" alt="BALAM">
@@ -865,9 +887,13 @@ function onEach(f,layer){
  var code=codeOf(f),name=nameOf(f),did=districtFor(code);
  layer.bindTooltip(tooltipText(f),{sticky:true});
  layer.on('click',function(){
-   if(!did||!active.has(did)){statusEl.textContent='Activa '+(did||'el distrito correspondiente')+' para explorar '+name+'.';return}
+   if(!did){statusEl.textContent='No se pudo vincular '+name+' a un distrito.';return}
+   if(!active.has(did)){active.add(did);renderDistrictControls();ensureDistrictData(did);window.dispatchEvent(new Event('balam:districts-changed'))}
    selectedContext={code:code,name:name,did:did};
    updateMap();
+   var fold=detailEl.closest('.balam-fold');
+   if(fold){fold.open=true;fold.scrollIntoView({behavior:'smooth',block:'nearest'})}
+   statusEl.textContent='📍 '+name+' · '+did+'. Ficha municipal abierta; consultando fuentes territoriales.';
    var b=layer.getBounds();map.fitBounds(b,{padding:[28,28],maxZoom:10});
    if(showActiveAgebs||showInactiveAgebs||showBlocks)loadAgeb(code.slice(2),name,did,b);
    else {clearFine();currentFine={mun:code.slice(2),name:name,did:did,bounds:b};statusEl.textContent='Municipio seleccionado. Activa una capa AGEB para cargar el detalle.'}
@@ -899,12 +925,16 @@ function renderDetail(code,name,did){
  if(data&&data.current_filter&&data.current_filter.operative){
    lines+='<p class="tiny"><b>Operativo disponible:</b> '+esc(data.current_filter.operative)+' · corte '+esc(data.cut||data.generated||'')+'</p>'
  }
- lines+='<div id="smnMunicipalInfo" class="smn-municipal-detail"><h4>🌦️ SMN/CONAGUA</h4><p class="tiny">Consultando datos meteorológicos validados…</p></div>';
+ lines+='<div id="municipalTerritory" data-code="'+esc(code)+'"><p class="tiny">Consultando población, localidades y AGEB en INEGI…</p></div>';
+ lines+='<div id="municipalRisk" data-code="'+esc(code)+'"><p class="tiny">Evaluando señales territoriales disponibles…</p></div>';
+ lines+='<div id="smnMunicipalInfo" class="smn-municipal-detail"><h4>🌦️ SMN/CONAGUA · pronóstico 3 días</h4><p class="tiny">Consultando corte meteorológico validado…</p></div>';
  var healthCount=window.BALAM_Health?.getMunicipalityCount(code);
  lines+='<div id="healthMunicipalInfo" class="tiny"><b>🏥 Red CLUES</b>: '+(healthCount===null||healthCount===undefined?'Catálogo no validado':fmt(healthCount)+' establecimientos registrados')+'. La ficha de cada unidad no confirma capacidad resolutiva.</div>';
  lines+='<div id="agebManager" class="ageb-manager"><div class="tiny">Cargando catálogo AGEB…</div></div>';
  detailEl.innerHTML=lines;
- if(window.BALAM_Smn)window.BALAM_Smn.renderMunicipality(code)
+ window.BALAM_Municipal?.select(code,name);
+ if(window.BALAM_Smn)window.BALAM_Smn.renderMunicipality(code);
+ if(currentFine&&currentFine.mun===code.slice(2))updateAgebManager();
 }
 
 function fc(j){if(j&&j.type==='FeatureCollection'&&Array.isArray(j.features))return j;if(j&&Array.isArray(j.features))return {type:'FeatureCollection',features:j.features};return {type:'FeatureCollection',features:[]}}
@@ -1010,6 +1040,7 @@ async function loadAgeb(mun,name,did,municipalityBounds){
  clearFine();currentFine={mun:mun,name:name,did:did,bounds:municipalityBounds};statusEl.textContent='Cargando AGEB de '+name+' · '+did+'…';
  try{
    var rs=await Promise.allSettled([cachedJson(AGEBU_URL+mun),cachedJson(AGEBR_URL+mun)]),all=[];
+   if(!currentFine||currentFine.mun!==mun)return;
    if(rs[0].status==='fulfilled')fc(rs[0].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Urbana';all.push(f)});
    if(rs[1].status==='fulfilled')fc(rs[1].value).features.forEach(function(f){f.properties=f.properties||{};f.properties.__ambito='Rural';all.push(f)});
    if(!all.length)throw new Error('sin AGEB');
@@ -1018,8 +1049,9 @@ async function loadAgeb(mun,name,did,municipalityBounds){
      l.bindTooltip('AGEB '+esc(info.ageb)+' · '+esc(info.amb)+(info.loc?' · Loc. '+esc(info.loc):''),{sticky:true});
      l.on('click',function(ev){if(ev&&ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);setAgebSelected(info.key,!selectedAgebs.has(info.key))})
    }}).addTo(map);
-   syncAgebStyles();statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' AGEB disponibles. Selecciona las necesarias; manzanas '+(showBlocks?'activadas.':'apagadas.');updateAgebManager()
- }catch(e){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message}
+   syncAgebStyles();statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' polígonos AGEB disponibles. Selecciona las necesarias; manzanas '+(showBlocks?'activadas.':'apagadas.');updateAgebManager();
+   window.BALAM_Municipal?.setAgeb('26'+mun,all.length,rs[0].status==='fulfilled'?fc(rs[0].value).features.length:0,rs[1].status==='fulfilled'?fc(rs[1].value).features.length:0,rs.some(function(x){return x.status!=='fulfilled'}));
+ }catch(e){if(currentFine&&currentFine.mun===mun){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message;window.BALAM_Municipal?.setAgebError('26'+mun);var holder=document.getElementById('agebManager');if(holder)holder.innerHTML='<p class="tiny">AGEB no disponibles en esta consulta; vuelve a seleccionar el municipio para reintentar.</p>'}}
 }
 
 function renderEmptyDetail(){selectedContext=null;detailEl.innerHTML='<div class="eyebrow">Selección</div><div class="detail-title">Elige un municipio activo</div><p class="tiny">El mapa conserva la lectura analítica actual y permite bajar a AGEB/manzana sólo cuando lo necesitas.</p>';updateMap()}
@@ -1114,5 +1146,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script defer src="assets/toll-route-detection.js"></script><script defer src="assets/denue-services.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/municipality-profile.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script defer src="assets/toll-route-detection.js"></script><script defer src="assets/denue-services.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
 </html>
