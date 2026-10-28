@@ -1,0 +1,16 @@
+{
+  "schema": "balam-road-support-osm-v1",
+  "status": "awaiting_public_snapshot",
+  "source": "OpenStreetMap / Geofabrik Mexico",
+  "source_url": "https://download.geofabrik.de/north-america/mexico.html",
+  "attribution": "© OpenStreetMap contributors, ODbL 1.0",
+  "generated_at": null,
+  "record_count": 0,
+  "counts": {
+    "fuel": 0,
+    "tire": 0,
+    "repair": 0
+  },
+  "disclaimer": "No se generó todavía una copia OSM verificable. No interpretar 0 como ausencia de negocios.",
+  "facilities": []
+}
