@@ -229,6 +229,27 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .balam-denue .budget-check{font-size:11px;color:#23667b}
 .balam-denue .budget-check input{accent-color:#2e86ad}
 .denue-icon{border-color:#2685ac!important}
+</style><style id="balam-geocase-v015">
+.toll-route-panel{border:1px solid #d1c09d;border-radius:10px;background:#fffbf0;padding:10px;margin:11px 0}
+.toll-route-panel>summary{font:850 11px/1.5 system-ui;color:#7e5420;cursor:pointer}
+.toll-route-panel p{font-size:10px;line-height:1.55;color:#73664d;margin:8px 0}
+.toll-route-panel .toll-controls{display:flex;align-items:center;gap:8px;font-size:10px;color:#645437;font-weight:700;margin:7px 0}
+.toll-route-panel .toll-controls input{accent-color:#b57d31;width:16px;height:16px}
+.toll-route-list{display:grid;gap:6px;max-height:280px;overflow:auto}
+.toll-route-row{padding:9px;border:1px solid #ead8b3;background:white;border-radius:9px;display:grid;gap:5px;color:#564528}
+.toll-route-row b{font:850 11px/1.2 system-ui;color:#684315}
+.toll-route-row small{display:block;font:10px/1.4 system-ui;color:#6e664e}
+.toll-route-actions{display:flex;gap:6px;flex-wrap:wrap}
+.toll-map-action{font:750 10px system-ui;border:1px solid #d1b17a;border-radius:7px;padding:6px 8px;background:#f8eacb;color:#75501e;cursor:pointer}
+.toll-map-action:disabled{opacity:.45;cursor:default}
+.toll-map-action:not(:disabled):hover{background:#e5f5e6;color:#216449;border-color:#74c48c}
+.balam-toll-icon{background:transparent!important;border:0!important}
+.balam-toll-icon>div{display:flex;align-items:center;justify-content:center;width:36px;height:36px;border-radius:10px;background:#fff2d3;border:3px solid #a97b38;box-shadow:0 2px 7px #0007;position:relative;font-size:19px}
+.balam-toll-icon .toll-pin-other{background:#f3f3ef;border-color:#8d947b;width:29px;height:29px}
+.balam-toll-icon small{position:absolute;bottom:-5px;right:-4px;background:#217750;border:2px solid white;border-radius:100%;min-width:15px;height:15px;text-align:center;color:white;font:800 10px/15px system-ui}
+.toll-map-popup{font:11px/1.5 system-ui;max-width:310px}
+.toll-map-popup>p{margin:5px 0}
+.toll-map-popup button{margin:4px}
 </style></head>
 <body>
 <header>
@@ -239,7 +260,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.14.0</div>
+    <div class="eyebrow">MAPA BALAM · v0.15.0</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
@@ -371,6 +392,19 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  </label>
  <p class="tiny">El tipo de ambulancia NO determina automáticamente la clase de caseta. Confirma la categoría aplicable y cualquier exención directamente con la autoridad.</p>
  <p class="tiny" id="budget-capufe-status" role="status">Consultando fuente oficial de tarifas…</p>
+ <details id="toll-route-panel" class="toll-route-panel" open>
+ <summary>🛣️ Casetas geolocalizadas sobre el recorrido · INEGI</summary>
+ <p class="tiny">La RNC contiene la localización oficial de plazas de cobro. BALAM destaca las cercanas al itinerario de ida y regreso, las agrupa por plaza y permite confirmar un cruce antes de sumarlo al costo.</p>
+ <label class="toll-controls"><input type="checkbox" id="toll-route-visible" checked disabled> Mostrar casetas geolocalizadas</label>
+ <label class="toll-controls"><input type="checkbox" id="toll-show-all"> Mostrar todas las plazas de este catálogo en Sonora, aun sin ruta</label>
+ <p id="toll-route-source" class="tiny">Cargando puntos geográficos RNC…</p>
+ <p id="toll-route-count" class="tiny">Sin detección.</p>
+ <p id="toll-route-status" class="tiny" role="status">Al dibujar un recorrido podrás revisar las casetas probables.</p>
+ <div id="toll-route-list" class="toll-route-list"></div>
+ <button type="button" class="btn" id="toll-reload">Actualizar lectura de casetas</button>
+ <p class="tiny"><b>Interpretación:</b> una caseta próxima a la polilínea es un <b>posible</b> cruce, no un peaje confirmado. Líneas paralelas, retornos y libramientos pueden crear falsos positivos. Solo los cruces que confirmes se incorporarán al cálculo.</p>
+ <p class="tiny"><a href="https://www.inegi.org.mx/programas/rnc/" target="_blank" rel="noopener noreferrer">Fuente INEGI Red Nacional de Caminos ↗</a> · <a href="https://www.inegi.org.mx/servicios/Ruteo/" target="_blank" rel="noopener noreferrer">API SAKBÉ para rutas y casetas ↗</a></p>
+</details>
  <div id="budget-toll-list" class="budget-toll-list"></div>
  <p class="tiny"><a href="https://pot.capufe.mx/gobmx/transparencia/Doc/TransparenciaF/Tarifas/Vigentes/2026/Tarifas-vigentes-2026.pdf" target="_blank" rel="noopener noreferrer">Consultar tarifas originales de CAPUFE 2026 (PDF) ↗</a></p>
  <div class="budget-viaticos-section">
@@ -1075,5 +1109,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script defer src="assets/denue-services.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script defer src="assets/toll-route-detection.js"></script><script defer src="assets/denue-services.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
 </html>
