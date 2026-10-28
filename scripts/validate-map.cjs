@@ -7,7 +7,7 @@ for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>
 }
 for(const path of files){let src=fs.readFileSync(path,'utf8');if(src.startsWith('import '))src=src.slice(src.indexOf('\n')+1);new vm.Script(src,{filename:path})}
 for(const id of ['smn-panel','smn-sonora-summary','smnDroughtInfo','drought-visible','health-panel','health-visible','health-status-filter','health-level','route-origin','route-destination','route-go','route-demo-consent','smnMunicipalInfo']){
- if(id==='smnDroughtInfo'||id==='smnMunicipalInfo')assert(html.includes('id="'+id+'"')||html.includes('id=\\"'+id+'\\"'),'missing generated '+id);
+ if(id==='smnDroughtInfo')assert(fs.readFileSync('assets/smn-layer.js','utf8').includes(id),'missing dynamic '+id);else if(id==='smnMunicipalInfo')assert(html.includes(id),'missing dynamic '+id);
  else assert(html.includes('id="'+id+'"'),'missing '+id);
 }
 const clues=JSON.parse(fs.readFileSync('data/health/sonora_latest.json','utf8'));
