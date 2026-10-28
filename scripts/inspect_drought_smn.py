@@ -7,5 +7,7 @@ r=urllib.request.Request(URL,headers={"User-Agent":"BALAM-Observatorio/0.10"})
 with urllib.request.urlopen(r,timeout=85) as res: buf=res.read(22*1024*1024)
 print("SOURCE_BYTES",len(buf))
 for i,row in enumerate(excel_rows(buf)):
-    print("ROW",i,json.dumps(row[:28],ensure_ascii=False)[:1800])
-    if i>=23:break
+    if i==0:print("HEADER_END",len(row),json.dumps(row[-16:],ensure_ascii=False))
+    if str(row[1] if len(row)>1 else "").zfill(2)=="26":
+        print("SONORA",i,"cols",len(row),"municipio",row[3],"latest",json.dumps(row[-16:],ensure_ascii=False))
+    if i>2200:break
