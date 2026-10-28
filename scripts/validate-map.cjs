@@ -1,6 +1,6 @@
 /* BALAM 0.10 smoke validation: no browser, no external deps. */
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
+const files=['assets/smn-layer.js','assets/municipality-profile.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
 for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/ig)].entries()){
  if(!/\bsrc=/.test(script[1]))new vm.Script(script[2],{filename:'index inline '+i});
@@ -10,6 +10,22 @@ for(const id of ['smn-panel','smn-sonora-summary','smnDroughtInfo','drought-visi
  if(id==='smnDroughtInfo')assert(fs.readFileSync('assets/smn-layer.js','utf8').includes(id),'missing dynamic '+id);else if(id==='smnMunicipalInfo')assert(html.includes(id),'missing dynamic '+id);
  else assert(html.includes('id="'+id+'"'),'missing '+id);
 }
+const municipalJs=fs.readFileSync('assets/municipality-profile.js','utf8');
+for(const id of ['municipalTerritory','municipalRisk'])assert(html.includes('id="'+id+'"'),'No existe destino municipal '+id);
+assert(html.includes('BALAM_Municipal?.select(code,name)')&&html.includes("fold.scrollIntoView"),'El clic sobre municipio no abre la ficha');
+assert(html.includes("window.BALAM_Municipal?.setAgeb('26'+mun"),'AGEB no envían su conteo a ficha municipal');
+assert(municipalJs.includes('wscatgeo/v2/mgem/26/')&&municipalJs.includes('wscatgeo/v2/localidades/26/'),'Faltan fuentes INEGI municipales');
+assert(municipalJs.includes('Sin feed municipal de alertas integrado')&&municipalJs.includes('Sin vinculación geográfica validada'),'No deben inventarse alertas oficiales activas');
+const parser=municipalJs.match(/function parseCensus\([\s\S]*?\n\}/);
+const counter=municipalJs.match(/function countLocalities\([\s\S]*?\n\}/);
+const numberHelper=municipalJs.match(/const num=x=>[^\n]+/);
+assert(parser&&counter&&numberHelper,'Faltan validadores de indicadores INEGI');
+const parsed=vm.runInNewContext(numberHelper[0]+';'+parser[0]+
+  "\nparseCensus({datos:[{pob_total:'936263',pob_femenina:'468773',pob_masculina:'467490'}],metadatos:{Fuente_informacion_estadistica:'Censo 2020'}})");
+assert(parsed.population===936263&&parsed.female+parsed.male===936263,'Desglose INEGI Hermosillo no coincide');
+const places=vm.runInNewContext(counter[0]+"\ncountLocalities({datos:[{cvegeo:'260300001'},{cvegeo:'260300002'}],numReg:2})");
+assert(places===2,'Conteo de localidades del catálogo incorrecto');
+console.log('BALAM 0.16 MUNICIPIO QA PASS',{population:parsed.population,sexSum:parsed.female+parsed.male,localitiesSample:places});
 const clues=JSON.parse(fs.readFileSync('data/health/sonora_latest.json','utf8'));
 const drought=JSON.parse(fs.readFileSync('data/smn/sonora_drought_latest.json','utf8'));
 const forecast=JSON.parse(fs.readFileSync('data/smn/sonora_latest.json','utf8'));
