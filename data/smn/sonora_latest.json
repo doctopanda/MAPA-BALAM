@@ -1,0 +1,18 @@
+{
+  "schema": "balam-smn-municipal-v1",
+  "status": "not_loaded",
+  "source": "SMN / CONAGUA · pronóstico por municipios",
+  "source_url": "https://smn.conagua.gob.mx/tools/GUI/webservices/?method=1",
+  "fetched_at": null,
+  "forecast_days": [],
+  "municipalities_count": 0,
+  "districts_count": 0,
+  "internal_watch_thresholds": {
+    "rain_mm_day": 30,
+    "wind_gust_kmh": 60,
+    "heat_c": 40,
+    "cold_c": 5
+  },
+  "disclaimer": "Todavía sin pronóstico validado. No hay alertas oficiales municipales obtenidas. Las señales BALAM no equivalen a alertas oficiales.",
+  "municipalities": []
+}
