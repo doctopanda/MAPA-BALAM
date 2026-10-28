@@ -24,7 +24,7 @@ function getNames(){
    return [code,name];
  }).filter(x=>/^26\d{3}$/.test(x[0])&&x[1]));
 }
-function nameOf(code){return geoNames.get(String(code))||String(code)}
+function nameOf(code){return geoNames.get(String(code))||all.find(f=>f.municipality_code===String(code))?.municipality_name||String(code)}
 function scope(){
  const ds=el('health-district').value,mun=el('health-municipality').value,inst=el('health-institution').value,lvl=el('health-level').value,st=el('health-status-filter').value;
  const active=el('health-scope').value==='active'?new Set(bridge.getActiveDistricts()):null;
