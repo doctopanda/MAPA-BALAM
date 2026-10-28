@@ -33,7 +33,7 @@ function controlsValid(){
 function selectedTolls(){
  const vehicle=e('budget-vehicle-class').value;
  let tollOut=0,tollBack=0,count=0;
- if(!state.capufe)return {tollOut,tollBack,count,error:null};
+ if(!state.capufe)return {error:'No se pudo validar la fuente de tarifas CAPUFE. Consulta el PDF oficial; no se mostrará un total que omita casetas por error.'};
  for(const plaza of state.capufe.plazas){
   const out=val('budget-out-'+plaza.id,0,2),back=val('budget-back-'+plaza.id,0,2);
   if(out===null||back===null||!Number.isInteger(out)||!Number.isInteger(back))return {error:'Cantidad de cruces inválida en '+plaza.name};
