@@ -15,7 +15,8 @@ function status(v){el('smn-status').textContent=v}
 function currentDay(item){
  if(!item?.days?.length)return null;
  const now=isoDay();
- return item.days.find(d=>d.date>=now)||item.days.at(-1);
+ const selected=el('smn-day')?.value;
+ return (selected&&item.days.find(d=>d.date===selected))||item.days.find(d=>d.date>=now)||item.days.at(-1);
 }
 function freshEnough(data){
  if(data?.status!=='ok'||!data.fetched_at)return false;
@@ -28,9 +29,9 @@ function color(r){
  const f=currentDay(r),metric=el('smn-metric').value;
  if(!f)return null;
  if(metric==='watch')return getSignals(f).length>1?PALETTE.high:getSignals(f).length?PALETTE.low:null;
- if(metric==='rain')return f.rain_mm>=30?'#206ba9':f.rain_mm>=10?'#72a6d5':null;
- if(metric==='heat')return f.tmax_c>=40?'#d66a27':f.tmax_c>=35?'#efb26a':null;
- if(metric==='wind')return f.gust_kmh>=60?'#914db3':f.gust_kmh>=40?'#c5a4db':null;
+ if(metric==='rain')return f.rain_mm===null?null:f.rain_mm>=30?'#206ba9':f.rain_mm>=10?'#72a6d5':f.rain_mm>0?'#c4def0':'#e9f2fa';
+ if(metric==='heat')return f.tmax_c===null?null:f.tmax_c>=40?'#c95339':f.tmax_c>=35?'#e8a15d':f.tmax_c>=30?'#efca8d':f.tmax_c>=25?'#e4e5a9':'#c3dce6';
+ if(metric==='wind')return f.gust_kmh===null?null:f.gust_kmh>=60?'#914db3':f.gust_kmh>=40?'#c5a4db':f.gust_kmh>=20?'#e3c9ed':'#edf2f4';
  return null;
 }
 function clearOverlay(){if(layer){bridge.map.removeLayer(layer);layer=null;}}
@@ -52,7 +53,7 @@ function paint(){
    return {pane,color:color(r)||'#999',weight:2,fillColor:color(r)||'#999',fillOpacity:.33,opacity:.9}
   }
  }).addTo(bridge.map);
- el('smn-overlay-count').textContent=filtered.length+' municipios resaltados';
+ el('smn-overlay-count').textContent=filtered.length+' municipios coloreados · '+(el('smn-day').value||'fecha actual');
 }
 function renderMunicipality(code){
  const target=el('smnMunicipalInfo');if(!target)return;
@@ -65,7 +66,7 @@ function renderMunicipality(code){
  target.innerHTML='<h4>🌦️ SMN/CONAGUA · '+esc(rec.name)+'</h4>'+
   '<p class="tiny">Pronóstico municipal a 3 días. Consulta: '+esc(dataset.fetched_at||'sin fecha')+'.</p>'+
   '<div class="smn-table-wrap"><table><thead><tr><th>Fecha</th><th>Mín./Máx.</th><th>Lluvia</th><th>Prob.</th><th>Rachas</th></tr></thead><tbody>'+tr+'</tbody></table></div>'+
-  '<div class="smn-signals"><b>Señales de vigilancia BALAM · primer día</b><ul>'+signs+'</ul></div>'+
+  '<div class="smn-signals"><b>Señales de vigilancia BALAM · '+esc(f?.date||'fecha no disponible')+'</b><ul>'+signs+'</ul></div>'+
   '<p class="tiny">Criterios internos provisionales, NO alertas oficiales ni predicción de daños. Revisar avisos de SMN y Protección Civil.</p>'+
   (crum!==null?'<p class="tiny">🚑 CRUM: '+crum+' registros inventariados en este municipio (no disponibilidad operativa).</p>':'<p class="tiny">🚑 Activa sesión CRUM para consultar recursos municipales.</p>')+
   '<a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico oficial ↗</a>';
@@ -82,6 +83,9 @@ async function load(){
   dataset=data;
   fresh=freshEnough(data);
   rows=new Map((data.municipalities||[]).map(x=>[x.code,x]));
+  const daySelector=el('smn-day'),keep=daySelector.value;
+  daySelector.replaceChildren(...(data.forecast_days||[]).map(day=>new Option(day,day)));
+  if((data.forecast_days||[]).includes(keep))daySelector.value=keep;
   if(!fresh){
     enabled=false;el('smn-visible').checked=false;el('smn-visible').disabled=true;
     status('Sin pronóstico reciente validado. Se desactiva la capa hasta obtener datos actualizados.');
@@ -100,8 +104,10 @@ async function load(){
 el('smn-visible').addEventListener('change',e=>{enabled=e.target.checked;paint()});
 el('smn-scope').addEventListener('change',paint);
 el('smn-metric').addEventListener('change',paint);
+el('smn-day').addEventListener('change',rerender);
 el('smn-reload').addEventListener('click',load);
 window.addEventListener('balam:districts-changed',paint);
+window.addEventListener('balam:municipalities-ready',paint);
 window.addEventListener('balam:crum-updated',()=>bridge.refreshSelectedMunicipality());
 window.BALAM_Smn={renderMunicipality,getData,refresh:load};
 load();
