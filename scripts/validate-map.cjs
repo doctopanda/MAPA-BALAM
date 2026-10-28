@@ -1,6 +1,6 @@
 /* BALAM 0.10 smoke validation: no browser, no external deps. */
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/crum-layer.js'];
+const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
 for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/ig)].entries()){
  if(!/\bsrc=/.test(script[1]))new vm.Script(script[2],{filename:'index inline '+i});
@@ -42,6 +42,18 @@ assert(values.kmRoundtrip===240,'Ida y vuelta incorrecta');
 assert(values.liters===30,'Rendimiento incorrecto');
 assert(Math.abs(values.litersWithReserve-34.5)<1e-9,'Reserva incorrecta');
 assert(Math.abs(values.cost-862.5)<1e-9,'Costo incorrecto');
+const src=fs.readFileSync('assets/logistics-route.js','utf8');
+assert(html.includes('id="logistics-return"')&&html.includes('id="logistics-show-return"'),'Controles de retorno real faltantes');
+assert(src.includes('async function routeReturn()')&&src.includes('const url=')&&src.includes('b.lon+\',\'+b.lat'),'Regreso OSRM independiente falta');
+assert(src.includes('outboundKm+(returnKm??outboundKm)'),'Ida+regreso no se suma correctamente');
+const support=fs.readFileSync('assets/support-catalog.js','utf8');
+const sql=fs.readFileSync('sql/013_route_support_sites_rls.sql','utf8');
+for(const id of ['support-catalog','support-admin','support-form','support-f-name','support-f-kind','support-f-ticket','support-f-status','support-f-evidence','support-near-list'])assert(html.includes('id="'+id+'"'),'Formulario catálogo ausente: '+id);
+assert(support.includes('window.BALAM_SupabaseClient')&&support.includes('balam_access'),'Sin sesión BALAM');
+assert(support.includes("role!=='admin_maestro'")&&support.includes('supabase.from(\'balam_route_support_sites\')'),'Editor Maestro no protegido en UI');
+assert(sql.includes('enable row level security')&&sql.includes('balam_private.is_master()')&&sql.includes('balam_route_support_audit'),'Falta protección RLS y bitácora');
+assert(src.includes('balam:logistics-route-ready')&&support.includes('balam:logistics-route-ready'),'Falta conectar la ruta a proveedores institucionales');
+console.log('BALAM v0.13 QA PASS: retorno independiente y catálogo RLS estructurados');
 console.log('BALAM LOGISTICS QA PASS',JSON.stringify({idaKm:120,retornoKm:240,litros:30,conReservaL:34.5,costoMXN:862.5}));
 
 assert(clues.facilities.every(f=>/^26\d{3}$/.test(f.municipality_code)&&f.lat>26&&f.lat<33.5&&f.lon>-115.5&&f.lon< -108));
