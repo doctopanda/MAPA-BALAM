@@ -256,6 +256,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 </style><style id="balam-municipal-profile-v016">
 #detail{scroll-margin-top:12px}#detail .detail-title{font-size:19px;line-height:1.3;margin:2px 0 6px}
 .municipal-section-title{font:850 12px/1.4 system-ui;color:#195d50;margin:13px 0 8px;border-top:1px solid #dceae6;padding-top:11px}
+.municipal-selector{display:grid;gap:5px;font:800 10px system-ui;color:#245f50;margin:7px 0 11px}.municipal-selector select{width:100%;min-height:34px;border:1px solid #b9d9cf;border-radius:9px;background:#fff;padding:6px 8px;color:#194e42;font:750 11px system-ui}
 .municipal-stats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
 .municipal-stat{background:#f1f9f6;border:1px solid #cee3db;border-radius:10px;padding:9px 8px;display:grid;gap:4px}
 .municipal-stat span{font-size:10px;color:#456e63;font-weight:750}.municipal-stat strong{font:900 19px system-ui;color:#164f43;overflow-wrap:anywhere}
@@ -332,9 +333,9 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 
   <div class="card" id="geoLayerPanel">
     <h3>Capas de detalle · AGEB y manzanas</h3>
-    <p class="tiny">Elige un municipio para obtener sus AGEB. “Activa” significa seleccionada para análisis, no condición sanitaria.</p>
-    <label class="geo-layer-option"><input id="showActiveAgebs" type="checkbox" checked><span><b>AGEB activas</b><small>Mostrar las seleccionadas en el mapa</small></span></label>
-    <label class="geo-layer-option"><input id="showInactiveAgebs" type="checkbox" checked><span><b>AGEB inactivas</b><small>Mostrar las que no has seleccionado</small></span></label>
+    <p class="tiny">Las AGEB se cuentan al seleccionar un municipio y se dibujan solo si activas sus capas. Esto mantiene libre el mapa para cambiar de municipio.</p>
+    <label class="geo-layer-option"><input id="showActiveAgebs" type="checkbox"><span><b>AGEB activas</b><small>Mostrar las seleccionadas en el mapa</small></span></label>
+    <label class="geo-layer-option"><input id="showInactiveAgebs" type="checkbox"><span><b>AGEB inactivas</b><small>Mostrar las que no has seleccionado</small></span></label>
     <label class="geo-layer-option"><input id="showBlocks" type="checkbox"><span><b>Manzanas</b><small>Cargar únicamente dentro de AGEB seleccionadas</small></span></label>
     <div id="geoLayerStatus" class="tiny" role="status">Manzanas apagadas; no se solicitarán hasta activar la capa.</div>
   </div>
@@ -627,7 +628,7 @@ var active=new Set();
 var stateLayer=null,stateBounds=null,agebLayer=null,geoCache={};
 var agebIndex=new Map(),selectedAgebs=new Set(),blockLayers=new Map(),currentFine=null;
 var selectedContext=null;
-var showActiveAgebs=true,showInactiveAgebs=true,showBlocks=false;
+var showActiveAgebs=false,showInactiveAgebs=false,showBlocks=false;
 var analysis={mode:'panorama',source:'balam',program:'resumen',indicator:'territorio',period:'available'};
 
 var controls=document.getElementById('districtControls');
@@ -883,21 +884,29 @@ function renderMapFloat(){
  mapFloat.innerHTML='<b>🐆 '+esc(m.label)+'</b><div class="float-path">'+esc(s.label)+' → '+esc(p.label)+' → <b>'+esc(ind.label)+'</b></div><span class="float-scope">nivel: '+esc(scope)+'</span>'
 }
 
+function selectMunicipalLayer(layer){
+ if(!layer||!layer.feature)return false;
+ var f=layer.feature,code=codeOf(f),name=nameOf(f),did=districtFor(code);
+ if(!did){statusEl.textContent='No se pudo vincular '+name+' a un distrito.';return false}
+ if(!active.has(did)){active.add(did);renderDistrictControls();ensureDistrictData(did);window.dispatchEvent(new Event('balam:districts-changed'))}
+ clearFine();
+ selectedContext={code:code,name:name,did:did};
+ updateMap();
+ var fold=detailEl.closest('.balam-fold');
+ if(fold){fold.open=true;fold.scrollIntoView({behavior:'smooth',block:'nearest'})}
+ statusEl.textContent='📍 '+name+' · '+did+'. Ficha municipal abierta; consultando fuentes territoriales.';
+ var b=layer.getBounds();map.fitBounds(b,{padding:[28,28],maxZoom:10});
+ loadAgeb(code.slice(2),name,did,b);
+ return true;
+}
+function selectMunicipalityByCode(code){
+ var found=null;
+ if(stateLayer)stateLayer.eachLayer(function(layer){if(layer.feature&&codeOf(layer.feature)===String(code))found=layer});
+ return selectMunicipalLayer(found);
+}
 function onEach(f,layer){
- var code=codeOf(f),name=nameOf(f),did=districtFor(code);
  layer.bindTooltip(tooltipText(f),{sticky:true});
- layer.on('click',function(){
-   if(!did){statusEl.textContent='No se pudo vincular '+name+' a un distrito.';return}
-   if(!active.has(did)){active.add(did);renderDistrictControls();ensureDistrictData(did);window.dispatchEvent(new Event('balam:districts-changed'))}
-   selectedContext={code:code,name:name,did:did};
-   updateMap();
-   var fold=detailEl.closest('.balam-fold');
-   if(fold){fold.open=true;fold.scrollIntoView({behavior:'smooth',block:'nearest'})}
-   statusEl.textContent='📍 '+name+' · '+did+'. Ficha municipal abierta; consultando fuentes territoriales.';
-   var b=layer.getBounds();map.fitBounds(b,{padding:[28,28],maxZoom:10});
-   if(showActiveAgebs||showInactiveAgebs||showBlocks)loadAgeb(code.slice(2),name,did,b);
-   else {clearFine();currentFine={mun:code.slice(2),name:name,did:did,bounds:b};statusEl.textContent='Municipio seleccionado. Activa una capa AGEB para cargar el detalle.'}
- })
+ layer.on('click',function(){selectMunicipalLayer(layer)});
 }
 function renderDetail(code,name,did){
  var d=cfg(did),data=districtData[did],m=municipalityRecord(did,code),ind=indicatorCfg(),value=null,precision='';
@@ -946,6 +955,8 @@ function clearFine(){if(agebLayer){map.removeLayer(agebLayer);agebLayer=null}map
 function agebStyle(f){var info=agebInfo(f,currentFine?currentFine.mun:'');var on=selectedAgebs.has(info.key),p=f.properties||{};return {pane:'agebPane',color:on?'#173a37':'#409993',weight:on?3:1.15,fillColor:p.__ambito==='Rural'?'#EC889B':'#7BB7B7',fillOpacity:on?.24:.12}}
 function syncAgebStyles(){
  if(!agebLayer)return;
+ if(!showActiveAgebs&&!showInactiveAgebs){if(map.hasLayer(agebLayer))map.removeLayer(agebLayer);return}
+ if(!map.hasLayer(agebLayer))agebLayer.addTo(map);
  agebIndex.forEach(function(info){
    var visible=selectedAgebs.has(info.key)?showActiveAgebs:showInactiveAgebs;
    if(visible&&!agebLayer.hasLayer(info.layer))agebLayer.addLayer(info.layer);
@@ -1048,7 +1059,7 @@ async function loadAgeb(mun,name,did,municipalityBounds){
      var info=agebInfo(f,mun);info.layer=l;agebIndex.set(info.key,info);
      l.bindTooltip('AGEB '+esc(info.ageb)+' · '+esc(info.amb)+(info.loc?' · Loc. '+esc(info.loc):''),{sticky:true});
      l.on('click',function(ev){if(ev&&ev.originalEvent)L.DomEvent.stopPropagation(ev.originalEvent);setAgebSelected(info.key,!selectedAgebs.has(info.key))})
-   }}).addTo(map);
+   }});
    syncAgebStyles();statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' polígonos AGEB disponibles. Selecciona las necesarias; manzanas '+(showBlocks?'activadas.':'apagadas.');updateAgebManager();
    window.BALAM_Municipal?.setAgeb('26'+mun,all.length,rs[0].status==='fulfilled'?fc(rs[0].value).features.length:0,rs[1].status==='fulfilled'?fc(rs[1].value).features.length:0,rs.some(function(x){return x.status!=='fulfilled'}));
  }catch(e){if(currentFine&&currentFine.mun===mun){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message;window.BALAM_Municipal?.setAgebError('26'+mun);var holder=document.getElementById('agebManager');if(holder)holder.innerHTML='<p class="tiny">AGEB no disponibles en esta consulta; vuelve a seleccionar el municipio para reintentar.</p>'}}
@@ -1127,6 +1138,7 @@ updateGeoLayerStatus();
 window.addEventListener('balam:health-updated',function(){if(selectedContext)renderDetail(selectedContext.code,selectedContext.name,selectedContext.did)});
 window.BALAM_SmnMap = {
  map:map,
+ selectMunicipality:selectMunicipalityByCode,
  getActiveDistricts:function(){return Array.from(active);},
  getMunicipalityFeatures:function(){var a=[];if(stateLayer)stateLayer.eachLayer(function(l){if(l.feature)a.push(l.feature)});return a;},
  getDistrictForMunicipality:function(code){return districtFor(String(code));},
