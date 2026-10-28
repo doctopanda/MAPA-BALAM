@@ -8,7 +8,8 @@ const money=n=>Number(n).toLocaleString('es-MX',{style:'currency',currency:'MXN'
 const num=(n,d=1)=>Number(n).toLocaleString('es-MX',{maximumFractionDigits:d});
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const serviceColors={fuel:'#e89824',tire:'#b8518f',repair:'#5769c1',health:'#288c65'};
-const routeModel={route:null};
+const routeModel={route:null,returnRoute:null,returnLine:null};
+let lastReturnRequest=0,returnAbort=null,returnGeneration=0;
 let osmServiceLayer=L.layerGroup().addTo(map),poiList=[],lookupTime=0,abort=null,version=0;
 let cached={key:null,items:null};
 const say=(t)=>{e('logistics-status').textContent=t};
@@ -24,14 +25,21 @@ function present(){
  const price=safeFinite('logistics-price',1,100);
  const reserve=safeFinite('logistics-reserve',0,100);
  if([yieldValue,price,reserve].some(v=>v===null)){p.textContent='Corrige rendimiento (2–30 km/L), precio (1–100 MXN/L) o reserva (0–100%).';return}
- const x=compute(r.distance/1000,yieldValue,price,reserve);
+ const returnKm=routeModel.returnRoute?.distance/1000??null;
+ const outboundKm=r.distance/1000;
+ const x=compute((outboundKm+(returnKm??outboundKm))/2,yieldValue,price,reserve);
+ x.kmOneWay=outboundKm;
+ x.kmRoundtrip=outboundKm+(returnKm??outboundKm);
+ x.liters=x.kmRoundtrip/yieldValue;
+ x.litersWithReserve=x.liters*(1+reserve/100);
+ x.cost=x.litersWithReserve*price;
  p.innerHTML='<div class="logistics-metrics">'+
  '<div><small>Ida</small><b>'+num(x.kmOneWay)+' km</b></div>'+
- '<div><small>Ida y vuelta estimada</small><b>'+num(x.kmRoundtrip)+' km</b></div>'+
+ '<div><small>'+ (returnKm!==null?'Ida y vuelta enrutadas':'Ida y vuelta estimada')+'</small><b>'+num(x.kmRoundtrip)+' km</b></div>'+
  '<div><small>Litros ida/vuelta</small><b>'+num(x.liters,2)+' L</b></div>'+
  '<div><small>Litros con reserva</small><b>'+num(x.litersWithReserve,2)+' L</b></div>'+
  '<div class="logistics-cost"><small>Costo estimado</small><b>'+money(x.cost)+'</b></div></div>'+
- '<p class="tiny">Estimación: doble de la distancia de ida, '+num(yieldValue)+' km/L, '+money(price)+'/L y '+num(reserve)+'% adicional de combustible. No representa consumo medido, tarifa oficial, viáticos ni ruta de retorno validada.</p>';
+ '<p class="tiny">'+(returnKm!==null?'Ida '+num(outboundKm,2)+' km + regreso '+num(returnKm,2)+' km por calles':'Sin retorno enrutado: se utiliza 2 × ida')+'. Rendimiento '+num(yieldValue)+' km/L, precio '+money(price)+'/L y '+num(reserve)+'% de reserva. No considera tráfico, cierres, tiempos sanitarios o consumo medido.</p>';
 }
 function clearLookups(){
  version++;
@@ -41,16 +49,55 @@ function clearLookups(){
  e('logistics-summary').textContent='Sin servicios consultados en el corredor.';
  e('logistics-query').disabled=!routeModel.route;
 }
+function clearReturn(){
+ returnGeneration++;
+ if(returnAbort){returnAbort.abort();returnAbort=null;}
+ if(routeModel.returnLine){map.removeLayer(routeModel.returnLine);routeModel.returnLine=null}
+ routeModel.returnRoute=null;
+ e('logistics-return-status').textContent='Regreso sin enrutamiento independiente. Se estima duplicando la ida.';
+}
+async function routeReturn(){
+ const route=routeModel.route;if(!route)return;
+ const a=route.origin,b=route.destination;
+ if(!Number.isFinite(a?.lat)||!Number.isFinite(a?.lon)||!Number.isFinite(b?.lat)||!Number.isFinite(b?.lon)){
+  e('logistics-return-status').textContent='No hay coordenadas de ambos establecimientos para calcular el retorno.';return;
+ }
+ if(Date.now()-lastReturnRequest<1600){e('logistics-return-status').textContent='Respeta el intervalo mínimo entre consultas al servicio vial de pruebas.';return;}
+ lastReturnRequest=Date.now();clearReturn();const token=returnGeneration;
+ e('logistics-return-status').textContent='Calculando ruta independiente desde la unidad receptora hasta el origen…';
+ const url='https://router.project-osrm.org/route/v1/driving/'+b.lon+','+b.lat+';'+a.lon+','+a.lat+'?overview=full&geometries=geojson&alternatives=false&steps=false';
+ const controller=new AbortController();returnAbort=controller;
+ const timer=setTimeout(()=>controller.abort(),20000);
+ try{
+  const response=await fetch(url,{signal:controller.signal});
+  if(!response.ok)throw Error('HTTP '+response.status);
+  const data=await response.json();
+  if(token!==returnGeneration)return;
+  const result=data.routes?.[0],coordinates=result?.geometry?.coordinates;
+  if(data.code!=='Ok'||!Number.isFinite(result?.distance)||result.distance<=0||!Array.isArray(coordinates)||coordinates.length<2)throw Error('Sin retorno por carretera verificable');
+  routeModel.returnRoute={distance:result.distance,coords:coordinates};
+  routeModel.returnLine=L.polyline(coordinates.map(p=>[p[1],p[0]]),{color:'#2b76ab',weight:4,dashArray:'7,11',opacity:.85,interactive:false}).addTo(map);
+  if(!e('logistics-show-return').checked)map.removeLayer(routeModel.returnLine);
+  e('logistics-return-status').textContent='↩️ Regreso enrutado por separado: '+num(result.distance/1000,2)+' km; trazo azul discontinuo. Motor de demostración sin cierres ni tráfico.';
+  present();
+ }catch(err){if(token===returnGeneration)e('logistics-return-status').textContent='Retorno no disponible ('+String(err.message).slice(0,110)+'). Se mantiene cálculo estimado como 2 × ida.'}
+ finally{clearTimeout(timer);if(returnAbort===controller)returnAbort=null}
+}
 function onRoute(route){
  if(!route||!Number.isFinite(route.distance)||route.distance<=0||!Array.isArray(route.coords)||route.coords.length<2)return;
+ clearReturn();
  routeModel.route={distance:route.distance,coords:route.coords,origin:route.origin,destination:route.destination};
+ e('logistics-return').disabled=false;
  clearLookups();present();
+ window.dispatchEvent(new CustomEvent('balam:logistics-route-ready',{detail:{distance:route.distance,coords:route.coords}}));
  const n=e('logistics-panel');
  const box=n.closest('details');if(box)box.open=true;
  say('Ruta cargada. Ajusta combustible y, si lo necesitas, consulta servicios cerca del recorrido.');
 }
 function reset(){
- routeModel.route=null;clearLookups();present();say('Sin ruta actual. Los servicios anteriores se han retirado.');
+ clearReturn();routeModel.route=null;e('logistics-return').disabled=true;
+ clearLookups();present();say('Sin ruta actual. Los servicios anteriores se han retirado.');
+ window.dispatchEvent(new Event('balam:logistics-route-cleared'));
 }
 function haversine(lat1,lon1,lat2,lon2){
  const r=Math.PI/180,a=Math.sin((lat2-lat1)*r/2)**2+Math.cos(lat1*r)*Math.cos(lat2*r)*Math.sin((lon2-lon1)*r/2)**2;
@@ -168,9 +215,11 @@ async function search(){
 }
 for(const id of ['logistics-efficiency','logistics-price','logistics-reserve'])e(id).addEventListener('input',present);
 for(const category of ['fuel','tire','repair','health'])e('logistics-'+category).addEventListener('change',renderPoints);
+e('logistics-return').addEventListener('click',routeReturn);
+e('logistics-show-return').addEventListener('change',ev=>{if(!routeModel.returnLine)return;if(ev.target.checked)routeModel.returnLine.addTo(map);else map.removeLayer(routeModel.returnLine)});
 e('logistics-query').addEventListener('click',search);
 e('logistics-clear').addEventListener('click',()=>{clearLookups();say('Servicios ocultados; la ruta y el cálculo de combustible permanecen.')});
 e('logistics-query').disabled=true;
-window.BALAM_Logistics={onRoute,reset,compute,_test:{nearestKm,haversine,sampleCoords,overpassQuery}};
+window.BALAM_Logistics={onRoute,reset,compute,getRoute:()=>routeModel.route?{...routeModel.route,returnRoute:routeModel.returnRoute}:null,_test:{nearestKm,haversine,sampleCoords,overpassQuery}};
 present();
 })();
