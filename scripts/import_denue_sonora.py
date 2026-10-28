@@ -36,10 +36,10 @@ def rows(data):
   try:txt=data.decode(enc);break
   except UnicodeDecodeError:continue
  head=txt[:5000]
- dialect=csv.Sniffer().sniff(head,delimiters=",;|\t") if any(c in head for c in ",;|\t") else csv.excel
+ try:dialect=csv.Sniffer().sniff(head,delimiters=",;|\t")
+ except csv.Error:dialect=csv.excel
  return csv.DictReader(io.StringIO(txt),dialect=dialect)
 def normalize(data):
- codes=set(),None
  items={}
  counters={"out_of_sonora":0,"invalid_location":0,"not_target_sciAN":0,"missing_id":0,"invalid_municipality":0}
  for row in data:
