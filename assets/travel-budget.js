@@ -101,7 +101,7 @@ async function loadTariffs(){
  const response=await fetch(DATA_URL,{cache:'no-cache'});if(!response.ok)throw Error('HTTP '+response.status);
  const data=await response.json();
  if(data.schema!=='balam-capufe-sonora-v1'||data.status!=='verified_official_tariff_extract'||data.plazas?.length!==7)throw Error('Corte o estructura tarifaria sin validar');
- state.capufe=data;addSource();
+ state.capufe=data;addSource();window.dispatchEvent(new Event('balam:capufe-ready'));
  e('budget-capufe-status').textContent='CAPUFE Red FONADIN 2026 · tarifas con IVA vigentes desde '+data.valid_from+' · 7 plazas/tramos de Sonora en catálogo.';
  }catch(err){
  state.capufe=null;e('budget-toll-list').textContent='No hay fuente CAPUFE verificable. El presupuesto conserva combustible y viáticos, sin atribuir tarifas.';
@@ -145,13 +145,25 @@ function onRoute(){
  state.route=getRoute();status(state.route?'Ruta cargada; captura casetas reales y activa viáticos si corresponde.':'Primero dibuja una ruta.');
  render();
 }
-e('budget-vehicle-class').addEventListener('change',addSource);
+e('budget-vehicle-class').addEventListener('change',()=>{addSource();window.dispatchEvent(new Event('balam:capufe-class-updated'))});
 e('budget-viaticos-enabled').addEventListener('change',toggleViatics);
 for(const id of ['budget-food','budget-lodging','budget-other','logistics-efficiency','logistics-price','logistics-reserve'])e(id).addEventListener('input',render);
 e('budget-download').addEventListener('click',exportCsv);
 window.addEventListener('balam:logistics-route-ready',onRoute);
 window.addEventListener('balam:logistics-return-ready',onRoute);
 window.addEventListener('balam:logistics-route-cleared',onRoute);
-window.BALAM_TravelBudget={sumBudget,calculate:computeCurrent};
+function setCrossing(plazaId,dir,count){
+ if(!state.capufe||!state.capufe.plazas.some(p=>p.id===plazaId)||!['out','back'].includes(dir)||!Number.isInteger(count)||count<0||count>2)return false;
+ const field=e('budget-'+dir+'-'+plazaId);if(!field)return false;
+ field.value=String(count);render();window.dispatchEvent(new CustomEvent('balam:budget-tolls-updated',{detail:{plazaId,dir,count}}));return true;
+}
+function clearAllTolls(){
+ for(const field of e('budget-toll-list').querySelectorAll('select'))field.value='0';
+ render();window.dispatchEvent(new Event('balam:budget-tolls-cleared'));
+}
+window.BALAM_TravelBudget={sumBudget,calculate:computeCurrent,
+ getVehicleClass:()=>e('budget-vehicle-class').value,
+ getTariff:(id)=>{const p=state.capufe?.plazas.find(x=>x.id===id);const v=e('budget-vehicle-class').value;return p&&v&&Number.isFinite(p[v])?{amount:p[v],name:p.name,valid_from:state.capufe.valid_from}:null;},
+ setCrossing,clearAllTolls,getCount:(id,dir)=>Number(e('budget-'+dir+'-'+id)?.value||0)};
 toggleViatics();loadTariffs();onRoute();
 })();
