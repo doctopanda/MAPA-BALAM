@@ -1051,7 +1051,7 @@ async function loadAgeb(mun,name,did,municipalityBounds){
    }}).addTo(map);
    syncAgebStyles();statusEl.textContent=name+' · '+did+': '+fmt(all.length)+' polígonos AGEB disponibles. Selecciona las necesarias; manzanas '+(showBlocks?'activadas.':'apagadas.');updateAgebManager();
    window.BALAM_Municipal?.setAgeb('26'+mun,all.length,rs[0].status==='fulfilled'?fc(rs[0].value).features.length:0,rs[1].status==='fulfilled'?fc(rs[1].value).features.length:0,rs.some(function(x){return x.status!=='fulfilled'}));
- }catch(e){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message;if(currentFine&&currentFine.mun===mun)window.BALAM_Municipal?.setAgebError('26'+mun)}
+ }catch(e){if(currentFine&&currentFine.mun===mun){statusEl.textContent='No fue posible cargar AGEB de '+name+': '+e.message;window.BALAM_Municipal?.setAgebError('26'+mun);var holder=document.getElementById('agebManager');if(holder)holder.innerHTML='<p class="tiny">AGEB no disponibles en esta consulta; vuelve a seleccionar el municipio para reintentar.</p>'}}
 }
 
 function renderEmptyDetail(){selectedContext=null;detailEl.innerHTML='<div class="eyebrow">Selección</div><div class="detail-title">Elige un municipio activo</div><p class="tiny">El mapa conserva la lectura analítica actual y permite bajar a AGEB/manzana sólo cuando lo necesitas.</p>';updateMap()}
