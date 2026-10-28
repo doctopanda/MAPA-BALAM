@@ -92,6 +92,19 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .smn-municipal-detail .smn-signals li{margin:6px 0}
 .smn-municipal-detail .smn-signals span{display:block;color:#536d60;margin:3px 0}
 .smn-municipal-detail a{font-size:11px;font-weight:700;color:#176b5b}
+
+.smn-summary{padding:11px;border-radius:12px;background:#e4f3ed;border:1px solid #b3d5c7;font:11px system-ui;color:#175844;margin:10px 0}
+.smn-summary>b{font-size:12px;display:block}
+.smn-summary p{margin:6px 0!important}
+.smn-quickstats{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:5px}
+.smn-quickstats>div{border-radius:8px;padding:7px 9px;background:#fff}
+.smn-quickstats b{display:block;font-size:11px;color:#205c4c}
+.smn-quickstats span{display:block;font-size:10px;color:#698377}
+.smn-hazards{margin:10px 0;background:#eef5f3;padding:10px;border-radius:10px}
+.smn-hazards>div{border-top:1px solid #c8dcd4;padding:8px 0}
+.smn-hazards span{display:block;font-size:11px;font-weight:700}
+.smn-hazards strong{display:block;font-size:11px;color:#975f26;margin:3px 0}
+.smn-hazards a{display:block;font-size:10px}
 </style></head>
 <body>
 <header>
@@ -166,7 +179,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <select id="smn-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
  <p id="smn-status" class="smn-status" role="status">Buscando el último corte validado…</p>
  <p id="smn-source" class="tiny"></p>
- <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
+ <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><div id="smn-sonora-summary" class="smn-summary" aria-live="polite">Cargando análisis meteorológico de Sonora…</div><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
  <button id="smn-reload" class="btn" type="button">Actualizar lectura</button>
  <div class="smn-links"><a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico SMN ↗</a>
  <a href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico" target="_blank" rel="noopener noreferrer">Ciclones Pacífico ↗</a>
