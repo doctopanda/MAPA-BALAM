@@ -120,6 +120,7 @@ function clearRoute(){
  if(jaguar){map.removeLayer(jaguar);jaguar=null;}
  if(anim){cancelAnimationFrame(anim);anim=null;}
  el('route-status').textContent='Ruta sin trazar. Selecciona dos establecimientos.';
+ window.BALAM_Logistics?.reset();
 }
 function selectOrigin(f){
  clearRoute();origin=f;destination=null;
@@ -214,6 +215,7 @@ async function route(){
   routeLine=L.polyline(coords.map(p=>[p[1],p[0]]),{pane:'routePane',color:'#e44a31',weight:6,opacity:.85}).addTo(map);
   map.fitBounds(routeLine.getBounds(),{padding:[45,45],maxZoom:12});
   animate(coords);
+  window.BALAM_Logistics?.onRoute({distance:road.distance,coords,origin:{clues:a.clues,name:a.name},destination:{clues:b.clues,name:b.name}});
   el('route-status').textContent='Ruta vial exploratoria: '+fmt(road.distance/1000)+' km · '+fmt(road.duration/60)+' min estimados. El jaguar indica dirección planificada, NO traslado real. No se verifican cierres viales, camas ni aceptación.';
  }catch(err){
   if(token===requestToken)el('route-status').textContent='Ruta no disponible: '+String(err.message).slice(0,110)+'. No se dibuja una línea artificial.';

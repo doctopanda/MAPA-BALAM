@@ -147,6 +147,31 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .balam-jaguar-pin{display:block;width:82px;height:86px;max-width:none;object-fit:contain;object-position:center center;pointer-events:none;user-select:none;filter:drop-shadow(0 3px 4px rgba(0,47,46,.55))}
 @media(max-width:540px){.balam-jaguar-pin{filter:drop-shadow(0 2px 3px rgba(0,47,46,.45))}}
 @media(prefers-reduced-motion:reduce){.health-house-icon.health-eligible .health-house-symbol{animation:none!important}}
+</style><style id="balam-logistics-v012">
+.balam-logistics{border:1px solid #a9d9c3;border-radius:12px;padding:10px;margin:12px 0;background:linear-gradient(160deg,#effbf5,#f9fffb)}
+.balam-logistics>summary{cursor:pointer;font:850 12px/1.4 system-ui;color:#175b4b}
+.balam-logistics>p{font-size:10px;margin:8px 0}
+.logistics-inputs{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-top:10px}
+.logistics-inputs label{font-size:10px!important;font-weight:800!important;margin:0!important;color:#2a594c;display:block}
+.logistics-inputs input{box-sizing:border-box;min-width:0!important;width:100%;border:1px solid #bad5c9;border-radius:8px;padding:8px 7px;font-size:14px;color:#185b4c;background:white;margin-top:4px;font-variant-numeric:tabular-nums}
+.logistics-output{background:#fff;border:1px solid #cfe5d9;border-radius:11px;padding:10px;margin:9px 0;font-size:11px;line-height:1.4;color:#265b4a}
+.logistics-metrics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+.logistics-metrics>div{background:#f1f9f5;border:1px solid #ddebe4;padding:8px;border-radius:8px;min-width:0}
+.logistics-metrics small{display:block;font-size:10px;color:#568072}
+.logistics-metrics b{display:block;font-size:clamp(13px,1.3vw,17px);overflow-wrap:anywhere;line-height:1.3;color:#1b614f}
+.logistics-metrics .logistics-cost{grid-column:1/-1;background:#def4e7}
+.logistics-metrics .logistics-cost b{font-size:clamp(17px,2vw,22px);color:#0b6552}
+.logistics-service-title{font-size:12px;font-weight:900;color:#185543;margin-top:11px}
+.logistics-service-toggles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:5px;margin:8px 0}
+.logistics-service-toggles label{font-size:10px!important;line-height:1.4;display:flex;align-items:center;gap:4px;margin:0!important}
+.logistics-service-toggles input{width:16px!important;height:16px!important}
+.logistics-service-buttons{display:flex;gap:6px;flex-wrap:wrap;margin:9px 0}
+.logistics-service-buttons button{flex:1;font-size:10px!important}
+.logistics-spot-list{display:grid;max-height:210px;overflow:auto;gap:5px}
+.logistics-spot{font:650 10px/1.35 system-ui;color:#215d4c;text-align:left;border:1px solid #c5e1d3;border-radius:9px;background:white;padding:7px 9px;cursor:pointer}
+.logistics-spot:hover{background:#e7f7ee}
+.logistics-service-marker{border:0;background:transparent}
+.logistics-service-marker>div{width:30px;height:30px;border-radius:100%;background:white;border:3px solid var(--service-color);box-shadow:0 2px 9px #0004;display:flex;align-items:center;justify-content:center;font-size:17px}
 </style></head>
 <body>
 <header>
@@ -157,7 +182,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.11.1</div>
+    <div class="eyebrow">MAPA BALAM · v0.12.0</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
@@ -261,6 +286,34 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
    <label class="health-consent"><input id="route-demo-consent" type="checkbox"> Consultar ruta puntual en un servidor de demostración externo, sin datos de pacientes</label>
    <button class="btn primary" type="button" id="route-go">🐆 Dibujar ruta vial</button><button class="btn" type="button" id="route-clear">Limpiar ruta</button><button class="btn" type="button" id="route-reset-selection">Cambiar origen / reiniciar selección</button>
    <p id="route-status" role="status" class="tiny">Ruta sin trazar. Selecciona dos establecimientos.</p>
+ <details id="logistics-panel" class="balam-logistics">
+  <summary>⛽ Logística del traslado · combustible y servicios de auxilio</summary>
+  <p class="tiny">Calculadora exploratoria vinculada a la distancia de la ruta seleccionada. No utiliza datos de pacientes ni precios oficiales.</p>
+  <div class="logistics-inputs">
+   <label for="logistics-efficiency">Rendimiento de la unidad (km/L)<input type="number" id="logistics-efficiency" min="2" max="30" step=".5" value="8"></label>
+   <label for="logistics-price">Precio de referencia (MXN/L)<input type="number" id="logistics-price" min="1" max="100" step=".5" value="25"></label>
+   <label for="logistics-reserve">Reserva operativa (%)<input type="number" id="logistics-reserve" min="0" max="100" step="5" value="15"></label>
+  </div>
+  <p class="tiny">Los valores precargados son solo ilustrativos. Ajusta rendimiento real y precio autorizado antes de utilizar la estimación.</p>
+  <div id="logistics-output" class="logistics-output" role="status" aria-live="polite">Sin ruta calculada.</div>
+  <div class="logistics-service-title">Servicios próximos a la ruta</div>
+  <p class="tiny">Consulta manual a OpenStreetMap: gasolineras, llanteras y talleres. Unidades CLUES cercanas como referencias geográficas de apoyo, no como garantía de atención de urgencias.</p>
+  <div class="logistics-service-toggles">
+   <label><input type="checkbox" id="logistics-fuel" checked> ⛽ Gasolineras</label>
+   <label><input type="checkbox" id="logistics-tire" checked> 🛞 Llanteras</label>
+   <label><input type="checkbox" id="logistics-repair" checked> 🔧 Talleres</label>
+   <label><input type="checkbox" id="logistics-health" checked> 🏥 Unidades CLUES</label>
+  </div>
+  <div class="logistics-service-buttons">
+   <button type="button" class="btn primary" id="logistics-query" disabled>🔎 Buscar servicios a lo largo del trayecto</button>
+   <button type="button" class="btn" id="logistics-clear">Ocultar servicios</button>
+  </div>
+  <p id="logistics-status" class="tiny" role="status">Dibuja una ruta vial para habilitar la consulta.</p>
+  <p id="logistics-summary" class="tiny">Sin servicios consultados.</p>
+  <div id="logistics-list" class="logistics-spot-list"></div>
+  <p class="tiny"><b>Gasolineras con ticket o convenio:</b> aún sin catálogo institucional verificado. Las estaciones OSM no se clasifican como aceptantes de vales, tickets o facturación autorizada.</p>
+  <p class="tiny">Cercanía al trazado ≠ accesibilidad vial, horario, disponibilidad ni capacidad de respuesta. Verificar servicios antes de un traslado real.</p>
+</details>
    <p class="tiny">El sello oficial BALAM se desplaza por la geometría de la ruta. Los destinos resaltados cumplen solo la regla exploratoria 1°→2° o 2°→3°, no representan elegibilidad clínica, derechohabiencia, cupo ni aceptación de referencia. La ruta NO es un traslado real ni un cálculo apto para despacho.</p>
  </details>
  <p class="tiny"><a href="https://gobi.salud.gob.mx/Bases_Clues.html" target="_blank" rel="noopener noreferrer">Fuente DGIS/CLUES ↗</a></p>
@@ -881,5 +934,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
 </html>
