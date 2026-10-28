@@ -17,9 +17,9 @@ const routePane=map.createPane('routePane');routePane.style.zIndex=479;routePane
 const markerLayer=L.layerGroup().addTo(map);
 function status(t){el('health-status').textContent=t}
 function scope(){
- const ds=el('health-district').value,mun=el('health-municipality').value,institution=el('health-institution').value,level=el('health-level').value;
+ const ds=el('health-district').value,mun=el('health-municipality').value,institution=el('health-institution').value,level=el('health-level').value,operational=el('health-status-filter').value;
  const act=el('health-scope').value==='active'?new Set(bridge.getActiveDistricts()):null;
- return all.filter(x=>(!ds||x.district===ds)&&(!mun||x.municipality_code===mun)&&(!institution||x.institution===institution)&&(!level||(level==='other'?!x.level:x.level===level))&&(!act||act.has(x.district)));
+ return all.filter(x=>(!ds||x.district===ds)&&(!mun||x.municipality_code===mun)&&(!institution||x.institution===institution)&&(!level||(level==='other'?!x.level:x.level===level))&&(!operational||x.status_source===operational)&&(!act||act.has(x.district)));
 }
 function optionSelect(id,items,label,render=x=>x){
  const e=el(id),prev=e.value;e.replaceChildren(new Option(label,''));
@@ -95,7 +95,7 @@ async function route(){
  if(Date.now()-lastDemo<1500){el('route-status').textContent='Espera al menos 1.5 segundos entre solicitudes';return}
  lastDemo=Date.now();clearRoute();
  el('route-status').textContent='Calculando ruta vial de prueba, sin pacientes ni datos personales…';
- const u='https://router.project-osrm.org/route/v1/driving/'+encodeURIComponent(a.lon+','+a.lat+';'+b.lon+','+b.lat)+'?overview=full&geometries=geojson&alternatives=false&steps=false';
+ const u='https://router.project-osrm.org/route/v1/driving/'+a.lon+','+a.lat+';'+b.lon+','+b.lat+'?overview=full&geometries=geojson&alternatives=false&steps=false';
  try{
   const ctl=new AbortController(),timeout=setTimeout(()=>ctl.abort(),20000);
   let r;try{r=await fetch(u,{signal:ctl.signal})}finally{clearTimeout(timeout)}
@@ -117,15 +117,15 @@ async function load(){
   const doc=await r.json();
   if(doc.schema!=='balam-clues-sonora-v1'||doc.status!=='ok'||doc.facility_count!==doc.facilities?.length||doc.facility_count<150)throw Error('Aún no hay catálogo Sonora verificado');
   all=doc.facilities.filter(x=>/^26\d{3}$/.test(x.municipality_code)&&Number.isFinite(x.lat)&&Number.isFinite(x.lon));
-  loaded=true;el('health-visible').disabled=false;
+  loaded=true;el('health-visible').disabled=false;window.dispatchEvent(new Event('balam:health-updated'));
   optionSelect('health-institution',all.map(x=>x.institution),'Todas las instituciones');
   status('CLUES · '+fmt(all.length)+' establecimientos institucionales · corte '+doc.source_cut+'. No implica disponibilidad en tiempo real.');
   filters();
- }catch(e){loaded=false;all=[];el('health-visible').checked=false;el('health-visible').disabled=true;status('Capa CLUES pendiente: '+String(e.message).slice(0,130)+'. No se inventaron establecimientos.')}
+ }catch(e){loaded=false;all=[];el('health-visible').checked=false;el('health-visible').disabled=true;window.dispatchEvent(new Event('balam:health-updated'));status('Capa CLUES pendiente: '+String(e.message).slice(0,130)+'. No se inventaron establecimientos.')}
 }
 el('health-visible').addEventListener('change',paint);
 el('health-scope').addEventListener('change',()=>{fillRouteSelects();paint()});
-for(const id of ['health-district','health-institution','health-municipality','health-level']){
+for(const id of ['health-district','health-institution','health-municipality','health-level','health-status-filter']){
  el(id).addEventListener('change',id==='health-district'?filters:()=>{fillRouteSelects();paint()});
 }
 el('health-reload').addEventListener('click',load);
