@@ -28,6 +28,7 @@ function present(){
  const returnKm=routeModel.returnRoute?.distance/1000??null;
  const outboundKm=r.distance/1000;
  const x=compute((outboundKm+(returnKm??outboundKm))/2,yieldValue,price,reserve);
+ x.kmOneWay=outboundKm;
  x.kmRoundtrip=outboundKm+(returnKm??outboundKm);
  x.liters=x.kmRoundtrip/yieldValue;
  x.litersWithReserve=x.liters*(1+reserve/100);
@@ -219,6 +220,6 @@ e('logistics-show-return').addEventListener('change',ev=>{if(!routeModel.returnL
 e('logistics-query').addEventListener('click',search);
 e('logistics-clear').addEventListener('click',()=>{clearLookups();say('Servicios ocultados; la ruta y el cálculo de combustible permanecen.')});
 e('logistics-query').disabled=true;
-window.BALAM_Logistics={onRoute,reset,compute,_test:{nearestKm,haversine,sampleCoords,overpassQuery}};
+window.BALAM_Logistics={onRoute,reset,compute,getRoute:()=>routeModel.route?{...routeModel.route,returnRoute:routeModel.returnRoute}:null,_test:{nearestKm,haversine,sampleCoords,overpassQuery}};
 present();
 })();
