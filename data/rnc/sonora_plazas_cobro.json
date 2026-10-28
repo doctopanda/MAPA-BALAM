@@ -1,0 +1,279 @@
+{
+  "schema": "balam-rnc-toll-plazas-v1",
+  "status": "public_geodata_verified_sample",
+  "source": "INEGI Red Nacional de Caminos · plaza_cobro ArcGIS FeatureServer",
+  "source_url": "https://lcidsig.inegi.org.mx/server/rest/services/Hosted/plaza_cobro/FeatureServer/0",
+  "retrieved_at": "2026-10-28",
+  "source_observation_period": "RNC features updated 2023–2024; check against 2025 before operational reliance",
+  "geographic_scope": "Sonora, verified named plazas from official layer; four neighboring Libramiento Mexicali features excluded",
+  "record_count": 26,
+  "plaza_count": 15,
+  "plazas": [
+    {
+      "id": "magdalena",
+      "name": "Magdalena",
+      "administration": "CAPUFE",
+      "section": "Libramiento Magdalena de Kino",
+      "capufe_tariff_id": "magdalena",
+      "points": [
+        {
+          "rnc_id": 148,
+          "lon": -110.948648717,
+          "lat": 30.629434131
+        },
+        {
+          "rnc_id": 152,
+          "lon": -110.948775376,
+          "lat": 30.629442343
+        }
+      ]
+    },
+    {
+      "id": "altar",
+      "name": "Altar",
+      "administration": "CAPUFE",
+      "section": "Santa Ana – Sonoita",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 149,
+          "lon": -111.518964163,
+          "lat": 30.593817149
+        },
+        {
+          "rnc_id": 151,
+          "lon": -111.519005901,
+          "lat": 30.593527329
+        }
+      ]
+    },
+    {
+      "id": "nogales",
+      "name": "Nogales",
+      "administration": "CAPUFE",
+      "section": "Libramiento de Nogales",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 150,
+          "lon": -110.974617347,
+          "lat": 31.258419474
+        },
+        {
+          "rnc_id": 153,
+          "lon": -110.974837885,
+          "lat": 31.258367046
+        }
+      ]
+    },
+    {
+      "id": "hermosillo",
+      "name": "Hermosillo 152",
+      "administration": "CAPUFE",
+      "section": "Hermosillo – Magdalena de Kino",
+      "capufe_tariff_id": "hermosillo",
+      "points": [
+        {
+          "rnc_id": 154,
+          "lon": -110.930122427,
+          "lat": 29.220837355
+        },
+        {
+          "rnc_id": 155,
+          "lon": -110.93040069,
+          "lat": 29.22074539
+        }
+      ]
+    },
+    {
+      "id": "guaymas",
+      "name": "Guaymas",
+      "administration": "CAPUFE",
+      "section": "Libramiento Guaymas",
+      "capufe_tariff_id": "guaymas",
+      "points": [
+        {
+          "rnc_id": 156,
+          "lon": -110.924510424,
+          "lat": 28.036722543
+        },
+        {
+          "rnc_id": 157,
+          "lon": -110.924569212,
+          "lat": 28.036411026
+        }
+      ]
+    },
+    {
+      "id": "esperanza",
+      "name": "Esperanza",
+      "administration": "CAPUFE",
+      "section": "Ciudad Obregón – Guaymas",
+      "capufe_tariff_id": "esperanza",
+      "points": [
+        {
+          "rnc_id": 158,
+          "lon": -109.93905348,
+          "lat": 27.603834958
+        },
+        {
+          "rnc_id": 159,
+          "lon": -109.939215558,
+          "lat": 27.603744504
+        }
+      ]
+    },
+    {
+      "id": "fundicion",
+      "name": "Fundición No. 149",
+      "administration": "CAPUFE",
+      "section": "Navojoa – Ciudad Obregón",
+      "capufe_tariff_id": "fundicion",
+      "points": [
+        {
+          "rnc_id": 160,
+          "lon": -109.719823478,
+          "lat": 27.320597333
+        },
+        {
+          "rnc_id": 161,
+          "lon": -109.719894358,
+          "lat": 27.320233926
+        }
+      ]
+    },
+    {
+      "id": "estacion_don",
+      "name": "Estación Don No. 148",
+      "administration": "CAPUFE",
+      "section": "Estación Don – Navojoa",
+      "capufe_tariff_id": "estacion_don",
+      "points": [
+        {
+          "rnc_id": 162,
+          "lon": -109.373099704,
+          "lat": 26.84982603
+        },
+        {
+          "rnc_id": 163,
+          "lon": -109.373377903,
+          "lat": 26.84978541
+        }
+      ]
+    },
+    {
+      "id": "slrc_estacion_doctor",
+      "name": "San Luis Río Colorado – Estación El Doctor",
+      "administration": "CAPUFE",
+      "section": "San Luis Río Colorado – Golfo de Santa Clara",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1065,
+          "lon": -114.760641764,
+          "lat": 32.375187741
+        }
+      ]
+    },
+    {
+      "id": "puente_colorado",
+      "name": "Puente Colorado",
+      "administration": "CAPUFE",
+      "section": "Sonoita – Mexicali",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1402,
+          "lon": -114.808801036,
+          "lat": 32.491692734
+        }
+      ]
+    },
+    {
+      "id": "slrc_internacional_ii",
+      "name": "Cruce Internacional San Luis Río Colorado II",
+      "administration": "CAPUFE",
+      "section": "Sonoita – Mexicali",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1531,
+          "lon": -114.701426466,
+          "lat": 32.457046965
+        }
+      ]
+    },
+    {
+      "id": "obregon_esperanza_hornos",
+      "name": "Plaza de Cobro Esperanza – Hornos",
+      "administration": "CAPUFE",
+      "section": "Libramiento Ciudad Obregón",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1620,
+          "lon": -109.89870943,
+          "lat": 27.60459717
+        },
+        {
+          "rnc_id": 1621,
+          "lon": -109.89873547,
+          "lat": 27.604431496
+        }
+      ]
+    },
+    {
+      "id": "libramiento_hermosillo",
+      "name": "Libramiento Hermosillo",
+      "administration": "Concesionado",
+      "section": "Libramiento Hermosillo",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1721,
+          "lon": -110.854134377,
+          "lat": 29.029752151
+        },
+        {
+          "rnc_id": 1722,
+          "lon": -110.854323822,
+          "lat": 29.029749174
+        }
+      ]
+    },
+    {
+      "id": "caseta_sahuaripa",
+      "name": "Caseta Sahuaripa",
+      "administration": "Concesionado",
+      "section": "Hermosillo – Sahuaripa",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1786,
+          "lon": -110.85552485,
+          "lat": 29.030272973
+        },
+        {
+          "rnc_id": 1787,
+          "lon": -110.853010989,
+          "lat": 29.030322798
+        }
+      ]
+    },
+    {
+      "id": "auxiliar_esperanza_hornos",
+      "name": "Auxiliar Esperanza – Hornos",
+      "administration": "Concesionado",
+      "section": "Libramiento Ciudad Obregón",
+      "capufe_tariff_id": null,
+      "points": [
+        {
+          "rnc_id": 1845,
+          "lon": -109.903106253,
+          "lat": 27.60692923
+        }
+      ]
+    }
+  ],
+  "disclaimer": "RNC records are geographic points, not evidence of open lanes, charge direction or actual route traversal. Sites near parallel roads may be false positives. Tariff mapping uses only clearly corresponding names to CAPUFE 2026, not an inference for uncertain aliases."
+}

@@ -196,22 +196,32 @@ async function search(){
  say('Consultando establecimientos y servicios cercanos al trazado; puede tardar y el servidor público puede rechazar la consulta…');
  let results=addHealth(coords);
  const q=overpassQuery(coords);
- abort=new AbortController();const requestAbort=abort;const timeout=setTimeout(()=>requestAbort.abort(),25000);
- try{
-  const resp=await fetch('https://overpass-api.de/api/interpreter',{
-   method:'POST',mode:'cors',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
-   body:'data='+encodeURIComponent(q),signal:requestAbort.signal
-  });
-  if(!resp.ok)throw Error('HTTP '+resp.status);
-  const doc=await resp.json();
+ const providers=['https://overpass.private.coffee/api/interpreter','https://overpass-api.de/api/interpreter'];
+ let failure=null,done=false;
+ for(let i=0;i<providers.length;i++){
   if(version!==expected)return;
-  results=results.concat(parsePOIs(doc,coords));
-  say('Servicios consultados en OpenStreetMap. Presencia y horarios no verificados. No equivale a disponibilidad ni a acceso garantizado.');
- }catch(err){
-  if(version!==expected)return;
-  say('OpenStreetMap/Overpass no respondió: '+String(err.message).slice(0,95)+'. Solo se muestran unidades CLUES cercanas; no asumir ausencia de gasolineras o talleres.');
- }finally{clearTimeout(timeout);if(abort===requestAbort)abort=null}
+  const requestAbort=new AbortController();abort=requestAbort;
+  const timeout=setTimeout(()=>requestAbort.abort(),i===0?14000:10000);
+  try{
+   const resp=await fetch(providers[i],{
+    method:'POST',mode:'cors',headers:{'Content-Type':'application/x-www-form-urlencoded;charset=UTF-8'},
+    body:'data='+encodeURIComponent(q),signal:requestAbort.signal
+   });
+   if(!resp.ok)throw Error('HTTP '+resp.status);
+   const doc=await resp.json();
+   if(version!==expected)return;
+   results=results.concat(parsePOIs(doc,coords));
+   done=true;
+   say('Servicios OpenStreetMap consultados mediante servidor '+(i+1)+' de '+providers.length+'. Presencia y horarios no verificados.');
+   break;
+  }catch(err){
+   if(version!==expected)return;
+   failure=err;
+   if(i===0)say('Servidor principal de Overpass no respondió; intentando una segunda instancia pública…');
+  }finally{clearTimeout(timeout);if(abort===requestAbort)abort=null}
+ }
  if(version!==expected)return;
+ if(!done)say('Overpass no disponible ('+String(failure?.message||'error desconocido').slice(0,80)+'). Mostrando unidades CLUES; las casetas INEGI se consultan por su catálogo independiente.');
  poiList=results;renderPoints();
 }
 for(const id of ['logistics-efficiency','logistics-price','logistics-reserve'])e(id).addEventListener('input',present);

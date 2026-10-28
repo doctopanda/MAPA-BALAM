@@ -1,6 +1,6 @@
 /* BALAM 0.10 smoke validation: no browser, no external deps. */
 const fs=require('fs'),vm=require('vm'),assert=require('assert');
-const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/denue-services.js','assets/crum-layer.js'];
+const files=['assets/smn-layer.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
 for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/ig)].entries()){
  if(!/\bsrc=/.test(script[1]))new vm.Script(script[2],{filename:'index inline '+i});
@@ -93,3 +93,30 @@ assert(Math.abs(demo.total-1369.71875)<0.0001,'Presupuesto total incorrecto');
 const noViatics=vm.runInNewContext(fn[0]+"\nsumBudget({outKm:120,returnKm:117,kmPerLiter:8,price:25,reserve:15,tollOut:114,tollBack:114,includeViaticos:false,food:220,lodging:0,other:70})",{});
 assert(noViatics.viatics===0&&Math.abs(noViatics.total-1079.71875)<0.0001,'Toggle de viáticos incorrecto');
 console.log('BALAM 0.14 QA PASS CAPUFE tarifas oficiales y viáticos',JSON.stringify({fundicion:fund.A,retornoKm:237,viaticos:290,total:demo.total}));
+
+
+const rnc=JSON.parse(fs.readFileSync('data/rnc/sonora_plazas_cobro.json','utf8'));
+assert(rnc.schema==='balam-rnc-toll-plazas-v1'&&rnc.status==='public_geodata_verified_sample');
+assert(rnc.record_count===26&&rnc.plaza_count===15&&rnc.plazas.length===15,'No corresponde a extracción revisada del servicio INEGI');
+assert(rnc.plazas.reduce((s,p)=>s+p.points.length,0)===26,'Se perdieron los puntos direccionales RNC');
+assert(new Set(rnc.plazas.map(p=>p.id)).size===15,'Duplicados de casetas geográficas');
+assert(rnc.plazas.every(p=>p.points.every(x=>Number.isFinite(x.lon)&&Number.isFinite(x.lat)&&x.lat>=26&&x.lat<=33.5&&x.lon>=-115.5&&x.lon<=-108)),'Puntos fuera del marco geográfico de Sonora');
+const rncIds=rnc.plazas.flatMap(p=>p.points.map(x=>x.rnc_id));
+assert(new Set(rncIds).size===26,'IDs RNC duplicados, posible cobro doble');
+const fundRnc=rnc.plazas.find(p=>p.id==='fundicion');
+assert(fundRnc.capufe_tariff_id==='fundicion'&&fundRnc.points.length===2&&Math.abs(fundRnc.points[0].lon-(-109.719823478))<1e-6,'Caseta Fundición no concuerda con punto oficial');
+assert(rnc.plazas.find(x=>x.id==='obregon_esperanza_hornos').capufe_tariff_id===null,'No vincular tarifa LICO a plaza sin correspondencia inequívoca');
+for(const p of rnc.plazas)assert(!p.capufe_tariff_id||tariff.plazas.some(t=>t.id===p.capufe_tariff_id),'Tarifa vinculada sin ficha oficial CAPUFE');
+const tollCode=fs.readFileSync('assets/toll-route-detection.js','utf8');
+for(const id of ['toll-route-panel','toll-route-list','toll-route-visible','toll-show-all','toll-route-count','toll-route-status'])assert(html.includes('id="'+id+'"'),'Falta control de casetas geográficas: '+id);
+assert(tollCode.includes('data/rnc/sonora_plazas_cobro.json')&&tollCode.includes("setCrossing(p.capufe_tariff_id,dir,next)"),'Conexión a CAPUFE no implementada');
+assert(tollCode.includes("confidence(match.km)!=='posible_cruce'"),'No se bloquean cobros por mero acercamiento de ruta');
+assert(tollCode.includes('if(!match')&&tollCode.includes('tariffData(p)'), 'No se restringe selección a plazas verificadas');
+assert(tollCode.includes('balam:logistics-return-ready')&&tollCode.includes('balam:logistics-route-ready'),'No se actualiza al cambiar dirección de ruta');
+const nameOfFn=tollCode.match(/function measurePoint\([\s\S]*?\n\}/);
+assert(nameOfFn,'No se encontró cálculo de proximidad sobre polilínea');
+const testPoint=vm.runInNewContext(nameOfFn[0]+"\nmeasurePoint([-109.719823478,27.320597333],[[-109.8,27.3],[-109.719823478,27.320597333],[-109.6,27.36]])");
+assert(testPoint.km<1e-9,'Caseta RNC exacta no cayó sobre la polilínea');
+const offPoint=vm.runInNewContext(nameOfFn[0]+"\nmeasurePoint([-113,29],[[-109.8,27.3],[-109.719823478,27.320597333],[-109.6,27.36]])");
+assert(offPoint.km>1,'Caseta lejana no se discrimina');
+console.log('BALAM 0.15 GEO-TOLLS QA PASS',{rncFeatures:rnc.record_count,groupedPlazas:rnc.plaza_count,priced:rnc.plazas.filter(p=>p.capufe_tariff_id).length});
