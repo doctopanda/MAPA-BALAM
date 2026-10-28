@@ -1,5 +1,7 @@
 import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const s=createClient('https://blkvamobfcyvlimnizaf.supabase.co','sb_publishable_gbN7i3poaBv7Y772DltBgg_Mvp5gzBM');
+window.BALAM_SupabaseClient=s;
+window.BALAM_SupabaseRole=null;
 const g=id=>document.getElementById(id), core=window.BALAM_CrumMap;
 const out=L.layerGroup().addTo(core.map);
 const crumPane=core.map.createPane('crumVehiclePane');crumPane.style.zIndex=690;
@@ -36,17 +38,18 @@ function draw(){
  g('crum-result-note').textContent='Mostrando '+Math.min(150,rows.length)+' de '+rows.length+' registros en tabla';
 }
 async function load(){
- const {data:{user},error:e}=await s.auth.getUser();if(!user||e){controls(false);status('Inicia sesión para ver el catálogo CRUM');return}
+ const {data:{user},error:e}=await s.auth.getUser();if(!user||e){window.BALAM_SupabaseRole=null;window.dispatchEvent(new Event('balam:auth-updated'));controls(false);status('Inicia sesión para ver el catálogo CRUM');return}
  const {data:member,error:er}=await s.from('balam_access').select('role,is_enabled').eq('user_id',user.id).maybeSingle();
- if(er||!member?.is_enabled){controls(false);status('La cuenta no tiene acceso habilitado en BALAM');return}
+ if(er||!member?.is_enabled){window.BALAM_SupabaseRole=null;window.dispatchEvent(new Event('balam:auth-updated'));controls(false);status('La cuenta no tiene acceso habilitado en BALAM');return}
  let all=[];for(let i=0;i<10000;i+=500){let {data,error}=await s.from('balam_crum_assets').select('asset_key,unit_label,locality_label,institution,type_original,type_class,district_id,municipality_code,lat,lon').eq('present_in_latest_import',true).order('asset_key').range(i,i+499);if(error){status('Error de lectura: '+error.message);return}all.push(...data);if(data.length<500)break}
  records=all;window.BALAM_CrumStats=Object.fromEntries(['DS01','DS02','DS03','DS04','DS05','DS06'].map(d=>[d,records.filter(r=>r.district_id===d).length]));window.dispatchEvent(new Event('balam:crum-updated'));controls(true);active=true;g('crum-toggle').checked=true;g('crum-role').textContent=member.role==='admin_maestro'?'Administrador Maestro':member.role.replaceAll('_',' ');
  let inst=g('crum-institution');inst.replaceChildren(new Option('Todas las instituciones',''));[...new Set(records.map(x=>x.institution))].sort().forEach(v=>inst.add(new Option(v,v)));
  let ty=g('crum-type');ty.replaceChildren(new Option('Todos los tipos',''));[...new Set(records.map(x=>x.type_class))].sort().forEach(v=>ty.add(new Option(v.replaceAll('_',' '),v)));
+ window.BALAM_SupabaseRole=member.role;window.dispatchEvent(new Event('balam:auth-updated'));
  draw();status('Conectado a Supabase · '+records.length+' unidades inventariadas');
 }
 g('crum-signin').addEventListener('submit',async e=>{e.preventDefault();status('Validando credenciales…');let {error}=await s.auth.signInWithPassword({email:g('crum-email').value.trim(),password:g('crum-password').value});g('crum-password').value='';if(error){status(error.message);return}await load()});
-g('crum-signout').addEventListener('click',async()=>{await s.auth.signOut();records=[];active=false;out.clearLayers();window.BALAM_CrumStats=null;window.dispatchEvent(new Event('balam:crum-updated'));controls(false);status('Sesión cerrada')});
+g('crum-signout').addEventListener('click',async()=>{await s.auth.signOut();records=[];active=false;out.clearLayers();window.BALAM_CrumStats=null;window.BALAM_SupabaseRole=null;window.dispatchEvent(new Event('balam:auth-updated'));window.dispatchEvent(new Event('balam:crum-updated'));controls(false);status('Sesión cerrada')});
 g('crum-refresh').addEventListener('click',load);
 g('crum-toggle').addEventListener('change',e=>{active=e.target.checked;draw()});
 g('crum-float-toggle').addEventListener('click',()=>{active=!active;g('crum-toggle').checked=active;draw()});
@@ -54,5 +57,5 @@ g('crum-show-all-districts').addEventListener('click',()=>{core.activateAllDistr
 g('crum-zoom').addEventListener('click',()=>{let ar=out.getLayers().map(x=>x.getLatLng());if(ar.length)core.map.fitBounds(L.latLngBounds(ar),{padding:[24,24],maxZoom:12})});
 for(let id of ['crum-district','crum-institution','crum-type','crum-scope','crum-search'])g(id).addEventListener(id==='crum-search'?'input':'change',draw);
 g('districtControls').addEventListener('change',()=>setTimeout(draw,0));
-s.auth.onAuthStateChange(e=>{if(e==='SIGNED_OUT'){records=[];active=false;out.clearLayers();controls(false)}});
+s.auth.onAuthStateChange(e=>{if(e==='SIGNED_OUT'){records=[];active=false;out.clearLayers();window.BALAM_SupabaseRole=null;window.dispatchEvent(new Event('balam:auth-updated'));controls(false)}});
 load();
