@@ -77,6 +77,7 @@ def main():
             }
     items=list(docs.values())
     count={cat:sum(1 for x in items if x['category']==cat) for cat in ('fuel','tire','repair')}
+    print('CATALOG DEBUG',{ 'inside':len(items),'categories':count,'excluded':errors,'polygon_count':len(mm) },flush=True)
     assert len(items)>=30 and count['fuel']>=8 and count['repair']>=3, 'Extract incomplete; refusing to overwrite: '+str(count)
     obj={
         'schema':'balam-road-support-osm-v1','status':'validated_public_snapshot',
