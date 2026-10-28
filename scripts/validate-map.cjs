@@ -34,7 +34,7 @@ assert(healthJs.includes('BALAM_Logistics?.onRoute')&&healthJs.includes('BALAM_L
 assert(logistics.includes("e('logistics-query').addEventListener('click',search)"),'Overpass no es a petición');
 assert(logistics.includes("method:'POST'")&&logistics.includes('overpass-api.de/api/interpreter'),'Servicios de ayuda no preparados');
 assert(logistics.includes('BALAM_Health?.getFacilities'),'Capa de unidades CLUES en ruta faltante');
-assert(logistics.includes('No consta aceptación de tickets')&&html.includes('aún sin catálogo institucional verificado'),'No inventar convenio ticket');
+assert(logistics.includes('No consta aceptación de tickets')&&html.includes('solamente las fichas institucionales verificadas'),'No inventar convenio ticket');
 const calc=logistics.match(/function compute\([\s\S]*?\n\}/);
 assert(calc,'Falta fórmula logística');
 const values=vm.runInNewContext(calc[0]+'\ncompute(120,8,25,15)',{});
