@@ -222,6 +222,13 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .budget-grand-total{background:#e7f5e9;border:1px solid #c0e3c8;border-radius:9px;padding:12px;margin-top:9px}
 .budget-grand-total span{display:block;font-size:11px;color:#386e4b}
 .budget-grand-total b{display:block;font-size:clamp(19px,2vw,25px);color:#157447;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+</style><style id="balam-denue-014">
+.balam-denue{background:#f5fbfd;border:1px solid #bfdde9;border-radius:10px;padding:10px;margin:10px 0}
+.balam-denue>summary{cursor:pointer;font:850 11px/1.45 system-ui;color:#176a85}
+.balam-denue>p{font-size:10px;color:#4a6875}
+.balam-denue .budget-check{font-size:11px;color:#23667b}
+.balam-denue .budget-check input{accent-color:#2e86ad}
+.denue-icon{border-color:#2685ac!important}
 </style></head>
 <body>
 <header>
@@ -379,6 +386,21 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <div id="budget-result" class="budget-result" aria-live="polite">Traza una ruta para calcular el presupuesto.</div>
  <button type="button" class="btn primary" id="budget-download" disabled>📊 Exportar presupuesto CSV</button>
  <p class="tiny"><b>Uso orientativo.</b> La ruta es un servicio de demostración; tarifas CAPUFE corresponden a la clase seleccionada. Verifica casetas, exenciones, consumo real y viáticos autorizados antes de presupuestar o facturar.</p>
+</details>
+<details id="denue-panel" class="balam-denue">
+  <summary>📍 DENUE INEGI · directorio de servicios en ruta</summary>
+  <p class="tiny">Fuente oficial de negocios georreferenciados, independiente de los resultados colaborativos OpenStreetMap. Se necesita importar primero la exportación oficial de Sonora.</p>
+  <label class="budget-check"><input id="denue-visible" type="checkbox" disabled> Mostrar establecimientos DENUE próximos a la ruta</label>
+  <div class="logistics-service-toggles">
+    <label><input type="checkbox" id="denue-fuel" checked> ⛽ Gasolineras</label>
+    <label><input type="checkbox" id="denue-tire" checked> 🛞 Llanteras</label>
+    <label><input type="checkbox" id="denue-repair" checked> 🔧 Talleres</label>
+  </div>
+  <p id="denue-status" class="tiny" role="status">Comprobando disponibilidad del catálogo oficial…</p>
+  <p id="denue-near-count" class="tiny">Sin ruta o catálogo.</p>
+  <div id="denue-near-list" class="logistics-spot-list"></div>
+  <button class="btn" id="denue-reload" type="button">Actualizar lectura DENUE</button>
+  <p class="tiny"><a href="https://www.inegi.org.mx/app/descarga/?ti=6" target="_blank" rel="noopener noreferrer">Descarga oficial DENUE INEGI ↗</a>. Los resultados no indican que el taller esté abierto ni que una estación acepte vales institucionales.</p>
 </details>
 <div class="logistics-service-title">Servicios próximos a la ruta</div>
   <p class="tiny">Consulta manual a OpenStreetMap: gasolineras, llanteras y talleres. Unidades CLUES cercanas como referencias geográficas de apoyo, no como garantía de atención de urgencias.</p>
@@ -1053,5 +1075,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script defer src="assets/logistics-route.js"></script><script defer src="assets/travel-budget.js"></script><script defer src="assets/denue-services.js"></script><script type="module" src="assets/crum-layer.js"></script><script type="module" src="assets/support-catalog.js"></script></body>
 </html>
