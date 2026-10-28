@@ -72,6 +72,13 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 </style><style id="smn-styles-v1">
 #smn-panel{margin:0;background:#f8fffb;border:0;padding:12px;color:#275546}
 #smn-panel h3{font-size:14px;margin:0 0 8px;color:#155d50}
+.drought-box{margin:10px 0;padding:9px;background:#f4f6e8;border:1px solid #d7d6af;border-radius:10px}
+.drought-box>label{font-size:11px;display:block;margin:6px 0}
+.drought-box .smn-switchrow{display:flex;gap:8px;align-items:center}
+.drought-box input{accent-color:#b27b37;width:17px;height:17px}
+.drought-box p{font-size:10px}
+#smnDroughtInfo p{margin:3px 0}
+#smnDroughtInfo strong{font-size:12px;color:#805b23}
 #smn-legend{background:#f6faf8;border:1px solid #d5e7dd;padding:8px;border-radius:9px;line-height:1.6}
 #smn-panel p{font-size:11px;line-height:1.5}
 #smn-panel label{font-size:11px;font-weight:750;display:block;margin:9px 0 5px}
@@ -92,6 +99,34 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .smn-municipal-detail .smn-signals li{margin:6px 0}
 .smn-municipal-detail .smn-signals span{display:block;color:#536d60;margin:3px 0}
 .smn-municipal-detail a{font-size:11px;font-weight:700;color:#176b5b}
+
+.smn-summary{padding:11px;border-radius:12px;background:#e4f3ed;border:1px solid #b3d5c7;font:11px system-ui;color:#175844;margin:10px 0}
+.smn-summary>b{font-size:12px;display:block}
+.smn-summary p{margin:6px 0!important}
+.smn-quickstats{display:grid;grid-template-columns:repeat(1,minmax(0,1fr));gap:5px}
+.smn-quickstats>div{border-radius:8px;padding:7px 9px;background:#fff}
+.smn-quickstats b{display:block;font-size:11px;color:#205c4c}
+.smn-quickstats span{display:block;font-size:10px;color:#698377}
+.smn-hazards{margin:10px 0;background:#eef5f3;padding:10px;border-radius:10px}
+.smn-hazards>div{border-top:1px solid #c8dcd4;padding:8px 0}
+.smn-hazards span{display:block;font-size:11px;font-weight:700}
+.smn-hazards strong{display:block;font-size:11px;color:#975f26;margin:3px 0}
+.smn-hazards a{display:block;font-size:10px}
+#health-panel{padding:12px;background:#f9fffc;border:0;font-size:11px}
+#health-panel h3{font-size:14px;color:#155e4f;margin:0 0 8px}
+#health-panel p{line-height:1.5;color:#526e64}
+#health-panel>label,.health-route-box label{font-size:11px;font-weight:750;display:block;margin:9px 0 5px;color:#245b4c}
+#health-panel select{display:block;min-height:37px;width:100%;box-sizing:border-box;border:1px solid #c2d9ce;background:#fff;border-radius:9px;color:#235747;font:600 11px system-ui;padding:7px}
+#health-panel .health-switch{display:flex;align-items:center;gap:8px;padding:9px;background:#e7f5f0;border-radius:9px}
+#health-panel input[type=checkbox]{width:17px;height:17px;accent-color:#21876d}
+#health-panel .health-legend{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0}
+.health-legend>span{white-space:nowrap;font-size:10px;color:#426e5d}
+.health-legend i{display:inline-block;width:11px;height:11px;margin-right:4px;border-radius:50%;vertical-align:middle}
+#health-panel .health-route-box{padding:8px;margin:12px 0;border:1px solid #c5ded2;background:#f2faf5;border-radius:11px}
+.health-route-box>summary{font-size:11px;cursor:pointer;font-weight:850;color:#1d6a52}
+.health-route-box .health-consent{font-size:10px!important;font-weight:550!important;line-height:1.4;display:flex!important;gap:7px;align-items:start}
+.health-route-arrow{font:bold 30px system-ui;color:#e43e24;text-shadow:-1px -1px #fff,1px -1px #fff,-1px 1px #fff,1px 1px #fff;transform-origin:center;line-height:30px}
+#healthMunicipalInfo{padding:9px;background:#ecf6f2;border-radius:8px;margin:10px 0}
 </style></head>
 <body>
 <header>
@@ -102,7 +137,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.9.0</div>
+    <div class="eyebrow">MAPA BALAM · v0.10.0</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
@@ -166,13 +201,47 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <select id="smn-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
  <p id="smn-status" class="smn-status" role="status">Buscando el último corte validado…</p>
  <p id="smn-source" class="tiny"></p>
- <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
+ <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><div id="smn-sonora-summary" class="smn-summary" aria-live="polite">Cargando análisis meteorológico de Sonora…</div>
+ <div class="drought-box">
+  <label class="smn-switchrow" for="drought-visible"><input id="drought-visible" type="checkbox" disabled> <b>🌵 Monitor de sequía por municipio (D0–D4)</b></label>
+  <label for="drought-scope">Territorio sequía</label><select id="drought-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
+  <p id="drought-sonora-summary" class="tiny" aria-live="polite">Cargando monitor quincenal…</p>
+  <p id="drought-status" class="tiny" role="status"></p>
+  <p id="drought-count" class="tiny">Capa apagada</p>
+  <p class="tiny">D0 anormalmente seco; D1–D4 sequía. <strong>Corte quincenal distinto del pronóstico inmediato.</strong></p>
+  <button id="drought-refresh" type="button" class="btn">Actualizar sequía</button>
+ </div><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
  <button id="smn-reload" class="btn" type="button">Actualizar lectura</button>
  <div class="smn-links"><a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico SMN ↗</a>
  <a href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico" target="_blank" rel="noopener noreferrer">Ciclones Pacífico ↗</a>
  <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" rel="noopener noreferrer">Sequía ↗</a>
  <a href="https://smn.conagua.gob.mx/es/climatologia/informacion-climatologica/informacion-estadistica-climatologica" target="_blank" rel="noopener noreferrer">Climatología ↗</a></div>
  <p class="tiny">Umbrales exploratorios BALAM: lluvia ≥30 mm/día; rachas ≥60 km/h; máxima ≥40 °C; mínima ≤5 °C. No son umbrales oficiales ni alertas de riesgo.</p>
+</section>
+<section id="health-panel" aria-label="Red de unidades de salud">
+ <h3>🏥 Red de salud · CLUES</h3>
+ <p>Establecimientos georreferenciados por institución, municipio y nivel de atención. Catálogo público de DGIS, independiente de SIESA y CRUM.</p>
+ <label class="health-switch"><input id="health-visible" type="checkbox" disabled> Mostrar unidades de salud en el mapa</label>
+ <label for="health-scope">Territorio</label><select id="health-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
+ <label for="health-district">Distrito</label><select id="health-district"><option value="">Todos los distritos</option><option>DS01</option><option>DS02</option><option>DS03</option><option>DS04</option><option>DS05</option><option>DS06</option></select>
+ <label for="health-municipality">Municipio</label><select id="health-municipality"><option value="">Todos los municipios</option></select>
+ <label for="health-institution">Institución / derechohabiencia</label><select id="health-institution"><option value="">Todas las instituciones</option></select>
+ <label for="health-status-filter">Estatus registrado en CLUES</label><select id="health-status-filter"><option value="EN OPERACION">En operación (fuente septiembre 2026)</option><option value="">Todos los estatus</option><option value="FUERA DE OPERACION">Fuera de operación</option><option value="PENDIENTE DE ENTRAR EN OPERACION">Pendientes de entrar en operación</option></select>
+ <label for="health-level">Nivel de atención</label><select id="health-level"><option value="">Todos los niveles</option><option value="1">Primer nivel</option><option value="2">Segundo nivel</option><option value="3">Tercer nivel</option><option value="other">Nivel no clasificado</option></select>
+ <div class="health-legend"><span><i style="background:#21876d"></i> Primero</span><span><i style="background:#456db4"></i> Segundo</span><span><i style="background:#9856ba"></i> Tercero</span><span><i style="background:#888e9b"></i> Por validar</span></div>
+ <p id="health-status" role="status" class="tiny">Conectando con la fuente CLUES…</p>
+ <p id="health-count" class="tiny">Catálogo aún no disponible</p>
+ <button class="btn" type="button" id="health-reload">Actualizar catálogo</button>
+ <details class="health-route-box"><summary>↝ Planear ruta de referencia</summary>
+   <p class="tiny">Selecciona establecimientos de origen y destino. El trazado experimental sigue carreteras disponibles en un servicio cartográfico de pruebas, nunca líneas rectas inventadas.</p>
+   <label for="route-origin">Unidad que refiere (origen)</label><select id="route-origin"><option value="">Seleccionar establecimiento…</option></select>
+   <label for="route-destination">Unidad receptora (destino)</label><select id="route-destination"><option value="">Seleccionar establecimiento…</option></select>
+   <label class="health-consent"><input id="route-demo-consent" type="checkbox"> Consultar ruta puntual en un servidor de demostración externo, sin datos de pacientes</label>
+   <button class="btn primary" type="button" id="route-go">Dibujar ruta vial</button><button class="btn" type="button" id="route-clear">Limpiar ruta</button>
+   <p id="route-status" role="status" class="tiny">Ruta sin trazar. Selecciona dos establecimientos.</p>
+   <p class="tiny">La flecha animada representa dirección de referencia planificada, NO desplazamiento real de una ambulancia. Sin tráfico, cortes viales ni confirmación de aceptación. No usar para despacho clínico.</p>
+ </details>
+ <p class="tiny"><a href="https://gobi.salud.gob.mx/Bases_Clues.html" target="_blank" rel="noopener noreferrer">Fuente DGIS/CLUES ↗</a></p>
 </section>
 <section id="crum-panel" aria-label="Catálogo CRUM protegido">
  <h3>🚑 CRUM | Respuesta prehospitalaria</h3>
@@ -217,8 +286,8 @@ function makeSidebarAccordion(){
   var aside=document.querySelector('.shell aside');
   if(!aside||aside.dataset.foldsReady)return;
   aside.dataset.foldsReady='1';
-  var sections=[['Herramientas del mapa',true],['Lectura analítica',false],['Distritos y selección',true],['Ficha de municipio',false],['Reglas BALAM',false],['AGEB y manzanas',true],['Clima y vigilancia · SMN',true],['Catálogo CRUM',false]];
-  var contents=Array.from(aside.children).filter(function(e){return e.matches('.card, #crum-panel')});
+  var sections=[['Herramientas del mapa',true],['Lectura analítica',false],['Distritos y selección',true],['Ficha de municipio',false],['Reglas BALAM',false],['AGEB y manzanas',true],['Clima y vigilancia · SMN',true],['Red de salud · CLUES',true],['Catálogo CRUM',false]];
+  var contents=Array.from(aside.children).filter(function(e){return e.matches('.card, #crum-panel, #smn-panel, #health-panel')});
   contents.forEach(function(node,i){
     var fold=document.createElement('details');fold.className='balam-fold';
     fold.open=!!(sections[i]&&sections[i][1]);
@@ -576,6 +645,8 @@ function renderDetail(code,name,did){
    lines+='<p class="tiny"><b>Operativo disponible:</b> '+esc(data.current_filter.operative)+' · corte '+esc(data.cut||data.generated||'')+'</p>'
  }
  lines+='<div id="smnMunicipalInfo" class="smn-municipal-detail"><h4>🌦️ SMN/CONAGUA</h4><p class="tiny">Consultando datos meteorológicos validados…</p></div>';
+ var healthCount=window.BALAM_Health?.getMunicipalityCount(code);
+ lines+='<div id="healthMunicipalInfo" class="tiny"><b>🏥 Red CLUES</b>: '+(healthCount===null||healthCount===undefined?'Catálogo no validado':fmt(healthCount)+' establecimientos registrados')+'. La ficha de cada unidad no confirma capacidad resolutiva.</div>';
  lines+='<div id="agebManager" class="ageb-manager"><div class="tiny">Cargando catálogo AGEB…</div></div>';
  detailEl.innerHTML=lines;
  if(window.BALAM_Smn)window.BALAM_Smn.renderMunicipality(code)
@@ -766,10 +837,12 @@ document.getElementById('quickDistrict').addEventListener('change',function(ev){
 });
 updateGeoLayerStatus();
 
+window.addEventListener('balam:health-updated',function(){if(selectedContext)renderDetail(selectedContext.code,selectedContext.name,selectedContext.did)});
 window.BALAM_SmnMap = {
  map:map,
  getActiveDistricts:function(){return Array.from(active);},
  getMunicipalityFeatures:function(){var a=[];if(stateLayer)stateLayer.eachLayer(function(l){if(l.feature)a.push(l.feature)});return a;},
+ getDistrictForMunicipality:function(code){return districtFor(String(code));},
  refreshSelectedMunicipality:function(){if(selectedContext)renderDetail(selectedContext.code,selectedContext.name,selectedContext.did)}
 };
 window.BALAM_CrumMap = {
@@ -786,5 +859,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script defer src="assets/drought-layer.js"></script><script defer src="assets/health-network.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
 </html>

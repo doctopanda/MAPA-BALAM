@@ -1,0 +1,20 @@
+name: BALAM - Inspección oficial sequía SMN
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/inspect_drought_smn.py'
+      - '.github/workflows/inspect-drought.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 6
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Leer estructura del excel oficial sin publicar categorías
+        run: python scripts/inspect_drought_smn.py

@@ -1,0 +1,35 @@
+name: BALAM - Monitor de sequía Sonora
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/drought_sonora.py'
+      - '.github/workflows/drought-sonora.yml'
+  schedule:
+    - cron: '17 19 1,16 * *'
+permissions:
+  contents: write
+concurrency:
+  group: balam-monitor-sequia
+  cancel-in-progress: false
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Obtener categorías por clave y fecha del último corte
+        run: python scripts/drought_sonora.py
+      - name: Publicar corte validado, sin sustituirlo por datos rotos
+        run: |
+          git add data/smn/sonora_drought_latest.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "BALAM SMN Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data(smn): monitor quincenal de sequía Sonora"
+          git push
