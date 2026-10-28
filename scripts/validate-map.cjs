@@ -92,7 +92,16 @@ assert(Math.abs(demo.fuel-851.71875)<0.0001,'Combustible de ruta real incorrecto
 assert(Math.abs(demo.total-1369.71875)<0.0001,'Presupuesto total incorrecto');
 const noViatics=vm.runInNewContext(fn[0]+"\nsumBudget({outKm:120,returnKm:117,kmPerLiter:8,price:25,reserve:15,tollOut:114,tollBack:114,includeViaticos:false,food:220,lodging:0,other:70})",{});
 assert(noViatics.viatics===0&&Math.abs(noViatics.total-1079.71875)<0.0001,'Toggle de viáticos incorrecto');
-console.log('BALAM 0.14 QA PASS CAPUFE tarifas oficiales y viáticos',JSON.stringify({fundicion:fund.A,retornoKm:237,viaticos:290,total:demo.total}));
+const tollSumFn=budgetJs.match(/function sumTollEntries\([\s\S]*?\n\}/);
+assert(tollSumFn,'No se encontró sumador independiente de casetas');
+const both=vm.runInNewContext(tollSumFn[0]+"\nsumTollEntries([{name:'Hermosillo 152',out:1,back:1,tariff:114},{name:'Altar',out:1,back:1,tariff:70}])");
+assert(both.tollOut===184&&both.tollBack===184&&both.count===4&&!both.error,'No suma dos casetas y ambos sentidos');
+const direction=vm.runInNewContext(tollSumFn[0]+"\nsumTollEntries([{name:'Hermosillo 152',out:1,back:0,tariff:114},{name:'Altar',out:0,back:1,tariff:70}])");
+assert(direction.tollOut===114&&direction.tollBack===70&&direction.count===2,'No mantiene ida y regreso independientes');
+const missingTariff=vm.runInNewContext(tollSumFn[0]+"\nsumTollEntries([{name:'Hermosillo 152',out:1,back:1,tariff:114},{name:'Altar',out:1,back:1,tariff:null}])");
+assert(missingTariff.error?.includes('Altar'),'El sistema debe impedir un total silenciosamente incompleto');
+assert(budgetJs.includes('setGeoCrossing')&&budgetJs.includes('getGeoTariff')&&budgetJs.includes('setGeoTariff'),'Falta memoria de cruces RNC sin tarifa oficial');
+console.log('BALAM 0.14 QA PASS CAPUFE tarifas oficiales, viáticos y múltiples casetas',JSON.stringify({fundicion:fund.A,retornoKm:237,viaticos:290,total:demo.total,casetasDobles:both.count}));
 
 
 const rnc=JSON.parse(fs.readFileSync('data/rnc/sonora_plazas_cobro.json','utf8'));
@@ -109,9 +118,10 @@ assert(rnc.plazas.find(x=>x.id==='obregon_esperanza_hornos').capufe_tariff_id===
 for(const p of rnc.plazas)assert(!p.capufe_tariff_id||tariff.plazas.some(t=>t.id===p.capufe_tariff_id),'Tarifa vinculada sin ficha oficial CAPUFE');
 const tollCode=fs.readFileSync('assets/toll-route-detection.js','utf8');
 for(const id of ['toll-route-panel','toll-route-list','toll-route-visible','toll-show-all','toll-route-count','toll-route-status'])assert(html.includes('id="'+id+'"'),'Falta control de casetas geográficas: '+id);
-assert(tollCode.includes('data/rnc/sonora_plazas_cobro.json')&&tollCode.includes("setCrossing(p.capufe_tariff_id,dir,next)"),'Conexión a CAPUFE no implementada');
-assert(tollCode.includes("confidence(match.km)!=='posible_cruce'"),'No se bloquean cobros por mero acercamiento de ruta');
-assert(tollCode.includes('if(!match')&&tollCode.includes('tariffData(p)'), 'No se restringe selección a plazas verificadas');
+assert(tollCode.includes('data/rnc/sonora_plazas_cobro.json')&&tollCode.includes('setCrossing(p.capufe_tariff_id,dir,next)'),'Conexión a CAPUFE no implementada');
+assert(tollCode.includes('setGeoCrossing(p.id,dir,next,p.name)')&&tollCode.includes('setGeoTariff(p.id,amount,p.name)'),'Falta registrar tarifas manuales por plaza RNC');
+assert(tollCode.includes('if(!match||match.km>.65)'),'Casetas fuera del corredor no deben sumarse por proximidad');
+assert(tollCode.includes('if(!match')&&tollCode.includes('tariffData(p)'), 'Falta validación de proximidad y fuente de tarifas');
 assert(tollCode.includes('balam:logistics-return-ready')&&tollCode.includes('balam:logistics-route-ready'),'No se actualiza al cambiar dirección de ruta');
 const nameOfFn=tollCode.match(/function measurePoint\([\s\S]*?\n\}/);
 assert(nameOfFn,'No se encontró cálculo de proximidad sobre polilínea');

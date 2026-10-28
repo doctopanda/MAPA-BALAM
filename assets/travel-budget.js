@@ -6,7 +6,7 @@ if(!e('budget-panel'))return;
 const DATA_URL='data/capufe/sonora_tarifas_2026.json';
 const fmt=n=>Number(n).toLocaleString('es-MX',{minimumFractionDigits:2,maximumFractionDigits:2});
 const money=n=>'$'+fmt(n);
-const state={capufe:null,route:null,ready:false};
+const state={capufe:null,route:null,ready:false,geoTolls:new Map()};
 function val(id,min=0,max=1000000){
  const raw=e(id)?.value;
  if(raw===undefined||raw===null||String(raw).trim()==='')return null;
@@ -30,20 +30,41 @@ function controlsValid(){
  const yieldVal=val('logistics-efficiency',2,30),price=val('logistics-price',1,100),reserve=val('logistics-reserve',0,100);
  return yieldVal===null||price===null||reserve===null?null:{yieldVal,price,reserve};
 }
+// Una fila por plaza y por sentido. La información RNC no duplica las tarifas CAPUFE.
+function sumTollEntries(entries){
+ let tollOut=0,tollBack=0,count=0;const missing=[],details=[];
+ for(const x of entries){
+  if(!Number.isInteger(x.out)||!Number.isInteger(x.back)||x.out<0||x.back<0||x.out>2||x.back>2)
+   return {error:'Cantidad de cruces inválida en '+x.name};
+  if(!x.out&&!x.back)continue;
+  count+=x.out+x.back;details.push(x);
+  if(typeof x.tariff!=='number'||!Number.isFinite(x.tariff)||x.tariff<0){missing.push(x.name);continue}
+  tollOut+=x.out*x.tariff;tollBack+=x.back*x.tariff;
+ }
+ return {tollOut,tollBack,count,details,missing,
+  error:missing.length?'Falta capturar la tarifa por cruce de: '+missing.join(', ')+'. El total permanece pendiente para evitar omisiones.':null};
+}
 function selectedTolls(){
- const vehicle=e('budget-vehicle-class').value;
- let tollOut=0,tollBack=0,count=0;
+ const vehicle=e('budget-vehicle-class').value,entries=[];
  if(!state.capufe)return {error:'No se pudo validar la fuente de tarifas CAPUFE. Consulta el PDF oficial; no se mostrará un total que omita casetas por error.'};
  for(const plaza of state.capufe.plazas){
   const out=val('budget-out-'+plaza.id,0,2),back=val('budget-back-'+plaza.id,0,2);
   if(out===null||back===null||!Number.isInteger(out)||!Number.isInteger(back))return {error:'Cantidad de cruces inválida en '+plaza.name};
   if(!out&&!back)continue;
-  if(!['A','B2','C2'].includes(vehicle))return {error:'Selecciona la clase de peaje en CAPUFE antes de agregar casetas.'};
+  if(!['A','B2','C2'].includes(vehicle))return {error:'Selecciona la clase de peaje antes de incluir casetas.'};
   const tariff=Number(plaza[vehicle]);
-  if(!Number.isFinite(tariff)||tariff<0)return {error:'Tarifa sin validar para '+plaza.name};
-  tollOut+=out*tariff;tollBack+=back*tariff;count+=out+back;
+  if(!Number.isFinite(tariff)||tariff<0)return {error:'Tarifa oficial sin validar para '+plaza.name};
+  entries.push({id:'capufe:'+plaza.id,name:plaza.name,out,back,tariff,source:'CAPUFE 2026'});
  }
- return {tollOut,tollBack,count,error:null};
+ for(const [id,g] of state.geoTolls){
+  if(!g.out&&!g.back)continue;
+  if(!['A','B2','C2'].includes(vehicle))return {error:'Selecciona la clase de peaje antes de incluir casetas.'};
+  // Las plazas vinculadas a CAPUFE ya se contabilizan con sus propios controles.
+  if(state.capufe.plazas.some(p=>p.id===id))return {error:'Posible duplicado tarifario en '+g.name};
+  const tariff=g.rates[vehicle];
+  entries.push({id:'rnc:'+id,name:g.name,out:g.out,back:g.back,tariff,source:'Tarifa manual sin verificar'});
+ }
+ return sumTollEntries(entries);
 }
 function computeCurrent(){
  const r=getRoute();if(!r)return {error:'Traza una ruta vial entre dos unidades para obtener el presupuesto.'};
@@ -55,7 +76,7 @@ function computeCurrent(){
  const returnKm=r.returnRoute?.distance/1000??null;
  const values=sumBudget({outKm:r.distance/1000,returnKm,kmPerLiter:v.yieldVal,price:v.price,reserve:v.reserve,
  tollOut:toll.tollOut,tollBack:toll.tollBack,includeViaticos:active,food:food??0,lodging:lodging??0,other:other??0});
- return {values,tollCount:toll.count,vehicle:e('budget-vehicle-class').value,origin:r.origin?.name||'Origen',destination:r.destination?.name||'Destino',includesViaticos:active};
+ return {values,tollCount:toll.count,tollDetails:toll.details,vehicle:e('budget-vehicle-class').value,origin:r.origin?.name||'Origen',destination:r.destination?.name||'Destino',includesViaticos:active};
 }
 function row(k,v,desc=''){return '<div class="budget-cost-row"><span>'+k+(desc?'<small>'+desc+'</small>':'')+'</span><strong>'+money(v)+'</strong></div>'}
 function render(){
@@ -65,6 +86,7 @@ function render(){
  out.innerHTML='<p class="tiny">Traslado: '+String(result.origin).replace(/&/g,'&amp;').replace(/</g,'&lt;')+' → '+String(result.destination).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</p>'+
  row('Combustible estimado',x.fuel,fmt(x.kmTotal)+' km de trayecto total · '+fmt(x.liters)+' L con reserva')+
  row('Casetas de ida',x.tollOut)+row('Casetas de regreso',x.tollBack)+
+ (result.tollDetails.length?'<p class="tiny"><b>Detalle de casetas confirmadas:</b></p>'+result.tollDetails.map(t=>row(String(t.name).replace(/&/g,'&amp;').replace(/</g,'&lt;'),(t.out+t.back)*t.tariff,t.out+' ida + '+t.back+' regreso × '+money(t.tariff)+' · '+t.source)).join(''):'')+
  row('Viáticos'+(result.includesViaticos?' (incluidos)':' (no incluidos)'),x.viatics)+
  '<div class="budget-grand-total"><span>Presupuesto total estimado</span><b>'+money(x.total)+'</b></div>'+
  '<p class="tiny">Cruces de caseta seleccionados manualmente: '+result.tollCount+'. '+(x.estimatedReturn?'La distancia de regreso se estima como igual a la ida.':'Regreso calculado por separado en motor vial.')+
@@ -135,6 +157,7 @@ function exportCsv(){
  ['Fuente CAPUFE',state.capufe?.source_url||'sin fuente'],
  ['Nota','Presupuesto orientativo, sin validación de Finanzas ni disponibilidad actual; no apto despacho clínico']
  ];
+ for(const t of r.tollDetails)rows.push(['Caseta '+t.name,t.source,'Ida',String(t.out),'Regreso',String(t.back),'Tarifa MXN',String(t.tariff),'Subtotal MXN',String((t.out+t.back)*t.tariff)]);
  const csv='\uFEFF'+rows.map(cols=>cols.map(v=>'"'+String(v??'').replace(/"/g,'""')+'"').join(',')).join('\r\n');
  const blob=new Blob([csv],{type:'text/csv;charset=utf-8'});
  const url=URL.createObjectURL(blob),a=document.createElement('a');a.href=url;
@@ -152,6 +175,29 @@ e('budget-download').addEventListener('click',exportCsv);
 window.addEventListener('balam:logistics-route-ready',onRoute);
 window.addEventListener('balam:logistics-return-ready',onRoute);
 window.addEventListener('balam:logistics-route-cleared',onRoute);
+function getGeoRecord(plazaId,name){
+ let row=state.geoTolls.get(plazaId);
+ if(!row){row={name:String(name||plazaId),out:0,back:0,rates:{A:null,B2:null,C2:null}};state.geoTolls.set(plazaId,row)}
+ if(name)row.name=String(name);
+ return row;
+}
+function setGeoCrossing(plazaId,dir,count,name){
+ if(!state.capufe||typeof plazaId!=='string'||!plazaId||!['out','back'].includes(dir)||!Number.isInteger(count)||count<0||count>2||
+ state.capufe.plazas.some(p=>p.id===plazaId))return false;
+ const row=getGeoRecord(plazaId,name);row[dir]=count;
+ render();window.dispatchEvent(new CustomEvent('balam:budget-tolls-updated',{detail:{plazaId,dir,count,source:'RNC'}}));return true;
+}
+function setGeoTariff(plazaId,amount,name){
+ const clazz=e('budget-vehicle-class').value;
+ if(!state.capufe||!['A','B2','C2'].includes(clazz)||typeof plazaId!=='string'||!plazaId||
+ state.capufe.plazas.some(p=>p.id===plazaId)||!(amount===null||(typeof amount==='number'&&Number.isFinite(amount)&&amount>=0&&amount<=100000)))return false;
+ getGeoRecord(plazaId,name).rates[clazz]=amount;
+ render();window.dispatchEvent(new CustomEvent('balam:budget-tolls-updated',{detail:{plazaId,source:'RNC-tarifa-manual'}}));return true;
+}
+function getGeoTariff(id){
+ const clazz=e('budget-vehicle-class').value;
+ return state.geoTolls.get(id)?.rates?.[clazz]??null;
+}
 function setCrossing(plazaId,dir,count){
  if(!state.capufe||!state.capufe.plazas.some(p=>p.id===plazaId)||!['out','back'].includes(dir)||!Number.isInteger(count)||count<0||count>2)return false;
  const field=e('budget-'+dir+'-'+plazaId);if(!field)return false;
@@ -159,11 +205,12 @@ function setCrossing(plazaId,dir,count){
 }
 function clearAllTolls(){
  for(const field of e('budget-toll-list').querySelectorAll('select'))field.value='0';
- render();window.dispatchEvent(new Event('balam:budget-tolls-cleared'));
+ state.geoTolls.clear();render();window.dispatchEvent(new Event('balam:budget-tolls-cleared'));
 }
 window.BALAM_TravelBudget={sumBudget,calculate:computeCurrent,
  getVehicleClass:()=>e('budget-vehicle-class').value,
  getTariff:(id)=>{const p=state.capufe?.plazas.find(x=>x.id===id);const v=e('budget-vehicle-class').value;return p&&v&&Number.isFinite(p[v])?{amount:p[v],name:p.name,valid_from:state.capufe.valid_from}:null;},
- setCrossing,clearAllTolls,getCount:(id,dir)=>Number(e('budget-'+dir+'-'+id)?.value||0)};
+ setCrossing,clearAllTolls,getCount:(id,dir)=>Number(e('budget-'+dir+'-'+id)?.value||0),
+ setGeoCrossing,setGeoTariff,getGeoTariff,getGeoCount:(id,dir)=>Number(state.geoTolls.get(id)?.[dir]||0),sumTollEntries};
 toggleViatics();loadTariffs();onRoute();
 })();
