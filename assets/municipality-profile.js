@@ -9,8 +9,8 @@ const sources={
  census:'https://www.inegi.org.mx/servicios/catalogounico/',
  age:'https://www.inegi.org.mx/app/scitel/default?ev=12',
  localities:'https://www.inegi.org.mx/servicios/catalogounico/',
- warning:'https://www.gob.mx/cenapred',
- epidemiology:'https://www.gob.mx/salud/acciones-y-programas/direccion-general-de-epidemiologia',
+ warning:'https://proteccioncivil.sonora.gob.mx/',
+ epidemiology:'https://www.gob.mx/salud/es/acciones-y-programas/direccion-general-de-epidemiologia-boletin-epidemiologico',
  cyclone:'https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico'
 };
 const link=(url,text)=>'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">'+esc(text)+' ↗</a>';
@@ -89,11 +89,11 @@ function renderRisk(){
   (f?'<div class="municipal-riskline"><b>Señales meteorológicas BALAM · '+esc(f.date)+'</b><span>'+ (watch.length?watch.map(w=>'<strong class="municipal-riskpill">'+esc(dictionary[w])+'</strong>').join(' '):'Sin umbrales internos activados en el día consultado. Esto no descarta riesgos.')+'</span></div>':
   '<div class="municipal-riskline"><b>Pronóstico vigente</b><span>Sin corte municipal reciente verificable; consultar SMN.</span></div>')+
   '<div class="municipal-riskline"><b>🦠 Alertas epidemiológicas oficiales</b><span>Sin feed municipal de alertas integrado. Estado activo no verificable, no equivale a cero alertas.</span>'+
-   link(sources.epidemiology,'Dirección General de Epidemiología')+'</div>'+
+   link(sources.epidemiology,'Boletín epidemiológico SINAVE')+'</div>'+
   '<div class="municipal-riskline"><b>🌀 Ciclones y afectaciones</b><span>Sin vinculación geográfica validada de avisos o trayectorias activas al municipio. No se infiere seguridad.</span>'+
    link(sources.cyclone,'Avisos oficiales SMN')+'</div>'+
   '<div class="municipal-riskline"><b>🌊 Desastres y protección civil</b><span>Sin feed de alertamiento municipal verificado. Lluvia prevista no equivale a inundación confirmada.</span>'+
-   link(sources.warning,'CENAPRED')+'</div>'+
+   link(sources.warning,'Protección Civil Sonora')+'</div>'+
   '<p class="tiny">La tabla meteorológica de 3 días y la sequía se muestran debajo con sus cortes y vigencia. Señales BALAM ≠ avisos oficiales.</p>';
 }
 async function fetchOnce(key,url,cache,parse){
