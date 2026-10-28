@@ -70,7 +70,7 @@ function paint(){
 function renderMunicipality(code){
  const target=el('smnMunicipalInfo');if(!target)return;
  const rec=getData(code);
- if(!rec){target.innerHTML='<h4>🌦️ Pronóstico SMN</h4><p class="tiny">'+(fresh?'Sin pronóstico municipal en el último corte validado.':'No hay un corte reciente verificado. Consulta los avisos oficiales.')+'</p><a target="_blank" rel="noopener noreferrer" href="https://smn.conagua.gob.mx/es/">Abrir SMN/CONAGUA ↗</a>';return;}
+ if(!rec){target.innerHTML='<h4>🌦️ Pronóstico SMN</h4><p class="tiny">'+(fresh?'Sin pronóstico municipal en el último corte validado.':'No hay un corte reciente verificado. Consulta los avisos oficiales.')+'</p><div id="smnDroughtInfo">Monitor de sequía por municipio disponible por separado.</div><a target="_blank" rel="noopener noreferrer" href="https://smn.conagua.gob.mx/es/">Abrir SMN/CONAGUA ↗</a>';if(window.BALAM_Drought?.renderMunicipality)window.BALAM_Drought.renderMunicipality(code);return;}
  const f=currentDay(rec),sig=getSignals(f);
  const tr=rec.days.map(d=>'<tr><td>'+esc(d.date)+'</td><td>'+fmt(d.tmin_c,1)+' / '+fmt(d.tmax_c,1)+' °C</td><td>'+fmt(d.rain_mm,1)+' mm</td><td>'+fmt(d.rain_probability_pct)+'%</td><td>'+fmt(d.gust_kmh)+' km/h</td></tr>').join('');
  const signs=sig.length?sig.map(s=>'<li><b>'+esc(WATCH[s])+'</b><span>'+esc(ACTION[s])+'</span></li>').join(''):'<li>No se alcanzan los umbrales exploratorios configurados para el primer día. Esto no descarta riesgos.</li>';
