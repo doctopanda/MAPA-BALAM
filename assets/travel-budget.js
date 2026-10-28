@@ -62,7 +62,7 @@ function render(){
  const result=computeCurrent(),out=e('budget-result');
  if(result.error){out.textContent=result.error;e('budget-download').disabled=true;return}
  const x=result.values;e('budget-download').disabled=false;
- out.innerHTML='<p class="tiny">Traslado: '+String(result.origin).replace(/</g,'&lt;')+' → '+String(result.destination).replace(/</g,'&lt;')+'</p>'+
+ out.innerHTML='<p class="tiny">Traslado: '+String(result.origin).replace(/&/g,'&amp;').replace(/</g,'&lt;')+' → '+String(result.destination).replace(/&/g,'&amp;').replace(/</g,'&lt;')+'</p>'+
  row('Combustible estimado',x.fuel,fmt(x.kmTotal)+' km de trayecto total · '+fmt(x.liters)+' L con reserva')+
  row('Casetas de ida',x.tollOut)+row('Casetas de regreso',x.tollBack)+
  row('Viáticos'+(result.includesViaticos?' (incluidos)':' (no incluidos)'),x.viatics)+
@@ -72,7 +72,9 @@ function render(){
 }
 function addSource(){
  if(!state.capufe)return;
- const box=e('budget-toll-list');box.replaceChildren();
+ const box=e('budget-toll-list');
+ const previous=new Map([...box.querySelectorAll('select')].map(x=>[x.id,x.value]));
+ box.replaceChildren();
  const clazz=e('budget-vehicle-class').value;
  for(const plaza of state.capufe.plazas){
   const div=document.createElement('div');div.className='budget-toll-row';
@@ -86,6 +88,7 @@ function addSource(){
     const ctrl=document.createElement('select');ctrl.id='budget-'+dir+'-'+plaza.id;
     ctrl.setAttribute('aria-label',plaza.name+' cruces '+label);
     for(const n of [0,1,2])ctrl.add(new Option(String(n),String(n)));
+    if(previous.has(ctrl.id))ctrl.value=previous.get(ctrl.id);
     ctrl.addEventListener('change',render);
     wrap.append(ctrl);div.append(wrap);
   }
