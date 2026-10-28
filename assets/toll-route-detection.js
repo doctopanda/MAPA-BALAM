@@ -8,7 +8,8 @@ const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const fmt=v=>Number(v).toLocaleString('es-MX',{maximumFractionDigits:2});
 const rup=n=>Number(n).toLocaleString('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0});
 let plazas=[],model=null,confirmed=new Map(),nearCache=[];
-let markers=L.layerGroup().addTo(map),routeRevision=0,overlay={};
+const pane=map.createPane('tollRoutePane');pane.style.zIndex=730;
+let markers=L.layerGroup().addTo(map);
 const confidence=d=>d<=0.23?'posible_cruce':d<=0.65?'cercana':'fuera';
 function measurePoint(point,coords){
  if(!Array.isArray(coords)||coords.length<2)return {km:Infinity,atKm:0};
@@ -107,7 +108,7 @@ function render(){
   if(shown){
    const loc=p.points.reduce((acc,pt)=>({lon:acc.lon+pt.lon/p.points.length,lat:acc.lat+pt.lat/p.points.length}),{lon:0,lat:0});
    const icon=getIcon(possible,!!tariff);
-   L.marker([loc.lat,loc.lon],{icon,pane:'markerPane',title:p.name+' · INEGI RNC'}).bindPopup(popup(x),{maxWidth:330}).addTo(markers);
+   L.marker([loc.lat,loc.lon],{icon,pane:'tollRoutePane',title:p.name+' · INEGI RNC'}).bindPopup(popup(x),{maxWidth:330}).addTo(markers);
   }
   if(!near)continue;
   const card=document.createElement('div');card.className='toll-route-row';
