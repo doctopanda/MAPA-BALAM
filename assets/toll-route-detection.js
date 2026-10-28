@@ -59,12 +59,13 @@ function confirm(x,dir){
  const match=dir==='out'?x.out:x.back;
  if(!match||match.km>.65)return;
  const p=x.plaza,tariff=tariffData(p),next=crossingCount(p,dir)?0:1;
- const done=tariff?
+ if(p.capufe_tariff_id&&!tariff){e('toll-route-status').textContent='Selecciona la clase de peaje antes de confirmar '+p.name+'.';return}
+ const done=p.capufe_tariff_id?
   window.BALAM_TravelBudget?.setCrossing(p.capufe_tariff_id,dir,next):
   window.BALAM_TravelBudget?.setGeoCrossing(p.id,dir,next,p.name);
  if(!done)return;
  if(next){confirmed.set(p.id+':'+dir,true)}else confirmed.delete(p.id+':'+dir);
- const needsPrice=!tariff&&window.BALAM_TravelBudget?.getGeoTariff(p.id)===null;
+ const needsPrice=!p.capufe_tariff_id&&window.BALAM_TravelBudget?.getGeoTariff(p.id)===null;
  e('toll-route-status').textContent=(next?'Añadida':'Retirada')+' '+p.name+' '+(dir==='out'?'de ida':'de regreso')+'. '+
   (next&&needsPrice?'Tarifa manual pendiente: ingrésala en la tarjeta. ':'')+
   (match.km>.23?'Caseta cercana, confirma paso real.':'Verifica el cruce real.');
@@ -79,12 +80,13 @@ function popup(x){
   ' · Regreso: '+(x.back?fmt(x.back.km*1000)+' m':'sin ruta');box.append(distance);
  const price=tariffData(p),manual=window.BALAM_TravelBudget?.getGeoTariff(p.id);
  const priceEl=document.createElement('p');priceEl.textContent=price?
-  'Tarifa CAPUFE 2026 '+rup(price.amount)+' por cruce ('+window.BALAM_TravelBudget.getVehicleClass()+').':
+  'Tarifa CAPUFE 2026 '+rup(price.amount)+' por cruce ('+window.BALAM_TravelBudget.getVehicleClass()+').':p.capufe_tariff_id?
+  'Elige la clase vehicular para visualizar la tarifa CAPUFE.':
   (manual!==null?'Tarifa manual de '+rup(manual)+' por cruce, pendiente de verificación.':
    'Sin tarifa oficial vinculada. Confirma el paso y captura el precio manual en la lista.');
  box.append(priceEl);
- if(x.out?.km<=.65)box.append(makeButton(crossingCount(p,'out')?'✓ Ida incluida · quitar':'Confirmar ida',()=>confirm(x,'out')));
- if(x.back?.km<=.65)box.append(makeButton(crossingCount(p,'back')?'✓ Regreso incluido · quitar':'Confirmar regreso',()=>confirm(x,'back')));
+ if(x.out?.km<=.65)box.append(makeButton(crossingCount(p,'out')?'✓ Ida incluida · quitar':'Confirmar ida',()=>confirm(x,'out'),!!p.capufe_tariff_id&&!price));
+ if(x.back?.km<=.65)box.append(makeButton(crossingCount(p,'back')?'✓ Regreso incluido · quitar':'Confirmar regreso',()=>confirm(x,'back'),!!p.capufe_tariff_id&&!price));
  const foot=document.createElement('p');foot.className='tiny';foot.textContent='La proximidad al trazado NO confirma paso o cobro. Revisar el itinerario, sentido y posibles libramientos paralelos.';box.append(foot);
  return box;
 }
@@ -119,7 +121,7 @@ function render(){
   const b=document.createElement('b');b.textContent='🛣️ '+p.name;card.append(b);
   const line=document.createElement('small');
   line.textContent=(possible?'POSIBLE CRUCE':'CERCANA, NO CONFIRMADA')+
-   ' · '+p.section+' · '+(tariff?'CAPUFE '+rup(tariff.amount)+' por cruce':manual!==null?'Tarifa manual '+rup(manual)+' por cruce (sin verificar)':'Tarifa pendiente · captura manual');card.append(line);
+   ' · '+p.section+' · '+(tariff?'CAPUFE '+rup(tariff.amount)+' por cruce':p.capufe_tariff_id?'Selecciona clase vehicular':manual!==null?'Tarifa manual '+rup(manual)+' por cruce (sin verificar)':'Tarifa pendiente · captura manual');card.append(line);
   const dist=document.createElement('small');dist.textContent=
    'Ida: '+(x.out?fmt(x.out.km*1000)+' m':'sin ruta')+
    ' · Regreso: '+(x.back?fmt(x.back.km*1000)+' m':'sin ruta de retorno');card.append(dist);
@@ -128,11 +130,11 @@ function render(){
    const found=dir==='out'?x.out:x.back;
    const matched=found?.km<=.65;
    const n=crossingCount(p,dir);
-   const button=makeButton(n?'✓ '+label+' incluida · quitar':'Confirmar '+label,()=>confirm(x,dir),!matched);
+   const button=makeButton(n?'✓ '+label+' incluida · quitar':'Confirmar '+label,()=>confirm(x,dir),!matched||(!!p.capufe_tariff_id&&!tariff));
    actions.append(button);
   }
   card.append(actions);
-  if(!tariff){
+  if(!p.capufe_tariff_id){
    const priceLabel=document.createElement('label');priceLabel.className='toll-price-label';
    priceLabel.textContent='Tarifa por cruce (MXN) · captura manual no verificada';
    const input=document.createElement('input');input.type='number';input.min='0';input.max='100000';
