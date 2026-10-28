@@ -15,6 +15,15 @@ const drought=JSON.parse(fs.readFileSync('data/smn/sonora_drought_latest.json','
 const forecast=JSON.parse(fs.readFileSync('data/smn/sonora_latest.json','utf8'));
 assert(clues.status==='ok'&&clues.facility_count===clues.facilities.length&&clues.facility_count>=150);
 assert(new Set(clues.facilities.map(x=>x.clues)).size===clues.facility_count);
+assert(clues.facilities.every(f=>typeof f.municipality_name==='string'&&f.municipality_name.length>=2),'CLUES: municipios deben tener nombre');
+const healthJs=fs.readFileSync('assets/health-network.js','utf8');
+const crumJs=fs.readFileSync('assets/crum-layer.js','utf8');
+assert(healthJs.includes("x==='1'?'2':x==='2'?'3':null"),'Regla 1-2 y 2-3 no implementada');
+assert(healthJs.includes("f.status_source==='EN OPERACION'"),'Filtrado por estatus faltante');
+assert(healthJs.includes("m.on('click',()=>selectOnMap(f))"),'Selección de establecimientos sobre mapa ausente');
+assert(healthJs.includes('jaguarIcon()')&&healthJs.includes('img.brand-logo'),'Jaguar oficial en ruta faltante');
+assert(healthJs.includes('health-house-icon'),'Casitas por nivel ausentes');
+assert(crumJs.includes('ambulanceIcon(ar.length)'),'Iconos de ambulancia CRUM ausentes');
 assert(clues.facilities.every(f=>/^26\d{3}$/.test(f.municipality_code)&&f.lat>26&&f.lat<33.5&&f.lon>-115.5&&f.lon< -108));
 assert(drought.status==='ok'&&drought.municipalities_count===72&&drought.municipalities.length===72);
 assert(drought.municipalities.every(x=>x.category===null||/^D[0-4]$/.test(x.category)));
