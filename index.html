@@ -69,6 +69,28 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .geo-layer-option b{display:block;color:#185644;font-size:11px}
 .geo-layer-option small{display:block;margin:3px 0 0;font-size:10px;color:#607b71}
 #geoLayerStatus{padding:7px 8px;background:#eef9f3;border-radius:8px}
+</style><style id="smn-styles-v1">
+#smn-panel{margin:0;background:#f8fffb;border:0;padding:12px;color:#275546}
+#smn-panel h3{font-size:14px;margin:0 0 8px;color:#155d50}
+#smn-panel p{font-size:11px;line-height:1.5}
+#smn-panel label{font-size:11px;font-weight:750;display:block;margin:9px 0 5px}
+#smn-panel select{min-height:37px;display:block;width:100%;border:1px solid #c2d9ce;border-radius:9px;background:white;color:#235747;font:600 11px system-ui;padding:7px}
+.smn-switchrow{border-radius:10px;background:#eaf7f1;padding:9px;margin:5px 0}
+.smn-switchrow label{display:flex!important;gap:8px;align-items:center;margin:0!important}
+.smn-switchrow input{width:18px;height:18px;accent-color:#308e7e;flex:0 0 auto}
+.smn-status{background:#eef7f4;padding:10px;border-radius:9px;color:#27584b}
+.smn-links{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}
+.smn-links a{font-size:10px;color:#146854;text-decoration:underline;font-weight:750}
+.smn-municipal-detail{margin:12px 0;border-top:1px solid #d1e5d9;padding:10px 0;color:#285448}
+.smn-municipal-detail h4{margin:0 0 8px;font-size:13px}
+.smn-municipal-detail .smn-table-wrap{overflow-x:auto}
+.smn-municipal-detail table{border-collapse:collapse;width:100%;font-size:10px}
+.smn-municipal-detail td,.smn-municipal-detail th{border-bottom:1px solid #d8e9df;padding:5px 4px;white-space:nowrap}
+.smn-municipal-detail .smn-signals{padding:8px;border-radius:9px;background:#fff8ed;margin:8px 0;font-size:11px}
+.smn-municipal-detail .smn-signals ul{padding-left:18px}
+.smn-municipal-detail .smn-signals li{margin:6px 0}
+.smn-municipal-detail .smn-signals span{display:block;color:#536d60;margin:3px 0}
+.smn-municipal-detail a{font-size:11px;font-weight:700;color:#176b5b}
 </style></head>
 <body>
 <header>
@@ -79,7 +101,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 <div class="shell">
 <aside>
   <div class="card">
-    <div class="eyebrow">MAPA BALAM · v0.8.0</div>
+    <div class="eyebrow">MAPA BALAM · v0.9.0</div>
     <h2>Centro de Capas</h2>
     <p class="lead">Elige un distrito aquí, o combina varios en “Distritos visibles”. El mapa inicia sin selección.</p>
     <label class="district-quick-label" for="quickDistrict">Explorar distrito</label>
@@ -132,6 +154,25 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
     <label class="geo-layer-option"><input id="showBlocks" type="checkbox"><span><b>Manzanas</b><small>Cargar únicamente dentro de AGEB seleccionadas</small></span></label>
     <div id="geoLayerStatus" class="tiny" role="status">Manzanas apagadas; no se solicitarán hasta activar la capa.</div>
   </div>
+<section id="smn-panel" aria-label="Capa meteorológica SMN y vigilancia">
+ <h3>🌦️ SMN / CONAGUA · Vigilancia meteorológica</h3>
+ <p>Pronóstico oficial por municipio (3 días) y señales operativas exploratorias de BALAM. No reemplaza los avisos de Protección Civil.</p>
+ <div class="smn-switchrow"><label for="smn-visible"><input id="smn-visible" type="checkbox" disabled> Mostrar capa SMN sobre los polígonos</label></div>
+ <label for="smn-metric">Variable cartográfica</label>
+ <select id="smn-metric"><option value="heat">Temperatura máxima (°C)</option><option value="rain">Precipitación prevista (mm/día)</option><option value="wind">Rachas de viento (km/h)</option><option value="watch">Señales de vigilancia BALAM</option></select>
+ <label for="smn-day">Fecha del pronóstico</label><select id="smn-day"><option value="">Sin corte disponible</option></select>
+ <label for="smn-scope">Ámbito</label>
+ <select id="smn-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
+ <p id="smn-status" class="smn-status" role="status">Buscando el último corte validado…</p>
+ <p id="smn-source" class="tiny"></p>
+ <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p>
+ <button id="smn-reload" class="btn" type="button">Actualizar lectura</button>
+ <div class="smn-links"><a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico SMN ↗</a>
+ <a href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico" target="_blank" rel="noopener noreferrer">Ciclones Pacífico ↗</a>
+ <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" rel="noopener noreferrer">Sequía ↗</a>
+ <a href="https://smn.conagua.gob.mx/es/climatologia/informacion-climatologica/informacion-estadistica-climatologica" target="_blank" rel="noopener noreferrer">Climatología ↗</a></div>
+ <p class="tiny">Umbrales exploratorios BALAM: lluvia ≥30 mm/día; rachas ≥60 km/h; máxima ≥40 °C; mínima ≤5 °C. No son umbrales oficiales ni alertas de riesgo.</p>
+</section>
 <section id="crum-panel" aria-label="Catálogo CRUM protegido">
  <h3>🚑 CRUM | Respuesta prehospitalaria</h3>
  <p>Inventario independiente de SIESA. Los puntos son ubicaciones de referencia, no GPS ni disponibilidad.</p>
@@ -175,7 +216,7 @@ function makeSidebarAccordion(){
   var aside=document.querySelector('.shell aside');
   if(!aside||aside.dataset.foldsReady)return;
   aside.dataset.foldsReady='1';
-  var sections=[['Herramientas del mapa',true],['Lectura analítica',false],['Distritos y selección',true],['Ficha de municipio',false],['Reglas BALAM',false],['AGEB y manzanas',true],['Catálogo CRUM',false]];
+  var sections=[['Herramientas del mapa',true],['Lectura analítica',false],['Distritos y selección',true],['Ficha de municipio',false],['Reglas BALAM',false],['AGEB y manzanas',true],['Clima y vigilancia · SMN',true],['Catálogo CRUM',false]];
   var contents=Array.from(aside.children).filter(function(e){return e.matches('.card, #crum-panel')});
   contents.forEach(function(node,i){
     var fold=document.createElement('details');fold.className='balam-fold';
@@ -230,6 +271,7 @@ function toggleBaseTiles(enable){
   candidate.addTo(map);
   if(stateLayer)updateMap()
 }
+map.createPane('smnPane');map.getPane('smnPane').style.zIndex=415;map.getPane('smnPane').style.pointerEvents='none';
 map.createPane('blocksPane');map.getPane('blocksPane').style.zIndex=420;map.getPane('blocksPane').style.pointerEvents='none';
 map.createPane('agebPane');map.getPane('agebPane').style.zIndex=430;map.getPane('agebPane').style.pointerEvents='auto';
 
@@ -531,8 +573,10 @@ function renderDetail(code,name,did){
  if(data&&data.current_filter&&data.current_filter.operative){
    lines+='<p class="tiny"><b>Operativo disponible:</b> '+esc(data.current_filter.operative)+' · corte '+esc(data.cut||data.generated||'')+'</p>'
  }
+ lines+='<div id="smnMunicipalInfo" class="smn-municipal-detail"><h4>🌦️ SMN/CONAGUA</h4><p class="tiny">Consultando datos meteorológicos validados…</p></div>';
  lines+='<div id="agebManager" class="ageb-manager"><div class="tiny">Cargando catálogo AGEB…</div></div>';
- detailEl.innerHTML=lines
+ detailEl.innerHTML=lines;
+ if(window.BALAM_Smn)window.BALAM_Smn.renderMunicipality(code)
 }
 
 function fc(j){if(j&&j.type==='FeatureCollection'&&Array.isArray(j.features))return j;if(j&&Array.isArray(j.features))return {type:'FeatureCollection',features:j.features};return {type:'FeatureCollection',features:[]}}
@@ -682,6 +726,7 @@ async function init(){
    var gj=await fetch(MUN_URL).then(function(r){if(!r.ok)throw new Error('municipios '+r.status);return r.json()});
    stateLayer=L.geoJSON(gj,{style:styleFeature,onEachFeature:onEach}).addTo(map);
    stateBounds=stateLayer.getBounds();map.fitBounds(stateBounds,{padding:[18,18]});updateMap();
+   window.dispatchEvent(new Event('balam:municipalities-ready'));
    statusEl.textContent='Sonora listo: '+gj.features.length+' municipios · selecciona un distrito para ver sus datos.'
  }catch(e){statusEl.textContent='Error de inicialización: '+e.message}
 }
@@ -719,6 +764,12 @@ document.getElementById('quickDistrict').addEventListener('change',function(ev){
 });
 updateGeoLayerStatus();
 
+window.BALAM_SmnMap = {
+ map:map,
+ getActiveDistricts:function(){return Array.from(active);},
+ getMunicipalityFeatures:function(){var a=[];if(stateLayer)stateLayer.eachLayer(function(l){if(l.feature)a.push(l.feature)});return a;},
+ refreshSelectedMunicipality:function(){if(selectedContext)renderDetail(selectedContext.code,selectedContext.name,selectedContext.did)}
+};
 window.BALAM_CrumMap = {
  map: map,
  getActiveDistricts: function(){return Array.from(active);},
@@ -733,5 +784,5 @@ toggleBaseTiles(true);
 init();
 })();
 </script>
-<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script type="module" src="assets/crum-layer.js"></script></body>
+<a href="crum.html" target="_blank" rel="noopener noreferrer" style="display:inline-block;background:#205f4b;color:white;padding:9px 14px;border-radius:10px;margin:8px 4px;text-decoration:none;font:700 12px system-ui">🚑 CRUM · Catálogo de ambulancias</a><script defer src="assets/smn-layer.js"></script><script type="module" src="assets/crum-layer.js"></script></body>
 </html>
