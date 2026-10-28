@@ -126,6 +126,7 @@ def parse(raw):
     districts={c:d["id"] for d in cfg["districts"] for c in d["municipalities"]}
     weather=json.loads(WEATHER.read_text(encoding="utf-8"))
     by_name={norm(item["name"]):item["code"][-3:] for item in weather["municipalities"]}
+    names_by_code={item["code"][-3:]:item["name"] for item in weather["municipalities"]}
     found={}
     counters={"non_sonora":0,"invalid_geolocation":0,"unknown_municipality":0,"duplicates":0}
     for row in body:
@@ -152,6 +153,7 @@ def parse(raw):
             "status_source":read(row,columns["status"])[:90],
             "type":read(row,columns["kind"])[:120],
             "municipality_code":"26"+mun,
+            "municipality_name":names_by_code.get(mun,read(row,columns["mun_name"]) or "Municipio "+mun),
             "district":districts[mun],
             "lat":round(lat,6),"lon":round(lon,6)
         }

@@ -2,6 +2,18 @@ import {createClient} from 'https://esm.sh/@supabase/supabase-js@2.57.0';
 const s=createClient('https://blkvamobfcyvlimnizaf.supabase.co','sb_publishable_gbN7i3poaBv7Y772DltBgg_Mvp5gzBM');
 const g=id=>document.getElementById(id), core=window.BALAM_CrumMap;
 const out=L.layerGroup().addTo(core.map);
+const crumPane=core.map.createPane('crumVehiclePane');crumPane.style.zIndex=690;
+function ambulanceIcon(count){
+ const size=count>1?44:38;
+ const svg='<svg viewBox="0 0 56 44" width="'+size+'" height="'+Math.round(size*.79)+'" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'+
+  '<path d="M5 12H32V33H5Z M32 19H42L51 27V33H32Z" fill="#157d9d" stroke="white" stroke-width="3" stroke-linejoin="round"/>'+
+  '<path d="M14 22H24 M19 17V27" stroke="white" stroke-width="4" stroke-linecap="round"/>'+
+  '<path d="M36 23H42L46 28H36Z" fill="#d8f4f7"/>'+
+  '<circle cx="16" cy="34" r="5" fill="#203d45" stroke="white" stroke-width="2"/>'+
+  '<circle cx="42" cy="34" r="5" fill="#203d45" stroke="white" stroke-width="2"/></svg>';
+ const counter=count>1?'<b class="crum-vehicle-count">'+count+'</b>':'';
+ return L.divIcon({className:'crum-ambulance-icon',html:'<div class="crum-vehicle-symbol">'+svg+counter+'</div>',iconSize:[size+12,size+7],iconAnchor:[Math.round(size/2),Math.round(size/2)],popupAnchor:[0,-Math.round(size/2)]});
+}
 let records=[],active=false;
 window.BALAM_CrumForMunicipality=function(code){return window.BALAM_CrumStats?records.filter(r=>r.municipality_code===String(code).slice(-3)).length:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -14,7 +26,7 @@ function draw(){
  let geo=new Map(); for(const r of rows){if(!Number.isFinite(r.lat)||!Number.isFinite(r.lon))continue;let k=r.lat.toFixed(5)+','+r.lon.toFixed(5);if(!geo.has(k))geo.set(k,[]);geo.get(k).push(r);}
  if(active){if(!core.map.hasLayer(out))out.addTo(core.map);for(const ar of geo.values()){
   const a=ar[0],popup='<strong>🚑 '+ar.length+' recursos inventariados</strong><p>'+esc(a.locality_label)+'</p><ul>'+ar.slice(0,12).map(x=>'<li>'+esc(x.unit_label)+' · '+esc(x.institution)+'</li>').join('')+'</ul><small>No informa disponibilidad operativa ni GPS en vivo.</small>';
-  L.circleMarker([a.lat,a.lon],{pane:'markerPane',radius:Math.min(20,5+Math.sqrt(ar.length)*2.4),color:'#fff',weight:1.5,fillColor:ar.length>1?'#164a3e':'#07836d',fillOpacity:.88}).bindPopup(popup,{maxWidth:300}).addTo(out);
+  L.marker([a.lat,a.lon],{pane:'crumVehiclePane',icon:ambulanceIcon(ar.length),title:'CRUM · '+ar.length+' recursos inventariados'}).bindPopup(popup,{maxWidth:300}).addTo(out);
  }}else core.map.removeLayer(out);
  g('crum-count').textContent=rows.length.toLocaleString('es-MX');
  g('crum-places').textContent=geo.size+' ubicaciones';
