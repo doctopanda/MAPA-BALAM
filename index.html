@@ -159,7 +159,8 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <p>Pronóstico oficial por municipio (3 días) y señales operativas exploratorias de BALAM. No reemplaza los avisos de Protección Civil.</p>
  <div class="smn-switchrow"><label for="smn-visible"><input id="smn-visible" type="checkbox" disabled> Mostrar capa SMN sobre los polígonos</label></div>
  <label for="smn-metric">Variable cartográfica</label>
- <select id="smn-metric"><option value="watch">Señales de vigilancia BALAM</option><option value="rain">Precipitación prevista (mm/día)</option><option value="heat">Temperatura máxima (°C)</option><option value="wind">Rachas de viento (km/h)</option></select>
+ <select id="smn-metric"><option value="heat">Temperatura máxima (°C)</option><option value="rain">Precipitación prevista (mm/día)</option><option value="wind">Rachas de viento (km/h)</option><option value="watch">Señales de vigilancia BALAM</option></select>
+ <label for="smn-day">Fecha del pronóstico</label><select id="smn-day"><option value="">Sin corte disponible</option></select>
  <label for="smn-scope">Ámbito</label>
  <select id="smn-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
  <p id="smn-status" class="smn-status" role="status">Buscando el último corte validado…</p>
@@ -168,7 +169,8 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <button id="smn-reload" class="btn" type="button">Actualizar lectura</button>
  <div class="smn-links"><a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico SMN ↗</a>
  <a href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico" target="_blank" rel="noopener noreferrer">Ciclones Pacífico ↗</a>
- <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" rel="noopener noreferrer">Sequía ↗</a></div>
+ <a href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico" target="_blank" rel="noopener noreferrer">Sequía ↗</a>
+ <a href="https://smn.conagua.gob.mx/es/climatologia/informacion-climatologica/informacion-estadistica-climatologica" target="_blank" rel="noopener noreferrer">Climatología ↗</a></div>
  <p class="tiny">Umbrales exploratorios BALAM: lluvia ≥30 mm/día; rachas ≥60 km/h; máxima ≥40 °C; mínima ≤5 °C. No son umbrales oficiales ni alertas de riesgo.</p>
 </section>
 <section id="crum-panel" aria-label="Catálogo CRUM protegido">
