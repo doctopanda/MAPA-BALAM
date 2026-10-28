@@ -42,7 +42,8 @@ jobs:
             nwr/amenity=fuel nwr/shop=tyres nwr/shop=car_repair \
             -o /tmp/balam-roads/services.osm.pbf --overwrite
           osmium export /tmp/balam-roads/services.osm.pbf \
-            -f geojsonseq -o /tmp/balam-roads/services.geojsonseq --overwrite
+            -f geojsonseq -x print_record_separator=false \
+            -o /tmp/balam-roads/services.geojsonseq --overwrite
           echo 'EXPORT_STATS:'
           wc -l /tmp/balam-roads/services.geojsonseq
           head -n 2 /tmp/balam-roads/services.geojsonseq | cut -c1-1000
