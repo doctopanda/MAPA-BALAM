@@ -3,6 +3,7 @@ const s=createClient('https://blkvamobfcyvlimnizaf.supabase.co','sb_publishable_
 const g=id=>document.getElementById(id), core=window.BALAM_CrumMap;
 const out=L.layerGroup().addTo(core.map);
 let records=[],active=false;
+window.BALAM_CrumForMunicipality=function(code){return window.BALAM_CrumStats?records.filter(r=>r.municipality_code===String(code).slice(-3)).length:null};
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 function status(v){g('crum-status').textContent=v;}
 function controls(on){g('crum-login').hidden=on;g('crum-private').hidden=!on;g('crum-floating').hidden=!on;}
@@ -26,7 +27,7 @@ async function load(){
  const {data:{user},error:e}=await s.auth.getUser();if(!user||e){controls(false);status('Inicia sesión para ver el catálogo CRUM');return}
  const {data:member,error:er}=await s.from('balam_access').select('role,is_enabled').eq('user_id',user.id).maybeSingle();
  if(er||!member?.is_enabled){controls(false);status('La cuenta no tiene acceso habilitado en BALAM');return}
- let all=[];for(let i=0;i<10000;i+=500){let {data,error}=await s.from('balam_crum_assets').select('asset_key,unit_label,locality_label,institution,type_original,type_class,district_id,lat,lon').eq('present_in_latest_import',true).order('asset_key').range(i,i+499);if(error){status('Error de lectura: '+error.message);return}all.push(...data);if(data.length<500)break}
+ let all=[];for(let i=0;i<10000;i+=500){let {data,error}=await s.from('balam_crum_assets').select('asset_key,unit_label,locality_label,institution,type_original,type_class,district_id,municipality_code,lat,lon').eq('present_in_latest_import',true).order('asset_key').range(i,i+499);if(error){status('Error de lectura: '+error.message);return}all.push(...data);if(data.length<500)break}
  records=all;window.BALAM_CrumStats=Object.fromEntries(['DS01','DS02','DS03','DS04','DS05','DS06'].map(d=>[d,records.filter(r=>r.district_id===d).length]));window.dispatchEvent(new Event('balam:crum-updated'));controls(true);active=true;g('crum-toggle').checked=true;g('crum-role').textContent=member.role==='admin_maestro'?'Administrador Maestro':member.role.replaceAll('_',' ');
  let inst=g('crum-institution');inst.replaceChildren(new Option('Todas las instituciones',''));[...new Set(records.map(x=>x.institution))].sort().forEach(v=>inst.add(new Option(v,v)));
  let ty=g('crum-type');ty.replaceChildren(new Option('Todos los tipos',''));[...new Set(records.map(x=>x.type_class))].sort().forEach(v=>ty.add(new Option(v.replaceAll('_',' '),v)));
