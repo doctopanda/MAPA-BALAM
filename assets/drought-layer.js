@@ -16,7 +16,7 @@ function draw(){
  const features=bridge.getMunicipalityFeatures().filter(f=>{
   const p=f.properties||{},c=String(p.cvegeo||p.CVEGEO||'');
   const d=rows.get(c);
-  return d&&d.category&&fill[d.category]&&(scope==='all'||selected.has(window.BALAM_MunicipalDistrict?.[c]));
+  return d&&d.category&&fill[d.category]&&(scope==='all'||selected.has(bridge.getDistrictForMunicipality(c)));
  });
  if(!bridge.map.getPane('droughtPane')){
   const pane=bridge.map.createPane('droughtPane');pane.style.zIndex=418;pane.style.pointerEvents='none';
