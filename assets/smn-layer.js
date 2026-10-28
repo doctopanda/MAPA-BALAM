@@ -38,7 +38,7 @@ function clearOverlay(){if(layer){bridge.map.removeLayer(layer);layer=null;}}
 function renderLegend(){
  const metric=el('smn-metric').value;
  const items={
-  heat:'<span>🟦 &lt;25°C · 🟨 25–29.9°C · 🟧 30–39.9°C · 🟥 ≥40°C</span>',
+  heat:'<span><b style="color:#3855b5">●</b> &lt;25°C · <b style="color:#988d23">●</b> 25–29.9°C · <b style="color:#bd741e">●</b> 30–39.9°C · <b style="color:#c12d24">●</b> ≥40°C</span>',
   rain:'<span>⬜ Sin lluvia · 🟦 0.1–9.9 mm · 🔵 10–29.9 mm · 🔷 ≥30 mm</span>',
   wind:'<span>⬜ &lt;20 km/h · 🟪 20–39.9 km/h · 💜 40–59.9 km/h · 🟣 ≥60 km/h</span>',
   watch:'<span>🟨 Una señal interna · 🟥 Dos o más · sin color = ninguna activada</span>'
@@ -62,7 +62,7 @@ function paint(){
  layer=L.geoJSON({type:'FeatureCollection',features:filtered},{
   pane,interactive:false,style:f=>{
    const code=String(f.properties?.cvegeo||f.properties?.CVEGEO||''),r=rows.get(code);
-   return {pane,color:color(r)||'#999',weight:2,fillColor:color(r)||'#999',fillOpacity:.33,opacity:.9}
+   return {pane,color:color(r)||'#999',weight:2.7,fillColor:color(r)||'#999',fillOpacity:.69,opacity:1}
   }
  }).addTo(bridge.map);
  el('smn-overlay-count').textContent=filtered.length+' municipios coloreados · '+(el('smn-day').value||'fecha actual');
@@ -74,16 +74,37 @@ function renderMunicipality(code){
  const f=currentDay(rec),sig=getSignals(f);
  const tr=rec.days.map(d=>'<tr><td>'+esc(d.date)+'</td><td>'+fmt(d.tmin_c,1)+' / '+fmt(d.tmax_c,1)+' °C</td><td>'+fmt(d.rain_mm,1)+' mm</td><td>'+fmt(d.rain_probability_pct)+'%</td><td>'+fmt(d.gust_kmh)+' km/h</td></tr>').join('');
  const signs=sig.length?sig.map(s=>'<li><b>'+esc(WATCH[s])+'</b><span>'+esc(ACTION[s])+'</span></li>').join(''):'<li>No se alcanzan los umbrales exploratorios configurados para el primer día. Esto no descarta riesgos.</li>';
+ 
+ const hazards='<div class="smn-hazards"><b>Otras amenazas y evidencia</b>'+
+  '<div><span>Sequía (monitor D0–D4)</span><strong>Sin corte municipal validado en BALAM</strong><a target="_blank" rel="noopener noreferrer" href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico">Monitor oficial ↗</a></div>'+
+  '<div><span>Ciclones y tormentas tropicales</span><strong>Sin aviso geográfico municipal asociado</strong><a target="_blank" rel="noopener noreferrer" href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico">Avisos SMN ↗</a></div>'+
+  '<div><span>Deslaves e inundaciones</span><strong>Susceptibilidad no evaluada para este municipio</strong><a target="_blank" rel="noopener noreferrer" href="https://www.atlasnacionalderiesgos.gob.mx/">Atlas Nacional de Riesgos ↗</a></div>'+
+  '<p class="tiny">Que una variable esté sin evaluar no significa riesgo bajo. El pronóstico de lluvia, por sí solo, no predice un deslave ni una inundación.</p></div>';
+
  const crum=window.BALAM_CrumForMunicipality?.(String(code))??null;
  target.innerHTML='<h4>🌦️ SMN/CONAGUA · '+esc(rec.name)+'</h4>'+
   '<p class="tiny">Pronóstico municipal a 3 días. Consulta: '+esc(dataset.fetched_at||'sin fecha')+'.</p>'+
   '<div class="smn-table-wrap"><table><thead><tr><th>Fecha</th><th>Mín./Máx.</th><th>Lluvia</th><th>Prob.</th><th>Rachas</th></tr></thead><tbody>'+tr+'</tbody></table></div>'+
   '<div class="smn-signals"><b>Señales de vigilancia BALAM · '+esc(f?.date||'fecha no disponible')+'</b><ul>'+signs+'</ul></div>'+
-  '<p class="tiny">Criterios internos provisionales, NO alertas oficiales ni predicción de daños. Revisar avisos de SMN y Protección Civil.</p>'+
+  '<p class="tiny">Criterios internos provisionales, NO alertas oficiales ni predicción de daños. Revisar avisos de SMN y Protección Civil.</p>'+hazards+
   (crum!==null?'<p class="tiny">🚑 CRUM: '+crum+' registros inventariados en este municipio (no disponibilidad operativa).</p>':'<p class="tiny">🚑 Activa sesión CRUM para consultar recursos municipales.</p>')+
   '<a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico oficial ↗</a>';
 }
-function rerender(){paint();bridge.refreshSelectedMunicipality();}
+
+function renderSonoraSummary(){
+ const target=el('smn-sonora-summary');if(!target)return;
+ if(!fresh||!dataset){target.textContent='Sin corte SMN municipal reciente. No inferir situación meteorológica actual.';return}
+ const date=el('smn-day').value;
+ const points=[...rows.values()].map(r=>({r,f:r.days.find(x=>x.date===date)})).filter(x=>x.f);
+ if(!points.length){target.textContent='No hay pronóstico verificable para esta fecha.';return}
+ const max=(field)=>points.filter(x=>Number.isFinite(x.f[field])).sort((x,y)=>y.f[field]-x.f[field])[0];
+ const peakRain=max('rain_mm'),peakHeat=max('tmax_c'),peakWind=max('gust_kmh');
+ const w=points.filter(x=>getSignals(x.f).length).length;
+ const item=(field,prefix,unit)=>{const x=field==='rain_mm'?peakRain:field==='tmax_c'?peakHeat:peakWind;return x?'<div><b>'+prefix+' · '+fmt(x.f[field],1)+' '+unit+'</b><span>'+esc(x.r.name)+'</span></div>':''};
+ target.innerHTML='<b>Panorama Sonora · '+esc(date)+'</b><p>'+points.length+' municipios con pronóstico; '+w+' con señales internas de vigilancia. No son avisos oficiales.</p><div class="smn-quickstats">'+item('tmax_c','Máx. térmica','°C')+item('rain_mm','Mayor lluvia prevista','mm')+item('gust_kmh','Mayor racha','km/h')+'</div>';
+}
+
+function rerender(){paint();renderSonoraSummary();bridge.refreshSelectedMunicipality();}
 async function load(){
  if(loading)return;
  loading=true;status('Consultando corte SMN validado…');
@@ -115,7 +136,7 @@ async function load(){
 }
 el('smn-visible').addEventListener('change',e=>{enabled=e.target.checked;paint()});
 el('smn-scope').addEventListener('change',paint);
-el('smn-metric').addEventListener('change',paint);
+el('smn-metric').addEventListener('change',()=>{paint();renderSonoraSummary()});
 el('smn-day').addEventListener('change',rerender);
 el('smn-reload').addEventListener('click',load);
 window.addEventListener('balam:districts-changed',paint);
