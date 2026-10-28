@@ -76,7 +76,7 @@ function renderMunicipality(code){
  const signs=sig.length?sig.map(s=>'<li><b>'+esc(WATCH[s])+'</b><span>'+esc(ACTION[s])+'</span></li>').join(''):'<li>No se alcanzan los umbrales exploratorios configurados para el primer día. Esto no descarta riesgos.</li>';
  
  const hazards='<div class="smn-hazards"><b>Otras amenazas y evidencia</b>'+
-  '<div><span>Sequía (monitor D0–D4)</span><strong>Sin corte municipal validado en BALAM</strong><a target="_blank" rel="noopener noreferrer" href="https://smn.conagua.gob.mx/es/climatologia/monitor-de-sequia/monitor-de-sequia-en-mexico">Monitor oficial ↗</a></div>'+
+  '<div id="smnDroughtInfo"><b>Sequía</b><p>Corte quincenal en proceso de validación…</p></div>'+
   '<div><span>Ciclones y tormentas tropicales</span><strong>Sin aviso geográfico municipal asociado</strong><a target="_blank" rel="noopener noreferrer" href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico">Avisos SMN ↗</a></div>'+
   '<div><span>Deslaves e inundaciones</span><strong>Susceptibilidad no evaluada para este municipio</strong><a target="_blank" rel="noopener noreferrer" href="https://www.atlasnacionalderiesgos.gob.mx/">Atlas Nacional de Riesgos ↗</a></div>'+
   '<p class="tiny">Que una variable esté sin evaluar no significa riesgo bajo. El pronóstico de lluvia, por sí solo, no predice un deslave ni una inundación.</p></div>';
@@ -89,6 +89,7 @@ function renderMunicipality(code){
   '<p class="tiny">Criterios internos provisionales, NO alertas oficiales ni predicción de daños. Revisar avisos de SMN y Protección Civil.</p>'+hazards+
   (crum!==null?'<p class="tiny">🚑 CRUM: '+crum+' registros inventariados en este municipio (no disponibilidad operativa).</p>':'<p class="tiny">🚑 Activa sesión CRUM para consultar recursos municipales.</p>')+
   '<a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico oficial ↗</a>';
+ if(window.BALAM_Drought?.renderMunicipality)window.BALAM_Drought.renderMunicipality(code);
 }
 
 function renderSonoraSummary(){
@@ -134,7 +135,14 @@ async function load(){
   rerender();
  }finally{loading=false}
 }
-el('smn-visible').addEventListener('change',e=>{enabled=e.target.checked;paint()});
+el('smn-visible').addEventListener('change',e=>{
+ enabled=e.target.checked;
+ if(enabled){
+  const drought=el('drought-visible');
+  if(drought?.checked){drought.checked=false;drought.dispatchEvent(new Event('change'))}
+ }
+ paint();
+});
 el('smn-scope').addEventListener('change',paint);
 el('smn-metric').addEventListener('change',()=>{paint();renderSonoraSummary()});
 el('smn-day').addEventListener('change',rerender);
