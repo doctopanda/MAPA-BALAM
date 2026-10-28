@@ -72,6 +72,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 </style><style id="smn-styles-v1">
 #smn-panel{margin:0;background:#f8fffb;border:0;padding:12px;color:#275546}
 #smn-panel h3{font-size:14px;margin:0 0 8px;color:#155d50}
+#smn-legend{background:#f6faf8;border:1px solid #d5e7dd;padding:8px;border-radius:9px;line-height:1.6}
 #smn-panel p{font-size:11px;line-height:1.5}
 #smn-panel label{font-size:11px;font-weight:750;display:block;margin:9px 0 5px}
 #smn-panel select{min-height:37px;display:block;width:100%;border:1px solid #c2d9ce;border-radius:9px;background:white;color:#235747;font:600 11px system-ui;padding:7px}
@@ -165,7 +166,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
  <select id="smn-scope"><option value="active">Distritos seleccionados</option><option value="all">Todo Sonora</option></select>
  <p id="smn-status" class="smn-status" role="status">Buscando el último corte validado…</p>
  <p id="smn-source" class="tiny"></p>
- <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p>
+ <p id="smn-overlay-count" class="tiny">0 municipios resaltados</p><p id="smn-legend" class="tiny" aria-live="polite">Seleccione una variable meteorológica.</p>
  <button id="smn-reload" class="btn" type="button">Actualizar lectura</button>
  <div class="smn-links"><a href="https://smn.conagua.gob.mx/es/pronostico-del-tiempo-por-municipios" target="_blank" rel="noopener noreferrer">Pronóstico SMN ↗</a>
  <a href="https://smn.conagua.gob.mx/es/pronosticos/avisos/aviso-de-ciclon-tropical-en-el-oceano-pacifico" target="_blank" rel="noopener noreferrer">Ciclones Pacífico ↗</a>
@@ -555,6 +556,7 @@ function renderDetail(code,name,did){
  else if(ind.scope==='territory'){precision='Territorio'}
  else precision='Sin corte territorial';
  var lines='<div class="eyebrow">'+did+' · '+esc(d.head)+'</div><div class="detail-title">'+esc(name)+'</div>';
+ if(d.climate||d.landscape){lines+='<p class="tiny"><b>Contexto regional BALAM:</b> '+esc(d.landscape||'')+' · '+esc(d.climate||'')+'. Caracterización territorial orientativa; no equivale a riesgo climático municipal ni alerta oficial.</p>'}
  lines+='<div class="metricline"><span>Modo</span><b>'+esc(modeCfg().label)+'</b></div>';
  lines+='<div class="metricline"><span>Fuente</span><b>'+esc(sourceCfg().label)+'</b></div>';
  lines+='<div class="metricline"><span>Indicador</span><b>'+esc(ind.label)+'</b></div>';
