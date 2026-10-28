@@ -1,0 +1,33 @@
+name: BALAM - Importar CLUES oficiales Sonora
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'scripts/clues_sonora.py'
+      - '.github/workflows/clues-sonora.yml'
+permissions:
+  contents: write
+concurrency:
+  group: balam-clues-sonora
+  cancel-in-progress: false
+jobs:
+  catalog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Descargar y validar corte CLUES
+        run: python scripts/clues_sonora.py
+      - name: Guardar solo datos institucionales validables
+        run: |
+          git add data/health/sonora_latest.json
+          if git diff --cached --quiet; then exit 0; fi
+          git config user.name "BALAM Catálogos Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data(clues): catálogo institucional Sonora validado"
+          git push
