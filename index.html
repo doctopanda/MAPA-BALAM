@@ -240,6 +240,9 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
 .toll-route-row b{font:850 11px/1.2 system-ui;color:#684315}
 .toll-route-row small{display:block;font:10px/1.4 system-ui;color:#6e664e}
 .toll-route-actions{display:flex;gap:6px;flex-wrap:wrap}
+.toll-price-label{display:grid;gap:5px;font:750 10px/1.4 system-ui;color:#725528;margin-top:5px}
+.toll-price-label input{width:100%;box-sizing:border-box;min-height:32px;padding:7px 9px;border-radius:8px;border:1px solid #dfc58e;background:#fffdf7;color:#563f1a;font:700 12px system-ui}
+.toll-price-label input:disabled{opacity:.55;cursor:not-allowed}
 .toll-map-action{font:750 10px system-ui;border:1px solid #d1b17a;border-radius:7px;padding:6px 8px;background:#f8eacb;color:#75501e;cursor:pointer}
 .toll-map-action:disabled{opacity:.45;cursor:default}
 .toll-map-action:not(:disabled):hover{background:#e5f5e6;color:#216449;border-color:#74c48c}
@@ -381,7 +384,7 @@ main{position:relative;min-width:0;min-height:650px}.map{position:absolute;inset
   <div id="logistics-output" class="logistics-output" role="status" aria-live="polite">Sin ruta calculada.</div>
   <details id="budget-panel" class="balam-budget-panel" open>
  <summary>🧾 Presupuesto total: combustible + casetas + viáticos</summary>
- <p class="tiny">Selecciona únicamente las casetas efectivamente atravesadas, una por sentido de circulación. Tarifas oficiales CAPUFE de 2026; no se identifica automáticamente si una ruta cruza determinada plaza.</p>
+ <p class="tiny">Confirma todas las casetas que atraviesa cada sentido (ida y regreso) de forma independiente. Cuando la plaza no tenga una tarifa oficial vinculada, captura el monto manual por cruce y verifica la fuente antes de autorizar; no se completan importes desconocidos con cero.</p>
  <label class="budget-field">Clase tarifaria del vehículo (confirmar con CAPUFE)
   <select id="budget-vehicle-class">
    <option value="">Elegir categoría de peaje…</option>
