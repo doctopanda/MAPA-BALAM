@@ -67,7 +67,7 @@ def main():
                 errors['invalid']+=1;continue
             code,name=locate(*pt,mm)
             if not code:errors['outside_municipal_boundaries']+=1;continue
-            key=str(f.get('id') or tags.get('@id') or tags.get('id') or '')
+            key=str(f.get('id') or tags.get('@fid') or tags.get('@id') or tags.get('id') or '')
             if not key:errors['invalid']+=1;continue
             docs['OSM:'+key]={
                 'id':'OSM:'+key,'category':cat,
