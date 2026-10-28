@@ -1,0 +1,44 @@
+name: BALAM - Actualizar pronóstico SMN Sonora
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '23 */3 * * *'
+  push:
+    paths:
+      - 'scripts/smn_sonora.py'
+      - '.github/workflows/smn-sonora.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: balam-smn-sonora
+  cancel-in-progress: false
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: true
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validar transformador sin red
+        run: python scripts/smn_sonora.py --self-test
+      - name: Consultar fuente oficial SMN y filtrar Sonora
+        run: python scripts/smn_sonora.py
+      - name: Publicar solamente cuando hay un corte válido
+        run: |
+          git add data/smn/sonora_latest.json
+          if git diff --cached --quiet; then
+            echo "Sin cambios"
+            exit 0
+          fi
+          git config user.name "BALAM SMN Bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data(smn): actualizar pronóstico municipal verificado"
+          git push
