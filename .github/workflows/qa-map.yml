@@ -1,0 +1,23 @@
+name: BALAM - Validar mapa multi-capas
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'index.html'
+      - 'assets/**'
+      - 'scripts/validate-map.cjs'
+      - 'data/health/**'
+      - 'data/smn/**'
+      - '.github/workflows/qa-map.yml'
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/validate-map.cjs
