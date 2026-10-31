@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BALAM Visor · Observatorio móvil</title><meta name="theme-color" content="#176d60">
+<meta name="description" content="BALAM Visor móvil: panorama, indicadores, demografía CONAPO y contexto territorial de Sonora.">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="BALAM Visor">
+<link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css">
+</head><body>
+<a class="skip" href="#content">Ir al contenido</a>
+<header class="top"><div class="identity"><div class="mark" aria-hidden="true">🐆</div><div><strong>BALAM <span>VISOR</span></strong><small>Observatorio territorial · Sonora</small></div></div><span class="mode">AGREGADOS PÚBLICOS</span></header>
+<main id="content" tabindex="-1">
+<section class="hero"><div><div class="eyebrow">BALAM v6.0 · EXPERIENCIA MÓVIL</div><h1 id="screenTitle">Panorama general</h1><p id="screenSubtitle">Lectura operativa y demográfica con procedencia explícita.</p></div><button id="reload" class="refresh" type="button" title="Actualizar datos" aria-label="Actualizar datos">↻</button></section>
+<div class="context"><label for="district">Distrito de Salud</label><select id="district" aria-label="Distrito de Salud"><option value="">Preparando distritos…</option></select><div id="cut" class="cut" aria-live="polite">Conectando fuentes…</div></div>
+<div class="alert" id="warning" role="status" hidden></div>
+<section id="panel-home" class="screen active" aria-label="Panorama">
+<div class="kpi-grid" id="kpis" aria-live="polite"></div>
+<article class="sheet"><div class="sheet-head"><h2>Lectura territorial</h2><span>Por fuente</span></div><p id="overviewText">Cargando datos publicados…</p></article>
+<div class="quick-grid"><button class="quick" type="button" data-go="indicators"><span>📊</span><strong>Indicadores</strong><small>Resultados y actividad</small></button><button class="quick" type="button" data-go="territory"><span>🧭</span><strong>Territorio</strong><small>Municipios y CONAPO</small></button><a class="quick" id="quickMap" href="../" rel="noopener"><span>🗺️</span><strong>Mapa BALAM</strong><small>Polígonos y capas</small></a><button class="quick" type="button" data-go="sources"><span>🔎</span><strong>Fuentes</strong><small>Cortes y trazabilidad</small></button></div>
+</section>
+<section id="panel-indicators" class="screen" aria-label="Indicadores" hidden>
+<article class="sheet"><div class="sheet-head"><h2>Operativo publicado</h2><span id="indicatorCut">Corte</span></div><div id="indicatorBars" class="bars"></div><p class="note">No se confunden casos, atenciones, acciones ni registros. Los datos corresponden únicamente al corte documentado.</p></article>
+<article class="sheet"><h2>Registros municipales disponibles</h2><div id="municipalityBars" class="bars"></div><p class="note">Filas canónicas del almacén público BALAM. No equivalen a personas únicas ni a incidencia.</p></article>
+</section>
+<section id="panel-territory" class="screen" aria-label="Territorio" hidden>
+<article class="sheet"><div class="sheet-head"><h2>Perfil municipal</h2><span>CONAPO 2026</span></div><label class="field" for="municipality">Seleccionar municipio <select id="municipality"><option value="">Cargando catálogo…</option></select></label><div id="municipalKpis" class="kpi-grid compact"></div><div id="municipalCharts"></div><div class="actions"><a id="mapMunicipality" href="../" class="link-primary">Abrir mapa territorial ↗</a></div></article>
+</section>
+<section id="panel-sources" class="screen" aria-label="Fuentes y acceso">
+<article class="sheet"><h2>Procedencia de los datos</h2><div class="source" id="sourcesList"></div></article>
+<article class="sheet"><h2>Seguridad y alcance</h2><p>Esta PWA pública es de consulta de agregados. No permite cargar, modificar ni descargar registros nominales. Las funciones de SIESA, GOLIPCA, auditoría y permisos se incorporarán en un visor autenticado con control RLS.</p><p class="note">La falta de un corte no representa cero actividad. El servicio no ofrece avisos epidemiológicos municipales activos verificados.</p><a href="../" class="link-primary">Abrir BALAM Mapa ↗</a></article>
+</section>
+</main>
+<nav class="bottom" aria-label="Navegación principal"><button type="button" class="selected" data-screen="home" aria-current="page"><span>⌂</span>Inicio</button><button type="button" data-screen="indicators"><span>▥</span>Indicadores</button><button type="button" data-screen="territory"><span>◎</span>Territorio</button><button type="button" data-screen="sources"><span>☷</span>Fuentes</button></nav>
+<script defer src="./app.js"></script></body></html>
