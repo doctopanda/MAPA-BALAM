@@ -2,6 +2,24 @@
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),zlib=require('zlib');
 const files=['assets/balam-mobile.js','assets/smn-layer.js','assets/conapo-layer.js','assets/municipality-profile.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
+const visorHtml=fs.readFileSync('visor/index.html','utf8');
+const visorApp=fs.readFileSync('visor/app.js','utf8');
+const visorSW=fs.readFileSync('visor/sw.js','utf8');
+const visorCss=fs.readFileSync('visor/style.css','utf8');
+const visorManifest=JSON.parse(fs.readFileSync('visor/manifest.webmanifest','utf8'));
+new vm.Script(visorApp,{filename:'visor/app.js'});
+new vm.Script(visorSW,{filename:'visor/sw.js'});
+assert(visorManifest.scope==='./'&&visorManifest.display==='standalone','BALAM Visor: PWA mal configurada');
+assert(visorHtml.includes('id="panel-home"')&&visorHtml.includes('data-screen="territory"')&&visorHtml.includes('id="panel-indicators"'),'BALAM Visor: navegación incompleta');
+assert(visorCss.includes('@media(min-width:700px)')&&visorCss.includes('safe-area-inset-bottom'),'BALAM Visor: no es adaptable');
+assert(visorSW.includes("if(!url.pathname.includes('/visor/'))return"),'BALAM Visor: cache fuera del ámbito');
+assert(!visorApp.includes('service_role')&&!visorHtml.includes('sb_secret_')&&!visorApp.includes('supabase.from'),'BALAM Visor: no publicar lógica de escritura privada');
+for(const [,id] of visorApp.matchAll(/\$\('([A-Za-z][A-Za-z0-9-]*)'\)/g))assert(visorHtml.includes('id="'+id+'"'),'BALAM Visor: falta DOM '+id);
+const visorConapo=JSON.parse(require('zlib').inflateSync(Buffer.from(fs.readFileSync('data/conapo/sonora_municipios_2015_2030.b64','utf8').trim(),'base64')).toString());
+assert(visorConapo.profiles.length===72&&visorConapo.years.length===16,'BALAM Visor: no hay proyecciones municipales');
+assert(visorConapo.profiles.every(([code,trend,male,female])=>trend[11]===male.reduce((a,b)=>a+b,0)+female.reduce((a,b)=>a+b,0)),'BALAM Visor: denominadores CONAPO discordantes');
+console.log('BALAM VISOR PWA QA PASS',{municipios:visorConapo.profiles.length,view:'public-aggregates'});
+
 const mobileCss=fs.readFileSync('assets/balam-mobile.css','utf8'),mobileJs=fs.readFileSync('assets/balam-mobile.js','utf8');
 const webManifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
 assert(webManifest.display==='standalone'&&webManifest.start_url.startsWith('./'),'Manifest móvil inválido');
