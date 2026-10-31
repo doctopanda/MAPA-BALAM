@@ -4,7 +4,7 @@
 const $=id=>document.getElementById(id);
 const fmt=n=>Number.isFinite(n)?Math.round(n).toLocaleString('es-MX'):'Sin dato';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state={districts:null,ds05:null,conapo:null,loaded:false,district:'DS05',municipality:'26042',screen:'home'};
+const state={districts:null,ds05:null,conapo:null,names:new Map(),loaded:false,district:'DS05',municipality:'26042',screen:'home'};
 const headings={home:['Panorama general','Lectura operativa y demográfica con procedencia explícita.'],indicators:['Indicadores','Cada cifra mantiene su unidad y corte de origen.'],territory:['Territorio y población','Proyecciones CONAPO 2015–2030 por municipio.'],sources:['Fuentes y trazabilidad','Origen, límites y controles de interpretación.']};
 const srcData={districts:'../data/districts.json',siesa:'../data/ds05_metrics.json',conapo:'../data/conapo/sonora_municipios_2015_2030.b64'};
 const fail=e=>{$('warning').hidden=false;$('warning').textContent='No se pudieron cargar todos los datos: '+String(e.message||e)+'. Intenta actualizar. No se muestran cifras aproximadas.'};
@@ -88,7 +88,7 @@ function municipalityList(){
  const d=districtObj(),names=new Map(state.ds05?.municipalities?.map(m=>[m.cvegeo,m.name])||[]);
  const select=$('municipality');select.replaceChildren();
  for(const code of (d?.municipalities||[])){
-  const id='26'+code;const possible=state.conapo?.doc?.municipalityNames?.[id];
+  const id='26'+code;const possible=state.names.get(id);
   const label=names.get(id)||possible||'Municipio '+id;
   select.add(new Option(label+' · '+id,id));
  }
@@ -135,6 +135,11 @@ async function load(){
   if(districts.districts?.length!==6||!ds05.current_filter||!ds05.municipalities?.length)throw Error('Estructura BALAM no válida');
   state.districts=districts;state.ds05=ds05;state.conapo=conapo;state.loaded=true;
   populateDistricts();draw();
+  getJson('../data/smn/sonora_latest.json').then(doc=>{
+   if(!Array.isArray(doc.municipalities))return;
+   state.names=new Map(doc.municipalities.filter(x=>/^26\d{3}$/.test(x.code)&&x.name).map(x=>[x.code,x.name]));
+   if(state.loaded)renderTerritory();
+  }).catch(()=>{});
  }catch(e){fail(e);$('cut').textContent='Datos no disponibles. Reintenta actualizar.'}
 }
 $('district').addEventListener('change',e=>{state.district=e.target.value;draw()});
