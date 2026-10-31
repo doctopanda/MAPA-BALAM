@@ -1,7 +1,15 @@
 /* BALAM 0.10 smoke validation: no browser, no external deps. */
 const fs=require('fs'),vm=require('vm'),assert=require('assert'),zlib=require('zlib');
-const files=['assets/smn-layer.js','assets/conapo-layer.js','assets/municipality-profile.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
+const files=['assets/balam-mobile.js','assets/smn-layer.js','assets/conapo-layer.js','assets/municipality-profile.js','assets/drought-layer.js','assets/health-network.js','assets/logistics-route.js','assets/support-catalog.js','assets/travel-budget.js','assets/toll-route-detection.js','assets/denue-services.js','assets/crum-layer.js'];
 const html=fs.readFileSync('index.html','utf8');
+const mobileCss=fs.readFileSync('assets/balam-mobile.css','utf8'),mobileJs=fs.readFileSync('assets/balam-mobile.js','utf8');
+const webManifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
+assert(webManifest.display==='standalone'&&webManifest.start_url.startsWith('./'),'Manifest móvil inválido');
+assert(html.includes('assets/balam-mobile.css')&&html.includes('assets/balam-mobile.js')&&html.includes('manifest.webmanifest'),'No está conectado el modo móvil');
+assert(mobileCss.includes('#balamMobileBar')&&mobileCss.includes('max-width:900px')&&mobileCss.includes('safe-area-inset-bottom'),'Diseño táctil incompleto');
+assert(mobileJs.includes('balam-mobile-detail')&&mobileJs.includes('balamMobileClose')&&mobileJs.includes("map.invalidateSize({pan:false})"),'Navegación de mapa y ficha no conectada');
+console.log('BALAM MOBILE QA PASS');
+
 for(const [i,script] of [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/ig)].entries()){
  if(!/\bsrc=/.test(script[1]))new vm.Script(script[2],{filename:'index inline '+i});
 }
