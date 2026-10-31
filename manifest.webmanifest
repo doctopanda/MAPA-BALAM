@@ -1,0 +1,19 @@
+{
+  "name": "BALAM Mapa · Sonora",
+  "short_name": "BALAM Mapa",
+  "description": "Mapa territorial de Sonora, distritos, municipios, AGEB y vigilancia BALAM.",
+  "start_url": "./?source=mobile",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4fbf7",
+  "theme_color": "#168f8b",
+  "icons": [
+    {
+      "src": "assets/brand/jaguar-pin-ruta-balam.webp",
+      "sizes": "any",
+      "type": "image/webp",
+      "purpose": "any"
+    }
+  ]
+}
