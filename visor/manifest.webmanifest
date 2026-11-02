@@ -1,13 +1,19 @@
 {
-  "name": "BALAM Visor · Sonora",
+  "name": "BALAM Visor · Observatorio móvil",
   "short_name": "BALAM Visor",
-  "description": "Observatorio territorial móvil BALAM, solo agregados publicados.",
+  "description": "BALAM Visor v6.1: SIESA, GOLIPCA, demografía y territorio de Sonora",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
   "background_color": "#f3f8f5",
   "theme_color": "#176d60",
   "icons": [
+    {
+      "src": "./brand-jaguar.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
     {
       "src": "../assets/brand/jaguar-pin-ruta-balam.webp",
       "sizes": "any",
