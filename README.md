@@ -1,6 +1,55 @@
 # MAPA BALAM 🐆
 
-Mapa territorial del Observatorio BALAM para Sonora.
+Mapa territorial y observatorio BALAM para Sonora.
+
+## 🚀 Abrir BALAM · enlaces directos
+
+**Selecciona una aplicación y ábrela con un clic.** Tanto BALAM Mapa como BALAM Visor son aplicaciones web adaptables: se utiliza la **misma dirección en computadora y celular**, con interfaz adecuada a cada pantalla.
+
+| Producto | 💻 Escritorio | 📱 Celular / WebApp | Acceso |
+| --- | --- | --- | --- |
+| **BALAM Mapa** · distritos, municipios, AGEB, demografía, clima y capas | [🌐 Abrir Mapa](https://doctopanda.github.io/MAPA-BALAM/) | [📱 Abrir Mapa móvil](https://doctopanda.github.io/MAPA-BALAM/) | Público; la capa CRUM requiere iniciar sesión |
+| **BALAM Visor v6.0** · panorama, indicadores, CONAPO y fuentes | [🌐 Abrir Visor](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir Visor móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, únicamente datos agregados |
+| **BALAM CRUM** · panel específico | [🔒 Abrir CRUM](https://doctopanda.github.io/MAPA-BALAM/crum.html) | [🔒 Abrir CRUM desde celular](https://doctopanda.github.io/MAPA-BALAM/crum.html) | Inicio de sesión y permisos requeridos |
+
+### Accesos rápidos
+
+- 🗺️ **[ENTRAR A BALAM MAPA](https://doctopanda.github.io/MAPA-BALAM/)**
+- 📊 **[ENTRAR A BALAM VISOR](https://doctopanda.github.io/MAPA-BALAM/visor/)**
+- 🚑 **[ENTRAR AL PANEL CRUM (AUTENTICACIÓN)](https://doctopanda.github.io/MAPA-BALAM/crum.html)**
+
+### Cómo abrir las versiones móviles
+
+Abre el enlace del producto directamente desde el navegador del teléfono. Puedes agregarlo a la pantalla de inicio desde el menú del navegador (en Android, **Instalar aplicación** o **Añadir a pantalla principal**; en iOS, **Compartir → Añadir a pantalla de inicio**, según navegador). La instalación no convierte los datos conectados en información disponible sin internet; algunas secciones requieren red.
+
+**Importante:** BALAM Visor v6.0 no es todavía el visor operativo privado v5.3.3 completo. La captura SIESA, GOLIPCA, auditoría y nominales no se publican como una página abierta de GitHub. No se ofrece un enlace público a archivos HTML locales de respaldo como si fueran servicios web.
+
+### Versiones y estado
+
+| Componente | Versión de referencia | Publicación |
+| --- | --- | --- |
+| BALAM Mapa | v0.18 · diseño adaptable | GitHub Pages |
+| BALAM Visor | v6.0 · observatorio público | GitHub Pages en `/visor/` |
+| BALAM CRUM | Visor protegido | GitHub Pages con autenticación |
+| BALAM Visor operativo legado | v5.3.3 · archivo local | **No publicado**; requiere migración autenticada |
+
+---
+
+## 📌 Convención para próximos productos
+
+Cada repositorio nuevo de este ecosistema deberá comenzar su `README.md` con un bloque **«🚀 Abrir aplicación»**, antes de la información técnica, que incluya:
+
+1. **Enlace clicable al sitio de escritorio** y **enlace clicable al acceso móvil/PWA**. Si es una aplicación adaptable, indicar que ambos enlaces llevan a la misma URL.
+2. **Enlaces separados para mapas, visores, tableros o módulos**, cuando exista una dirección real para cada uno. Nunca publicar enlaces ficticios o rutas sin desplegar.
+3. **Estado del producto** (publicado, en pruebas, protegido o solo local), versión y fecha del corte de datos cuando corresponda.
+4. **Cómo instalar en celular** y qué partes requieren conexión a internet.
+5. **Acceso y privacidad**: identificar explícitamente el inicio de sesión requerido; no colocar enlaces a bases nominales, contraseñas ni tokens.
+
+Esta sección debe actualizarse **en el mismo cambio que publique una nueva página o modifique su URL**, para que el README siga siendo el directorio vigente de acceso.
+
+---
+
+## Histórico técnico y evolución
 
 ## v0.3 · visor estatal multi-distrito
 
