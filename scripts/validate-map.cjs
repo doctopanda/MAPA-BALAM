@@ -19,6 +19,14 @@ const visorConapo=JSON.parse(require('zlib').inflateSync(Buffer.from(fs.readFile
 assert(visorConapo.profiles.length===72&&visorConapo.years.length===16,'BALAM Visor: no hay proyecciones municipales');
 assert(visorConapo.profiles.every(([code,trend,male,female])=>trend[11]===male.reduce((a,b)=>a+b,0)+female.reduce((a,b)=>a+b,0)),'BALAM Visor: denominadores CONAPO discordantes');
 console.log('BALAM VISOR PWA QA PASS',{municipios:visorConapo.profiles.length,view:'public-aggregates'});
+assert(visorHtml.includes('id="panel-golipca"')&&visorHtml.includes('id="panel-modules"')&&visorHtml.includes('id="homeInsights"'),'BALAM Visor v6.1 sin paneles nuevos');
+assert(visorHtml.includes('data-screen="golipca"')&&visorHtml.includes('id="siesaAreaBars"'),'BALAM Visor v6.1 sin navegación o captura SIESA');
+for(const k of ["Gerencia y Rectoría","Operaciones","Logística","Inteligencia en Salud","Programas","CECOSABI","Administración"])
+ assert(visorApp.includes(k),'BALAM Visor v6.1: falta eje GOLIPCA '+k);
+assert(visorManifest.icons.some(x=>x.src==='./brand-jaguar.svg'),'BALAM Visor no usa sello original');
+assert(fs.readFileSync('visor/brand-jaguar.svg','utf8').includes('data:image/webp;base64'),'BALAM sello original ausente');
+require('child_process').execFileSync(process.execPath,['scripts/test-visor-mobile.cjs'],{stdio:'inherit'});
+
 
 const mobileCss=fs.readFileSync('assets/balam-mobile.css','utf8'),mobileJs=fs.readFileSync('assets/balam-mobile.js','utf8');
 const webManifest=JSON.parse(fs.readFileSync('manifest.webmanifest','utf8'));
