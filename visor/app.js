@@ -4,8 +4,8 @@
 const $=id=>document.getElementById(id);
 const fmt=n=>Number.isFinite(n)?Math.round(n).toLocaleString('es-MX'):'Sin dato';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const state={districts:null,ds05:null,conapo:null,names:new Map(),loaded:false,district:'DS05',municipality:'26042',screen:'home'};
-const headings={home:['Panorama general','Lectura operativa y demográfica con procedencia explícita.'],indicators:['Indicadores','Cada cifra mantiene su unidad y corte de origen.'],territory:['Territorio y población','Proyecciones CONAPO 2015–2030 por municipio.'],sources:['Fuentes y trazabilidad','Origen, límites y controles de interpretación.']};
+const state={districts:null,ds05:null,conapo:null,names:new Map(),loaded:false,district:'DS05',municipality:'26042',siesaMunicipality:'26042',goli:'G',screen:'home'};
+const headings={home:['Panorama general','Lectura operativa y demográfica con procedencia explícita.'],indicators:['SIESA · Indicadores','Atenciones, acciones y módulos del corte público.'],golipca:['GOLIPCA','Siete ejes de gestión articulados desde datos verificables.'],modules:['Módulos BALAM','Explora las herramientas y su disponibilidad.'],territory:['Territorio y población','Proyecciones CONAPO 2015–2030 por municipio.'],sources:['Fuentes y trazabilidad','Origen, límites y controles de interpretación.']};
 const srcData={districts:'../data/districts.json',siesa:'../data/ds05_metrics.json',conapo:'../data/conapo/sonora_municipios_2015_2030.b64'};
 const fail=e=>{$('warning').hidden=false;$('warning').textContent='No se pudieron cargar todos los datos: '+String(e.message||e)+'. Intenta actualizar. No se muestran cifras aproximadas.'};
 async function getJson(url){
@@ -114,9 +114,131 @@ function renderSources(){
  '<div class="source-item"><b>SIESA · operativo OSS HURACÁN POLO DS05</b><small>Último corte publicado '+esc(state.ds05?.cut||'sin fecha')+'. Fuente: data/ds05_metrics.json. No extrapolar a otros distritos.</small></div>'+
  '<div class="source-item"><b>Mapa territorial</b><small>Polígonos y capas publicados en MAPA-BALAM. La ficha pública del visor no contiene información personal.</small></div>';
 }
+const GOLI=[
+{id:'G',name:'Gerencia y Rectoría',brief:'Lectura de mando: actividad publicada, alcance territorial y límites del corte operativo.',source:'SIESA · corte operativo publicado',fields:[['Casos / atenciones','cases_or_attentions'],['Acciones asistenciales','healthcare_actions'],['Acciones operativas','discrete_operational_actions']]},
+{id:'O',name:'Operaciones',brief:'Acciones de campo y localidades documentadas. Las cifras de operación no equivalen a personas atendidas.',source:'SIESA · corte operativo publicado',fields:[['Acciones operativas','discrete_operational_actions'],['Localidades documentadas','localities']]},
+{id:'L',name:'Logística',brief:'Recursos, traslados, insumos y abastecimiento. Requiere corte logístico normalizado, no se infiere a partir de actuaciones clínicas.',source:'Fuente logística aún no conectada',fields:[]},
+{id:'I',name:'Inteligencia en Salud',brief:'Vigilancia epidemiológica por capturas canónicas y contexto demográfico. Los registros no representan casos confirmados.',source:'SIESA · módulos territoriales del corte público',fields:[]},
+{id:'P',name:'Programas',brief:'Promoción, vacunación y actividades de programas. No se presentan coberturas sin población objetivo y denominador compatibles.',source:'SIESA · módulos territoriales del corte público',fields:[]},
+{id:'C',name:'CECOSABI',brief:'Saneamiento y seguimiento territorial documentado. Sin atribución municipal automática cuando no existe llave geográfica válida.',source:'CECOSABI · archivo público de saneamiento',fields:[]},
+{id:'A',name:'Administración',brief:'Registro, auditoría, calidad de captura, permisos y recursos. Los expedientes y la administración protegida no se exponen en GitHub.',source:'Corte de captura SIESA; auditoría autenticada pendiente',fields:[]}
+];
+const MODS=[
+{id:'golipca',glyph:'◉',title:'GOLIPCA',desc:'Gestión integral en siete ejes',state:'público'},
+{id:'indicators',glyph:'▥',title:'SIESA',desc:'Indicadores y módulos capturados',state:'corte DS05'},
+{id:'territory',glyph:'⌖',title:'CONAPO',desc:'Demografía, edad y sexo',state:'72 municipios'},
+{id:'map',glyph:'▧',title:'MAPA BALAM',desc:'Polígonos, AGEB y herramientas',state:'publicado'},
+{id:'crum',glyph:'✚',title:'CRUM',desc:'Inventario con acceso autenticado',state:'restringido'},
+{id:'cecosabi',glyph:'⚗',title:'CECOSABI',desc:'Saneamiento territorial disponible',state:'corte DS05',goli:'C'},
+{id:'intel',glyph:'◎',title:'INTELIGENCIA',desc:'Vigilancia y análisis epidemiológico',state:'parcial',goli:'I'},
+{id:'sources',glyph:'◈',title:'FUENTES',desc:'Fechas y reglas de trazabilidad',state:'público'},
+{id:'laboratory',glyph:'◌',title:'MUESTRAS EBT',desc:'Nominales y resultados no publicados',state:'protegido'}
+];
+const PUBLIC_SIESA_MODULES=[
+['atencion_medica','Atención médica'],['enfermeria','Enfermería'],
+['promocion_salud','Promoción de la salud'],['vigilancia_epidemiologica','Vigilancia epidemiológica'],
+['vacunacion','Vacunación'],['vectores','Vectores'],['riesgos_sanitarios','Riesgos sanitarios'],
+['salud_mental','Salud mental'],['seguimiento_localidad_desastre','Seguimiento por desastre']
+];
+const totalModule=key=>(state.ds05?.municipalities||[]).reduce((acc,m)=>acc+(Number(m.modules?.[key])||0),0);
+function metricTile(label,value,source){return cell(label,value,source)}
+function activeSource(){return isDS05()&&!!state.ds05?.current_filter}
+function moduleSums(){return PUBLIC_SIESA_MODULES.map(([key,label])=>({key,label,value:totalModule(key)}))}
+function actionLink(tab,label){return '<button class="text-button" type="button" data-go="'+esc(tab)+'">'+esc(label||'Ver detalle')+' ↗</button>'}
+function renderHomeExtras(){
+ const s=state.ds05?.current_filter, ds=state.district;
+ const pop=populationDistrict();
+ $('homeInsights').innerHTML=
+  '<div class="insight-item"><b>Distrito activo</b><span>'+esc(ds+' · '+(districtObj()?.head||''))+'</span></div>'+
+  '<div class="insight-item"><b>Demografía</b><span>CONAPO 2026 · '+fmt(pop)+' habitantes proyectados</span></div>'+
+  '<div class="insight-item"><b>Operación</b><span>'+(activeSource()?'SIESA '+esc(state.ds05.cut)+' · operativo específico':'Sin corte SIESA publicado; no significa cero actividad')+'</span></div>'+
+  '<div class="insight-item"><b>Consulta</b><span>Datos agregados · sin expedientes personales</span></div>';
+ if(!activeSource()){
+  $('homeOperations').innerHTML='<p class="empty-state">El distrito no tiene un corte SIESA público comparable. Puedes explorar su población y territorio.</p>';
+ }else{
+  const sums=moduleSums().sort((a,b)=>b.value-a.value);
+  const mx=Math.max(1,...sums.map(x=>x.value));
+  $('homeOperations').innerHTML=sums.slice(0,5).map(x=>bar(x.label,x.value,mx,'capturas')).join('')+
+   '<p class="note">Registros por módulo, no personas únicas ni acciones discretas. Corte '+esc(state.ds05.cut)+'.</p>';
+ }
+ const ids=[['G','Gerencia'],['O','Operaciones'],['L','Logística'],['I','Inteligencia'],['P','Programas'],['C','CECOSABI'],['A','Administración']];
+ $('homeGolipca').innerHTML=ids.map(([id,label])=>'<button type="button" data-goli="'+id+'" class="goli-pill"><b>'+id+'</b><span>'+esc(label)+'</span></button>').join('');
+}
+function renderSiesaArea(){
+ const selector=$('siesaMunicipality'),all=state.ds05?.municipalities||[];
+ const prev=state.siesaMunicipality;
+ selector.replaceChildren(new Option('Todos los municipios DS05','ALL'));
+ for(const m of all)selector.add(new Option(m.name,m.cvegeo));
+ if(prev!=='ALL'&&!all.some(x=>x.cvegeo===prev))state.siesaMunicipality='ALL';
+ selector.value=state.siesaMunicipality;
+ if(!activeSource()){
+  selector.disabled=true;
+  $('siesaAreaKpis').innerHTML='';
+  $('siesaAreaBars').innerHTML='<p class="empty-state">Sin datos SIESA por municipio para este distrito.</p>';
+  return;
+ }
+ selector.disabled=false;
+ const mun=all.find(x=>x.cvegeo===state.siesaMunicipality),mods=PUBLIC_SIESA_MODULES.map(([key,label])=>({label,value:mun?(Number(mun.modules?.[key])||0):totalModule(key)}));
+ const cap=mun?mun.canonical_rows:all.reduce((n,x)=>n+x.canonical_rows,0);
+ const loc=mun?mun.documented_localities:null;
+ $('siesaAreaKpis').innerHTML=metricTile('Filas canónicas',cap,'Almacén público SIESA')+
+  metricTile('Áreas de captura',mods.filter(x=>x.value>0).length,'Módulos con registros')+
+  metricTile('Localidades documentadas',loc,'No sumar entre municipios')+
+  metricTile('Módulos presentes',mods.filter(x=>x.value>0).length,'SIESA · '+state.ds05.cut);
+ const max=Math.max(1,...mods.map(x=>x.value));
+ $('siesaAreaBars').innerHTML=mods.sort((a,b)=>b.value-a.value).map(x=>bar(x.label,x.value,max,'registros')).join('');
+}
+function renderGolipca(){
+ const g=GOLI.find(x=>x.id===state.goli)||GOLI[0];
+ $('goliSelector').innerHTML=GOLI.map(x=>'<button type="button" data-goli="'+x.id+'" class="'+(g.id===x.id?'active':'')+'" aria-pressed="'+(g.id===x.id)+'"><b>'+x.id+'</b><small>'+esc(x.name)+'</small></button>').join('');
+ $('goliTitle').textContent=g.id+' · '+g.name;
+ $('goliDescription').textContent=g.brief;
+ const avail=activeSource();
+ $('goliKpis').innerHTML='';$('goliBars').innerHTML='';
+ $('goliStatus').textContent=avail&&g.id!=='L'?'DS05 · '+state.ds05.cut:'Sin corte específico';
+ $('goliSource').textContent='Procedencia: '+g.source+'. '+(avail?'Corte territorial DS05, 12/10/2026.':'No extrapolar cifras SIESA a este distrito.');
+ if(!avail){$('goliBars').innerHTML='<p class="empty-state">No hay corte público para este distrito y eje. GOLIPCA conserva su estructura, pero no genera datos artificiales.</p>';return}
+ const s=state.ds05.current_filter,ce=state.ds05.cecosabi;
+ if(g.fields.length){$('goliKpis').innerHTML=g.fields.map(([label,key])=>metricTile(label,s[key],'SIESA · DS05')).join('')}
+ if(g.id==='I'||g.id==='P'){
+  const keys=g.id==='I'?['vigilancia_epidemiologica','vectores','riesgos_sanitarios']:['promocion_salud','vacunacion'];
+  const v=keys.map(key=>({label:PUBLIC_SIESA_MODULES.find(x=>x[0]===key)[1],value:totalModule(key)})),mx=Math.max(1,...v.map(x=>x.value));
+  $('goliKpis').innerHTML=metricTile('Registros en módulos',v.reduce((a,b)=>a+b.value,0),'Suma de capturas, no personas')+
+  metricTile('Municipios con datos',state.ds05.municipalities.filter(m=>keys.some(k=>m.modules?.[k]>0)).length,'SIESA · DS05');
+  $('goliBars').innerHTML=v.map(x=>bar(x.label,x.value,mx,'registros')).join('');
+ }else if(g.id==='C'){
+  const rows=ce?.rows||[];
+  $('goliKpis').innerHTML=metricTile('Letrinas encaladas',ce?.latrines_limed_total,'CECOSABI · '+(ce?.cut||''))+
+   metricTile('Registros de localidades',rows.length,'Sin atribución municipal automática')+
+   metricTile('Última variación reportada',ce?.latest_delta,'Dato del archivo CECOSABI');
+  const mx=Math.max(1,...rows.map(x=>x.letrinasEncaladas));
+  $('goliBars').innerHTML=rows.slice().sort((a,b)=>b.letrinasEncaladas-a.letrinasEncaladas).map(x=>bar(x.localidad,x.letrinasEncaladas,mx,'letrinas')).join('');
+  $('goliSource').textContent='Fuente CECOSABI · '+(ce?.cut||state.ds05.cut)+'. '+(ce?.note||'No se asigna geográficamente sin validación.');
+ }else if(g.id==='A'){
+  const total=(state.ds05.municipalities||[]).reduce((n,m)=>n+m.canonical_rows,0);
+  $('goliKpis').innerHTML=metricTile('Filas canónicas disponibles',total,'No personas')+
+   metricTile('Instantáneas no canónicas',s.uncanonical_siesa_snapshots,'No sumar como capturas únicas')+
+   metricTile('Municipios con registros',state.ds05.municipalities.length,'DS05');
+  $('goliBars').innerHTML='<p class="empty-state">Gestión administrativa, usuarios y bitácora: reservados al entorno autenticado.</p>';
+ }else if(g.id==='L'){
+  $('goliBars').innerHTML='<p class="empty-state">Todavía no se ha publicado una fuente logística autorizada. No confundimos traslados, insumos ni inventarios con acciones SIESA.</p>';
+ }else if(g.id==='O'){
+  $('goliKpis').innerHTML+=metricTile('Letrinas encaladas (fuente separada)',ce?.latrines_limed_total,'CECOSABI · saneamiento');
+  $('goliBars').innerHTML='<p class="note">El saneamiento es una fuente distinta de las acciones operativas SIESA. No sumar ambas cifras.</p>';
+ }
+}
+function renderModules(){
+ $('modulesGrid').innerHTML=MODS.map(x=>{
+  const link=x.id==='map'?'../':x.id==='crum'?'../crum.html':null;
+  const attr=link?'href="'+link+'" rel="noopener"':'type="button" data-module="'+x.id+'"';
+  const tag=link?'a':'button';
+  return '<'+tag+' class="module-card" '+attr+'><span class="module-glyph">'+x.glyph+'</span><span class="module-body"><strong>'+esc(x.title)+'</strong><small>'+esc(x.desc)+'</small></span><span class="module-state">'+esc(x.state)+'</span></'+tag+'>';
+ }).join('');
+}
+
 function draw(){
  if(!state.loaded)return;
- renderHome();renderIndicators();renderTerritory();renderSources();
+ renderHome();renderHomeExtras();renderIndicators();renderSiesaArea();renderGolipca();renderModules();renderTerritory();renderSources();
 }
 function show(tab){
  if(!headings[tab])return;
@@ -124,9 +246,10 @@ function show(tab){
  for(const [key] of Object.entries(headings)){
   const node=$('panel-'+key);node.hidden=key!==tab;node.classList.toggle('active',key===tab);
  }
+ document.querySelectorAll('.topic-strip button[data-go]').forEach(btn=>btn.classList.toggle('active',btn.dataset.go===tab));
  document.querySelectorAll('.bottom button').forEach(btn=>{const selected=btn.dataset.screen===tab;btn.classList.toggle('selected',selected);selected?btn.setAttribute('aria-current','page'):btn.removeAttribute('aria-current')});
  $('screenTitle').textContent=headings[tab][0];$('screenSubtitle').textContent=headings[tab][1];
- document.documentElement.scrollTop=0;
+ window.scrollTo({top:0,behavior:'instant'});
 }
 async function load(){
  $('warning').hidden=true;$('cut').textContent='Actualizando fuentes…';state.loaded=false;
@@ -144,6 +267,16 @@ async function load(){
 }
 $('district').addEventListener('change',e=>{state.district=e.target.value;draw()});
 $('municipality').addEventListener('change',e=>{state.municipality=e.target.value;renderTerritory()});
+$('siesaMunicipality').addEventListener('change',e=>{state.siesaMunicipality=e.target.value;renderSiesaArea()});
+document.addEventListener('click',e=>{
+ const b=e.target.closest('[data-goli]');
+ if(b){state.goli=b.dataset.goli;show('golipca');renderGolipca();return}
+ const m=e.target.closest('[data-module]');if(!m)return;
+ const id=m.dataset.module;
+ if(id==='cecosabi'||id==='intel'){state.goli=id==='cecosabi'?'C':'I';show('golipca');renderGolipca()}
+ else if(headings[id])show(id);
+ else {show('sources')}
+});
 $('reload').addEventListener('click',load);
 document.querySelectorAll('[data-go]').forEach(btn=>btn.addEventListener('click',()=>show(btn.dataset.go)));
 document.querySelectorAll('[data-screen]').forEach(btn=>btn.addEventListener('click',()=>show(btn.dataset.screen)));
