@@ -9,7 +9,7 @@ Mapa territorial y observatorio BALAM para Sonora.
 | Producto | 💻 Escritorio | 📱 Celular / WebApp | Acceso |
 | --- | --- | --- | --- |
 | **BALAM Mapa** · distritos, municipios, AGEB, demografía, clima y capas | [🌐 Abrir Mapa](https://doctopanda.github.io/MAPA-BALAM/) | [📱 Abrir Mapa móvil](https://doctopanda.github.io/MAPA-BALAM/) | Público; la capa CRUM requiere iniciar sesión |
-| **BALAM Visor v6.0** · panorama, indicadores, CONAPO y fuentes | [🌐 Abrir Visor](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir Visor móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, únicamente datos agregados |
+| **BALAM Visor v6.1** · panorama, indicadores, CONAPO y fuentes | [🌐 Abrir Visor](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir Visor móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, únicamente datos agregados |
 | **BALAM CRUM** · panel específico | [🔒 Abrir CRUM](https://doctopanda.github.io/MAPA-BALAM/crum.html) | [🔒 Abrir CRUM desde celular](https://doctopanda.github.io/MAPA-BALAM/crum.html) | Inicio de sesión y permisos requeridos |
 
 ### Accesos rápidos
@@ -29,7 +29,7 @@ Abre el enlace del producto directamente desde el navegador del teléfono. Puede
 | Componente | Versión de referencia | Publicación |
 | --- | --- | --- |
 | BALAM Mapa | v0.18 · diseño adaptable | GitHub Pages |
-| BALAM Visor | v6.0 · observatorio público | GitHub Pages en `/visor/` |
+| BALAM Visor | v6.1 · GOLIPCA y observatorio público | GitHub Pages en `/visor/` |
 | BALAM CRUM | Visor protegido | GitHub Pages con autenticación |
 | BALAM Visor operativo legado | v5.3.3 · archivo local | **No publicado**; requiere migración autenticada |
 
@@ -46,6 +46,22 @@ Cada repositorio nuevo de este ecosistema deberá comenzar su `README.md` con un
 5. **Acceso y privacidad**: identificar explícitamente el inicio de sesión requerido; no colocar enlaces a bases nominales, contraseñas ni tokens.
 
 Esta sección debe actualizarse **en el mismo cambio que publique una nueva página o modifique su URL**, para que el README siga siendo el directorio vigente de acceso.
+
+---
+
+## 📱 BALAM Visor v6.1 · navegación fluida y GOLIPCA (02/11/2026)
+
+La ruta **[BALAM Visor para celular y escritorio](https://doctopanda.github.io/MAPA-BALAM/visor/)** abre la misma PWA adaptable. La actualización toma como referencia la navegación modular del observatorio Allere Alumnae: accesos horizontales, tarjetas contextualizadas, cinco accesos inferiores y carga separada por pantalla.
+
+- **Panorama ampliado:** población proyectada CONAPO, municipios, unidades de atención y operación documentadas, lectura interpretativa, principales módulos SIESA y siete accesos GOLIPCA.
+- **SIESA:** indicadores del corte publicado DS05 (12/10/2026) y selección municipal para desglosar nueve áreas de captura. Los registros de módulos no equivalen a personas únicas.
+- **GOLIPCA:** G Gerencia y Rectoría, O Operaciones, L Logística, I Inteligencia en Salud, P Programas, C CECOSABI, A Administración. Cada eje identifica fuente y alcance; se presentan agregados solo cuando existe respaldo público.
+- **CECOSABI:** 977 letrinas encaladas en el corte publicado. No se hace inferencia de municipio sin llave territorial validada.
+- **Módulos:** acceso rápido a Mapa, CRUM autenticado, CONAPO, SIESA, Inteligencia, CECOSABI y fuentes.
+- **Seguridad:** la PWA no contiene base nominal, claves o funciones de escritura. Logística y administración protegida quedan correctamente señaladas como pendientes de integración.
+- **Identidad:** se recupera la marca original BALAM del mapa para la cabecera y el icono instalable de Visor.
+
+**Prueba de regresión:** `node scripts/test-visor-mobile.cjs`, incorporada al flujo de validación del repositorio. Comprueba navegación, GOLIPCA, CECOSABI y que los distritos sin corte SIESA no muestren falsos ceros.
 
 ---
 
