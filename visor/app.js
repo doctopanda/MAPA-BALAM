@@ -184,7 +184,7 @@ function renderSiesaArea(){
  $('siesaAreaKpis').innerHTML=metricTile('Filas canónicas',cap,'Almacén público SIESA')+
   metricTile('Áreas de captura',mods.filter(x=>x.value>0).length,'Módulos con registros')+
   metricTile('Localidades documentadas',loc,'No sumar entre municipios')+
-  metricTile('Corte',null,'SIESA · '+state.ds05.cut);
+  metricTile('Módulos presentes',mods.filter(x=>x.value>0).length,'SIESA · '+state.ds05.cut);
  const max=Math.max(1,...mods.map(x=>x.value));
  $('siesaAreaBars').innerHTML=mods.sort((a,b)=>b.value-a.value).map(x=>bar(x.label,x.value,max,'registros')).join('');
 }
