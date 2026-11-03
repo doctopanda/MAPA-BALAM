@@ -62,3 +62,12 @@ main{max-width:930px;margin:auto;padding:15px 14px}.hero{display:flex;align-item
 @media(min-width:700px){.topic-strip{margin-inline:-24px;padding-inline:24px}.module-grid{grid-template-columns:repeat(3,minmax(0,1fr))}.goli-selector{grid-template-columns:repeat(4,minmax(0,1fr))}.insight-grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
 @media(max-width:360px){.bottom button{font-size:8px}.bottom button span{font-size:19px}.mode{font-size:8px}.goli-selector{grid-template-columns:1fr}}
 @media(prefers-reduced-motion:reduce){.quick,.module-card{transition:none}}
+
+/* BALAM v6.3: acceso a un producto de escritorio independiente, no cambio de layout. */
+.desktop-route{display:inline-flex;align-items:center;justify-content:center;gap:5px;padding:10px 12px;margin-left:auto;border-radius:12px;border:1px solid #d1f1df;color:#fff;text-decoration:none;font:900 11px/1 system-ui;background:#ffffff25;white-space:nowrap;min-height:40px}
+.desktop-route:hover,.desktop-route:focus-visible{background:#ffffff40}
+.dual-product-banner{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px;background:linear-gradient(115deg,#e3f8ee,#fff7e7);border:1px solid #c2e5d4;border-radius:14px;margin:12px 0}
+.dual-product-banner div{display:grid;gap:6px}.dual-product-banner b{color:#1a6650;font-size:12px}
+.dual-product-banner small{color:#56786b;font-size:11px;line-height:1.5}
+.dual-product-banner a{display:inline-flex;align-items:center;justify-content:center;white-space:nowrap;border-radius:10px;background:#0f7764;color:#fff;padding:12px;text-decoration:none;font:900 11px/1 system-ui}
+@media(max-width:520px){.desktop-route{padding:9px 8px}.desktop-route span{display:none}.top .mode{font-size:8px;max-width:66px}.dual-product-banner{display:grid}.dual-product-banner a{width:100%}}
