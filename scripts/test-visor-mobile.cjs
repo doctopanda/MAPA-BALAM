@@ -22,7 +22,6 @@ for(const id of ids)map.set(id,new Node(id));
 const bottom=[...html.matchAll(/<button[^>]+data-screen="([^"]+)"/g)].map(x=>new Node('button',{screen:x[1]}));
 const topics=[...html.matchAll(/<button[^>]+data-go="([^"]+)"/g)].map(x=>new Node('button',{go:x[1]}));
 const doc={
- body:{dataset:{}},
  getElementById:id=>map.get(id)||null,
  querySelectorAll:query=>query==='.bottom button'?bottom:query==='.topic-strip button[data-go]'?topics:query==='[data-go]'?topics:query==='[data-screen]'?bottom:[],
  addEventListener:(type,cb)=>listeners.set(type,cb),
@@ -35,8 +34,7 @@ const fakeFetch=async url=>{
  const bytes=fs.readFileSync(p);
  return new Response(bytes,{status:200,headers:{'content-type':p.endsWith('.json')?'application/json':'text/plain'}});
 };
-const viewPrefs=new Map();
-const sandbox={document:doc,window:{DecompressionStream,scrollTo:()=>{},matchMedia:()=>({matches:true,addEventListener:()=>{}}),localStorage:{getItem:k=>viewPrefs.get(k)||null,setItem:(k,v)=>viewPrefs.set(k,v)}},
+const sandbox={document:doc,window:{DecompressionStream,scrollTo:()=>{}},
  location:{href:'https://doctopanda.github.io/MAPA-BALAM/visor/',protocol:'https:'},
  navigator:{},URL,Option:function(label,value){this.label=label;this.value=value},
  fetch:fakeFetch,DecompressionStream,Blob,Response,Uint8Array,atob,console};
@@ -45,14 +43,6 @@ const n=id=>{assert(map.has(id),'Missing HTML id '+id);return map.get(id)};
 async function check(){
  for(let i=0;i<30&&!n('kpis').innerHTML;i++)await new Promise(resolve=>setTimeout(resolve,40));
  assert(n('warning').hidden,'Unexpected data loading error: '+n('warning').textContent);
- assert(doc.body.dataset.layout==='mobile','Mobile should be default on small screens');
- assert(n('viewToggleText').textContent==='Vista escritorio','Switcher should offer desktop');
- n('viewToggle').listeners.click();
- assert(doc.body.dataset.layout==='desktop','Switcher should activate desktop view');
- assert(n('viewToggle').attributes['aria-pressed']==='true','Toggle accessibility state incorrect');
- assert(viewPrefs.get('balam-visor-view-preference-v1')==='desktop','View choice not persisted');
- n('viewToggle').listeners.click();
- assert(doc.body.dataset.layout==='mobile'&&viewPrefs.get('balam-visor-view-preference-v1')==='mobile','Switching back to mobile failed');
  assert(n('kpis').innerHTML.includes('13,116'),'DS05 KPIs were not rendered');
  assert(n('homeInsights').innerHTML.includes('2026'),'Missing contextual insight cards');
  assert(n('homeOperations').innerHTML.includes('Atención médica'),'Missing SIESA operational summaries');

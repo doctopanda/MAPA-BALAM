@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BALAM · Visor de escritorio | SIESA · GOLIPCA</title><meta name="theme-color" content="#0b6258">
+<meta name="description" content="BALAM Visor de escritorio, inspirado en el observatorio v5.3.3. Versión web pública de datos agregados.">
+<link rel="icon" href="../visor/brand-jaguar.svg" type="image/svg+xml"><link rel="stylesheet" href="./style.css">
+</head><body>
+<a class="skip" href="#main">Ir al contenido</a>
+<div class="app">
+<aside class="sidebar" id="sidebar" aria-label="Navegación de escritorio">
+  <a class="brand" href="../visor/" title="Abrir BALAM WebApp"><img src="../visor/brand-jaguar.svg" alt="Sello BALAM"><span><strong>BALAM</strong><small>OBSERVATORIO TERRITORIAL</small></span></a>
+  <div class="rail-meta"><b>ESCRITORIO · BALAM CLÁSICO</b><span>SIESA · GOLIPCA · SONORA</span></div>
+  <p class="rule">Persona ≠ atención ≠ acción ≠ cobertura. Cada métrica conserva su definición.</p>
+  <nav id="classicNav" aria-label="Módulos del visor">
+   <div class="nav-group">DATOS PROCESADOS</div>
+   <button type="button" data-tab="panorama" class="active">◈ <span>Panorama general</span></button>
+   <button type="button" data-tab="atenciones">✚ <span>Pacientes y atenciones</span></button>
+   <button type="button" data-tab="acciones">▥ <span>Acciones</span></button>
+   <button type="button" data-tab="areas">▤ <span>Áreas SIESA</span></button>
+   <button type="button" data-tab="paquetes">▧ <span>Paquetes SIESA</span></button>
+   <button type="button" data-tab="tiempo">◷ <span>Tiempo operativo</span></button>
+   <button type="button" data-tab="cruces">⌗ <span>Cruces y contexto</span></button>
+   <button type="button" data-tab="auditor">▣ <span>Centro de carga</span><em>LOCAL</em></button>
+   <div class="nav-group">GESTIÓN GOLIPCA</div>
+   <button type="button" data-tab="gerencia"><b>G</b><span>Gerencia y Rectoría</span></button>
+   <button type="button" data-tab="operacion"><b>O</b><span>Operaciones</span></button>
+   <button type="button" data-tab="logistica"><b>L</b><span>Logística</span></button>
+   <button type="button" data-tab="inteligencia"><b>I</b><span>Inteligencia en Salud</span></button>
+   <button type="button" data-tab="programas"><b>P</b><span>Programas</span></button>
+   <button type="button" data-tab="cecosabi"><b>C</b><span>CECOSABI</span></button>
+   <button type="button" data-tab="administracion"><b>A</b><span>Administración</span></button>
+   <div class="nav-group">LABORATORIO Y MAPAS</div>
+   <button type="button" data-tab="muestras">⚗ <span>Muestras EBT</span><em>PROTEGIDO</em></button>
+   <button type="button" data-tab="mapa">◎ <span>MAPA BALAM</span></button>
+   <div class="nav-group">CENTROS DE ANÁLISIS</div>
+   <button type="button" data-tab="graficos">▥ <span>Centro Gráfico</span></button>
+   <button type="button" data-tab="tablas">▤ <span>Centro de Tablas</span></button>
+  </nav>
+  <a class="switch-rail" href="../visor/">📱 Abrir BALAM WebApp ↗</a>
+  <div class="rail-footer">Datos públicos agregados · El HTML original con nominales permanece fuera de GitHub.</div>
+</aside>
+<div class="workspace">
+<header class="topbar"><div class="top-left"><button class="menu-btn" id="openMenu" type="button" aria-label="Abrir menú de módulos">☰</button><div><span class="kicker">VISOR DE ESCRITORIO · RECUPERADO</span><p>Vista clásica basada en BALAM v5.3.3 · únicamente agregados públicos</p></div></div><div class="top-actions"><a href="../visor/" class="top-switch">📱 Abrir WebApp</a><a href="../" class="top-map">🗺️ Abrir Mapa</a></div></header>
+<main id="main">
+<div class="titlebar"><div><h1 id="pageTitle">Panorama general</h1><p id="pageDescription">Análisis territorial y operativo de Sonora, con trazabilidad por corte y fuente.</p></div><div class="filters"><label for="district">Distrito de Salud<select id="district"><option value="">Cargando distritos…</option></select></label><label for="municipality">Municipio<select id="municipality"><option value="all">Todo el distrito</option></select></label></div></div>
+<div id="loadStatus" class="load-status" role="status">Consultando fuentes públicas…</div>
+<section id="content" aria-live="polite"></section>
+<div class="provenance"><b>Regla de trazabilidad:</b> los datos SIESA publicados corresponden a DS05 con corte del 12 de octubre de 2026; CONAPO 2026 es proyección demográfica. No se publican aquí registros nominales, archivos operativos ni expedientes.</div>
+<footer><a href="../visor/">BALAM WebApp ↗</a> · <a href="../">MAPA BALAM ↗</a> · <a href="https://github.com/doctopanda/MAPA-BALAM">Repositorio y README ↗</a></footer>
+</main>
+</div></div>
+<div class="backdrop" id="backdrop" hidden></div>
+<script defer src="./app.js"></script>
+</body></html>

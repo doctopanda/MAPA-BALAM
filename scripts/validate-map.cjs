@@ -12,10 +12,6 @@ new vm.Script(visorSW,{filename:'visor/sw.js'});
 assert(visorManifest.scope==='./'&&visorManifest.display==='standalone','BALAM Visor: PWA mal configurada');
 assert(visorHtml.includes('id="panel-home"')&&visorHtml.includes('data-screen="territory"')&&visorHtml.includes('id="panel-indicators"'),'BALAM Visor: navegación incompleta');
 assert(visorCss.includes('@media(min-width:700px)')&&visorCss.includes('safe-area-inset-bottom'),'BALAM Visor: no es adaptable');
-assert(visorHtml.includes('id="viewToggle"')&&visorHtml.includes('id="viewHint"'),'BALAM Visor: falta botón de cambio de vista');
-assert(visorCss.includes('body[data-layout="desktop"]')&&visorCss.includes('body[data-layout="mobile"]'),'BALAM Visor: faltan estilos explícitos de escritorio y móvil');
-assert(visorApp.includes('balam-visor-view-preference-v1')&&visorApp.includes("function toggleView()"),'BALAM Visor: falta guardar/restaurar preferencia de diseño');
-
 assert(visorSW.includes("if(!url.pathname.includes('/visor/'))return"),'BALAM Visor: cache fuera del ámbito');
 assert(!visorApp.includes('service_role')&&!visorHtml.includes('sb_secret_')&&!visorApp.includes('supabase.from'),'BALAM Visor: no publicar lógica de escritura privada');
 for(const [,id] of visorApp.matchAll(/\$\('([A-Za-z][A-Za-z0-9-]*)'\)/g))assert(visorHtml.includes('id="'+id+'"'),'BALAM Visor: falta DOM '+id);
@@ -23,6 +19,19 @@ const visorConapo=JSON.parse(require('zlib').inflateSync(Buffer.from(fs.readFile
 assert(visorConapo.profiles.length===72&&visorConapo.years.length===16,'BALAM Visor: no hay proyecciones municipales');
 assert(visorConapo.profiles.every(([code,trend,male,female])=>trend[11]===male.reduce((a,b)=>a+b,0)+female.reduce((a,b)=>a+b,0)),'BALAM Visor: denominadores CONAPO discordantes');
 console.log('BALAM VISOR PWA QA PASS',{municipios:visorConapo.profiles.length,view:'public-aggregates'});
+const desktopHtml=fs.readFileSync('escritorio/index.html','utf8'),desktopJs=fs.readFileSync('escritorio/app.js','utf8'),desktopCss=fs.readFileSync('escritorio/style.css','utf8');
+new vm.Script(desktopJs,{filename:'escritorio/app.js'});
+assert(visorHtml.includes('href="../escritorio/"'),'WebApp missing link to standalone desktop');
+assert(!visorHtml.includes('id="viewToggle"')&&!visorJsPlaceholder(),'Old layout-toggle must be reverted');
+function visorJsPlaceholder(){return visorApp.includes('balam-visor-view-preference-v1');}
+assert(desktopHtml.includes('href="../visor/"'),'Desktop missing WebApp return link');
+assert(desktopHtml.includes('data-tab="panorama"')&&desktopHtml.includes('data-tab="cecosabi"'),'Original module navigation incomplete');
+assert(desktopCss.includes('.sidebar')&&desktopCss.includes('.workspace'),'Desktop requires independent layout');
+for(const forbidden of ['balam-embedded-audit','BASE DE DATOS MARCOS ROCHIN.xlsx','SULEYMA ELIZABETH GONZALEZ CORDERO']){
+ assert(!desktopHtml.includes(forbidden)&&!desktopJs.includes(forbidden),'Original nominal audit material must never be public: '+forbidden);
+}
+require('child_process').execFileSync(process.execPath,['scripts/test-visor-desktop.cjs'],{stdio:'inherit'});
+
 assert(visorHtml.includes('id="panel-golipca"')&&visorHtml.includes('id="panel-modules"')&&visorHtml.includes('id="homeInsights"'),'BALAM Visor v6.1 sin paneles nuevos');
 assert(visorHtml.includes('data-screen="golipca"')&&visorHtml.includes('id="siesaAreaBars"'),'BALAM Visor v6.1 sin navegación o captura SIESA');
 for(const k of ["Gerencia y Rectoría","Operaciones","Logística","Inteligencia en Salud","Programas","CECOSABI","Administración"])
