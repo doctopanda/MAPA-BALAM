@@ -9,7 +9,7 @@ Mapa territorial y observatorio BALAM para Sonora.
 | Producto | 💻 Escritorio | 📱 Celular / WebApp | Acceso |
 | --- | --- | --- | --- |
 | **BALAM Mapa** · distritos, municipios, AGEB, demografía, clima y capas | [🌐 Abrir Mapa](https://doctopanda.github.io/MAPA-BALAM/) | [📱 Abrir Mapa móvil](https://doctopanda.github.io/MAPA-BALAM/) | Público; la capa CRUM requiere iniciar sesión |
-| **BALAM Visor v6.1** · panorama, indicadores, CONAPO y fuentes | [🌐 Abrir Visor](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir Visor móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, únicamente datos agregados |
+| **BALAM Visor v6.2** · panorama, indicadores, CONAPO y fuentes | [🌐 Abrir Visor](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir Visor móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, únicamente datos agregados |
 | **BALAM CRUM** · panel específico | [🔒 Abrir CRUM](https://doctopanda.github.io/MAPA-BALAM/crum.html) | [🔒 Abrir CRUM desde celular](https://doctopanda.github.io/MAPA-BALAM/crum.html) | Inicio de sesión y permisos requeridos |
 
 ### Accesos rápidos
@@ -46,6 +46,18 @@ Cada repositorio nuevo de este ecosistema deberá comenzar su `README.md` con un
 5. **Acceso y privacidad**: identificar explícitamente el inicio de sesión requerido; no colocar enlaces a bases nominales, contraseñas ni tokens.
 
 Esta sección debe actualizarse **en el mismo cambio que publique una nueva página o modifique su URL**, para que el README siga siendo el directorio vigente de acceso.
+
+---
+
+## 💻📱 BALAM Visor v6.2 · cambio manual de presentación (03/11/2026)
+
+En **[BALAM Visor](https://doctopanda.github.io/MAPA-BALAM/visor/)**, el botón de la cabecera ofrece **«Vista escritorio»** cuando se está en móvil y **«Vista móvil»** cuando se está en escritorio. Cambia el diseño **sin recargar datos, perder el distrito o el módulo abierto** y conserva la preferencia en este navegador.
+
+- **Móvil:** contenido ajustado a una columna visual compacta, barra inferior con cinco accesos, chips horizontales y tarjetas apilables.
+- **Escritorio:** menú lateral, paneles y tarjetas simultáneos, gráficos y módulos en cuadrícula.
+- **Forzar escritorio desde celular:** activa un lienzo más ancho que permite desplazamiento horizontal para consultar el tablero sin reducir los datos.
+- **Forzar móvil desde computadora:** muestra la misma interfaz estrecha de celular centrada en la ventana.
+- No se trata de dos fuentes o sistemas distintos: ambos modos consultan los mismos agregados públicos y aplican las mismas restricciones.
 
 ---
 

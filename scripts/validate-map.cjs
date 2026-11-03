@@ -12,6 +12,10 @@ new vm.Script(visorSW,{filename:'visor/sw.js'});
 assert(visorManifest.scope==='./'&&visorManifest.display==='standalone','BALAM Visor: PWA mal configurada');
 assert(visorHtml.includes('id="panel-home"')&&visorHtml.includes('data-screen="territory"')&&visorHtml.includes('id="panel-indicators"'),'BALAM Visor: navegación incompleta');
 assert(visorCss.includes('@media(min-width:700px)')&&visorCss.includes('safe-area-inset-bottom'),'BALAM Visor: no es adaptable');
+assert(visorHtml.includes('id="viewToggle"')&&visorHtml.includes('id="viewHint"'),'BALAM Visor: falta botón de cambio de vista');
+assert(visorCss.includes('body[data-layout="desktop"]')&&visorCss.includes('body[data-layout="mobile"]'),'BALAM Visor: faltan estilos explícitos de escritorio y móvil');
+assert(visorApp.includes('balam-visor-view-preference-v1')&&visorApp.includes("function toggleView()"),'BALAM Visor: falta guardar/restaurar preferencia de diseño');
+
 assert(visorSW.includes("if(!url.pathname.includes('/visor/'))return"),'BALAM Visor: cache fuera del ámbito');
 assert(!visorApp.includes('service_role')&&!visorHtml.includes('sb_secret_')&&!visorApp.includes('supabase.from'),'BALAM Visor: no publicar lógica de escritura privada');
 for(const [,id] of visorApp.matchAll(/\$\('([A-Za-z][A-Za-z0-9-]*)'\)/g))assert(visorHtml.includes('id="'+id+'"'),'BALAM Visor: falta DOM '+id);

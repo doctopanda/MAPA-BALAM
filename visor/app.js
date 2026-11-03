@@ -2,6 +2,31 @@
 (()=>{
 'use strict';
 const $=id=>document.getElementById(id);
+const VIEW_KEY='balam-visor-view-preference-v1';
+const compactMedia=typeof window.matchMedia==='function'?window.matchMedia('(max-width: 699px)'):null;
+let viewPreference=null;
+try{
+ const stored=window.localStorage?.getItem(VIEW_KEY);
+ if(stored==='mobile'||stored==='desktop')viewPreference=stored;
+}catch(_){}
+function activeView(){return viewPreference||((compactMedia?.matches??true)?'mobile':'desktop')}
+function updateView(){
+ const mode=activeView();
+ document.body.dataset.layout=mode;
+ const toggle=document.getElementById('viewToggle');
+ toggle.setAttribute('aria-pressed',String(mode==='desktop'));
+ toggle.setAttribute('aria-label',mode==='desktop'?'Cambiar a vista móvil':'Cambiar a vista de escritorio');
+ toggle.setAttribute('title',mode==='desktop'?'Cambiar a vista móvil':'Cambiar a vista de escritorio');
+ $('viewToggleIcon').textContent=mode==='desktop'?'📱':'💻';
+ $('viewToggleText').textContent=mode==='desktop'?'Vista móvil':'Vista escritorio';
+ $('viewHint').hidden=!(mode==='desktop'&&(compactMedia?.matches??false));
+}
+function toggleView(){
+ viewPreference=activeView()==='mobile'?'desktop':'mobile';
+ try{window.localStorage?.setItem(VIEW_KEY,viewPreference)}catch(_){}
+ updateView();
+}
+
 const fmt=n=>Number.isFinite(n)?Math.round(n).toLocaleString('es-MX'):'Sin dato';
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const state={districts:null,ds05:null,conapo:null,names:new Map(),loaded:false,district:'DS05',municipality:'26042',siesaMunicipality:'26042',goli:'G',screen:'home'};
@@ -265,6 +290,9 @@ async function load(){
   }).catch(()=>{});
  }catch(e){fail(e);$('cut').textContent='Datos no disponibles. Reintenta actualizar.'}
 }
+$('viewToggle').addEventListener('click',toggleView);
+compactMedia?.addEventListener?.('change',updateView);
+updateView();
 $('district').addEventListener('change',e=>{state.district=e.target.value;draw()});
 $('municipality').addEventListener('change',e=>{state.municipality=e.target.value;renderTerritory()});
 $('siesaMunicipality').addEventListener('change',e=>{state.siesaMunicipality=e.target.value;renderSiesaArea()});
