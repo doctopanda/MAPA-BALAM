@@ -6,11 +6,11 @@
 <link rel="icon" href="./brand-jaguar.svg" type="image/svg+xml"><link rel="manifest" href="./manifest.webmanifest"><link rel="stylesheet" href="./style.css">
 </head><body>
 <a class="skip" href="#content">Ir al contenido</a>
-<header class="top"><div class="identity"><div class="mark" aria-hidden="true"><img src="./brand-jaguar.svg" alt="" width="44" height="44"></div><div><strong>BALAM <span>VISOR</span></strong><small>Observatorio territorial · Sonora</small></div></div><span class="mode">AGREGADOS PÚBLICOS</span></header>
+<header class="top"><div class="identity"><div class="mark" aria-hidden="true"><img src="./brand-jaguar.svg" alt="" width="44" height="44"></div><div><strong>BALAM <span>VISOR</span></strong><small>Observatorio territorial · Sonora</small></div></div><button id="viewToggle" type="button" class="view-toggle" aria-label="Cambiar a vista de escritorio" aria-pressed="false"><span id="viewToggleIcon" aria-hidden="true">💻</span><span id="viewToggleText">Vista escritorio</span></button><span class="mode">AGREGADOS PÚBLICOS</span></header>
 <main id="content" tabindex="-1">
-<section class="hero"><div><div class="eyebrow">BALAM v6.1 · OBSERVATORIO MÓVIL</div><h1 id="screenTitle">Panorama general</h1><p id="screenSubtitle">Lectura operativa y demográfica con procedencia explícita.</p></div><button id="reload" class="refresh" type="button" title="Actualizar datos" aria-label="Actualizar datos">↻</button></section>
+<section class="hero"><div><div class="eyebrow">BALAM v6.2 · OBSERVATORIO ADAPTABLE</div><h1 id="screenTitle">Panorama general</h1><p id="screenSubtitle">Lectura operativa y demográfica con procedencia explícita.</p></div><button id="reload" class="refresh" type="button" title="Actualizar datos" aria-label="Actualizar datos">↻</button></section>
 <div class="context"><label for="district">Distrito de Salud</label><select id="district" aria-label="Distrito de Salud"><option value="">Preparando distritos…</option></select><div id="cut" class="cut" aria-live="polite">Conectando fuentes…</div></div>
-<div class="alert" id="warning" role="status" hidden></div>
+<div class="alert" id="warning" role="status" hidden></div><p class="view-hint" id="viewHint" hidden>Estás usando la vista de escritorio en una pantalla estrecha. Desliza horizontalmente para explorar el tablero completo o pulsa «Vista móvil» para regresar.</p>
 <nav class="topic-strip" aria-label="Accesos rápidos a módulos"><button type="button" data-go="home" class="active">◈ Panorama</button><button type="button" data-go="indicators">▥ SIESA</button><button type="button" data-go="golipca">◉ GOLIPCA</button><button type="button" data-go="territory">⌖ CONAPO</button><button type="button" data-go="modules">☷ Módulos</button><a href="../">🗺️ Mapa</a></nav>
 <section id="panel-home" class="screen active" aria-label="Panorama">
 <div class="kpi-grid" id="kpis" aria-live="polite"></div>
