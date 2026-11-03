@@ -19,6 +19,19 @@ const visorConapo=JSON.parse(require('zlib').inflateSync(Buffer.from(fs.readFile
 assert(visorConapo.profiles.length===72&&visorConapo.years.length===16,'BALAM Visor: no hay proyecciones municipales');
 assert(visorConapo.profiles.every(([code,trend,male,female])=>trend[11]===male.reduce((a,b)=>a+b,0)+female.reduce((a,b)=>a+b,0)),'BALAM Visor: denominadores CONAPO discordantes');
 console.log('BALAM VISOR PWA QA PASS',{municipios:visorConapo.profiles.length,view:'public-aggregates'});
+const desktopHtml=fs.readFileSync('escritorio/index.html','utf8'),desktopJs=fs.readFileSync('escritorio/app.js','utf8'),desktopCss=fs.readFileSync('escritorio/style.css','utf8');
+new vm.Script(desktopJs,{filename:'escritorio/app.js'});
+assert(visorHtml.includes('href="../escritorio/"'),'WebApp missing link to standalone desktop');
+assert(!visorHtml.includes('id="viewToggle"')&&!visorJsPlaceholder(),'Old layout-toggle must be reverted');
+function visorJsPlaceholder(){return visorApp.includes('balam-visor-view-preference-v1');}
+assert(desktopHtml.includes('href="../visor/"'),'Desktop missing WebApp return link');
+assert(desktopHtml.includes('data-tab="panorama"')&&desktopHtml.includes('data-tab="cecosabi"'),'Original module navigation incomplete');
+assert(desktopCss.includes('.sidebar')&&desktopCss.includes('.workspace'),'Desktop requires independent layout');
+for(const forbidden of ['balam-embedded-audit','BASE DE DATOS MARCOS ROCHIN.xlsx','SULEYMA ELIZABETH GONZALEZ CORDERO']){
+ assert(!desktopHtml.includes(forbidden)&&!desktopJs.includes(forbidden),'Original nominal audit material must never be public: '+forbidden);
+}
+require('child_process').execFileSync(process.execPath,['scripts/test-visor-desktop.cjs'],{stdio:'inherit'});
+
 assert(visorHtml.includes('id="panel-golipca"')&&visorHtml.includes('id="panel-modules"')&&visorHtml.includes('id="homeInsights"'),'BALAM Visor v6.1 sin paneles nuevos');
 assert(visorHtml.includes('data-screen="golipca"')&&visorHtml.includes('id="siesaAreaBars"'),'BALAM Visor v6.1 sin navegación o captura SIESA');
 for(const k of ["Gerencia y Rectoría","Operaciones","Logística","Inteligencia en Salud","Programas","CECOSABI","Administración"])
