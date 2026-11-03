@@ -4,32 +4,35 @@ Mapa territorial y observatorio BALAM para Sonora.
 
 ## 🚀 Abrir BALAM · enlaces directos
 
-**Selecciona una aplicación y ábrela con un clic.** Tanto BALAM Mapa como BALAM Visor son aplicaciones web adaptables: se utiliza la **misma dirección en computadora y celular**, con interfaz adecuada a cada pantalla.
+**Selecciona la experiencia que quieras abrir.** BALAM Mapa funciona en computadora y celular; BALAM Visor tiene además **dos experiencias independientes** conectadas entre sí: WebApp y escritorio clásico.
 
 | Producto | 💻 Escritorio | 📱 Celular / WebApp | Acceso |
 | --- | --- | --- | --- |
 | **BALAM Mapa** · distritos, municipios, AGEB, demografía, clima y capas | [🌐 Abrir Mapa](https://doctopanda.github.io/MAPA-BALAM/) | [📱 Abrir Mapa móvil](https://doctopanda.github.io/MAPA-BALAM/) | Público; la capa CRUM requiere iniciar sesión |
-| **BALAM Visor v6.2** · panorama, indicadores, CONAPO y fuentes | [🌐 Abrir Visor](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir Visor móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, únicamente datos agregados |
+| **BALAM Visor WebApp v6.1** · interfaz fluida, SIESA, GOLIPCA | [🌐 Abrir WebApp](https://doctopanda.github.io/MAPA-BALAM/visor/) | [📱 Abrir WebApp móvil](https://doctopanda.github.io/MAPA-BALAM/visor/) | Público, solo agregados |
+| **BALAM Visor Escritorio** · módulos clásicos v5.3.3 | [💻 Abrir Escritorio](https://doctopanda.github.io/MAPA-BALAM/escritorio/) | [📱 Consultar Escritorio](https://doctopanda.github.io/MAPA-BALAM/escritorio/) | Público, solo agregados; no incluye nominales |
 | **BALAM CRUM** · panel específico | [🔒 Abrir CRUM](https://doctopanda.github.io/MAPA-BALAM/crum.html) | [🔒 Abrir CRUM desde celular](https://doctopanda.github.io/MAPA-BALAM/crum.html) | Inicio de sesión y permisos requeridos |
 
 ### Accesos rápidos
 
 - 🗺️ **[ENTRAR A BALAM MAPA](https://doctopanda.github.io/MAPA-BALAM/)**
-- 📊 **[ENTRAR A BALAM VISOR](https://doctopanda.github.io/MAPA-BALAM/visor/)**
+- 📊 **[ENTRAR A BALAM WEBAPP](https://doctopanda.github.io/MAPA-BALAM/visor/)**
+- 💻 **[ENTRAR A BALAM ESCRITORIO](https://doctopanda.github.io/MAPA-BALAM/escritorio/)**
 - 🚑 **[ENTRAR AL PANEL CRUM (AUTENTICACIÓN)](https://doctopanda.github.io/MAPA-BALAM/crum.html)**
 
 ### Cómo abrir las versiones móviles
 
 Abre el enlace del producto directamente desde el navegador del teléfono. Puedes agregarlo a la pantalla de inicio desde el menú del navegador (en Android, **Instalar aplicación** o **Añadir a pantalla principal**; en iOS, **Compartir → Añadir a pantalla de inicio**, según navegador). La instalación no convierte los datos conectados en información disponible sin internet; algunas secciones requieren red.
 
-**Importante:** BALAM Visor v6.0 no es todavía el visor operativo privado v5.3.3 completo. La captura SIESA, GOLIPCA, auditoría y nominales no se publican como una página abierta de GitHub. No se ofrece un enlace público a archivos HTML locales de respaldo como si fueran servicios web.
+**Importante:** BALAM Visor WebApp v6.1 y BALAM Escritorio público no incluyen el visor operativo privado v5.3.3 completo. La captura SIESA, auditoría y nominales no se publican como una página abierta de GitHub. No se ofrece un enlace público a archivos HTML locales de respaldo como si fueran servicios web.
 
 ### Versiones y estado
 
 | Componente | Versión de referencia | Publicación |
 | --- | --- | --- |
 | BALAM Mapa | v0.18 · diseño adaptable | GitHub Pages |
-| BALAM Visor | v6.1 · GOLIPCA y observatorio público | GitHub Pages en `/visor/` |
+| BALAM Visor WebApp | v6.1 · GOLIPCA y observatorio público | GitHub Pages en `/visor/` |
+| BALAM Visor Escritorio | Clásico v5.3.3 · vista pública reconstruida | GitHub Pages en `/escritorio/` |
 | BALAM CRUM | Visor protegido | GitHub Pages con autenticación |
 | BALAM Visor operativo legado | v5.3.3 · archivo local | **No publicado**; requiere migración autenticada |
 
@@ -49,15 +52,16 @@ Esta sección debe actualizarse **en el mismo cambio que publique una nueva pág
 
 ---
 
-## 💻📱 BALAM Visor v6.2 · cambio manual de presentación (03/11/2026)
+## 🖥️ BALAM dual · WebApp y Escritorio clásico (03/11/2026)
 
-En **[BALAM Visor](https://doctopanda.github.io/MAPA-BALAM/visor/)**, el botón de la cabecera ofrece **«Vista escritorio»** cuando se está en móvil y **«Vista móvil»** cuando se está en escritorio. Cambia el diseño **sin recargar datos, perder el distrito o el módulo abierto** y conserva la preferencia en este navegador.
+**Dos productos, dos URLs, navegación bidireccional:**
 
-- **Móvil:** contenido ajustado a una columna visual compacta, barra inferior con cinco accesos, chips horizontales y tarjetas apilables.
-- **Escritorio:** menú lateral, paneles y tarjetas simultáneos, gráficos y módulos en cuadrícula.
-- **Forzar escritorio desde celular:** activa un lienzo más ancho que permite desplazamiento horizontal para consultar el tablero sin reducir los datos.
-- **Forzar móvil desde computadora:** muestra la misma interfaz estrecha de celular centrada en la ventana.
-- No se trata de dos fuentes o sistemas distintos: ambos modos consultan los mismos agregados públicos y aplican las mismas restricciones.
+- **[📱 BALAM Visor WebApp v6.1](https://doctopanda.github.io/MAPA-BALAM/visor/)**: aplicación adaptable de consulta con menú inferior, GOLIPCA y tarjetas.
+- **[💻 BALAM Visor de escritorio](https://doctopanda.github.io/MAPA-BALAM/escritorio/)**: navegación lateral recuperada de la estructura original v5.3.3, con panorama, atenciones, acciones, áreas, paquetes, siete ejes GOLIPCA, centro gráfico, tablas y acceso al mapa.
+
+**El botón de cambio de apariencia v6.2 fue revertido.** Cada aplicación tiene interfaz propia y contiene enlaces para pasar a la otra. Los agregados públicos se consumen de las mismas fuentes versionadas: SIESA DS05, CONAPO y catálogos territoriales.
+
+**Protección de datos:** el HTML v5.3.3 original proporcionado por el usuario contiene registros nominales incrustados y **no fue publicado en GitHub Pages**. La versión de escritorio online recupera la organización y muestra únicamente agregados públicos. La copia operativa completa se entrega como archivo local privado, sin subirla al repositorio.
 
 ---
 
