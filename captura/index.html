@@ -20,11 +20,13 @@
 <label>Distrito autorizado <input id="district" value="DS05 · Navojoa (simulación)" disabled></label>
 <label>Operativo <select id="operative"></select></label>
 </div>
+<div class="row-actions"><button type="button" id="new-operative" class="muted">+ Simular nuevo operativo</button></div>
 <div class="footnote">En producción el distrito y los operativos permitidos se obtendrán del usuario autenticado y se verificarán nuevamente en la base de datos.</div>
 </section>
 <section class="panel" aria-labelledby="persona-title">
 <div class="section-head"><span class="num">02</span><h2 id="persona-title">Paciente ya registrado</h2></div>
 <label>Buscar por folio del operativo <select id="patient"></select></label>
+<div class="row-actions"><button type="button" id="new-person" class="muted">+ Simular paciente nuevo</button></div>
 <div id="person-card" class="person-card" aria-live="polite"></div>
 <div class="footnote">Antes de asociar una atención, confirma la identidad del paciente. Los datos clínicos de otras áreas no se precargan por defecto.</div>
 <label class="confirm"><input type="checkbox" id="identity-ok"> Confirmo que seleccioné al paciente correcto (solo demostración)</label>
