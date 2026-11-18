@@ -31,6 +31,7 @@ function resetPatient(){
  $('person-card').textContent='Sin paciente seleccionado.';
  $('identity-ok').checked=false;opts($('patient-matches'),[],'Sin paciente seleccionado');
  $('history').textContent='Selecciona un folio autorizado.';
+ opts($('corr-action'),[],'Seleccionar acción');
  renderActions();
 }
 function renderActions(){
@@ -73,6 +74,7 @@ async function ensureAccess(){
  if(!allowed.length)throw Error('Tu usuario no tiene distritos asignados.');
  opts($('district'),allowed.map(d=>[d,d]),'');
  $('new-op-box').hidden=!admin;
+ $('admin-review').hidden=!admin;
  $('session-line').textContent=data.role+' · '+allowed.join(', ');
  $('auth-panel').hidden=true;$('work').hidden=false;
  await refreshOperativos();
@@ -85,6 +87,7 @@ async function refreshOperativos(){
  opts($('operative'),operativos.map(o=>[o.id,o.codigo+' · '+o.nombre+' ['+o.estado+']']),'Sin operativo seleccionado');
  $('operative').value=operativos.find(o=>o.estado==='activo')?.id||operativos[0]?.id||'';
  updateOperative();
+ await refreshCorrections();await refreshLotes();
 }
 function updateOperative(){
  resetPatient();
@@ -93,12 +96,13 @@ function updateOperative(){
 }
 async function history(){
  if(!current||!$('operative').value)return;
- const rows=await rpc('balam_v7_history',{p_operativo:$('operative').value,p_distrito:$('district').value,p_participacion:current.participacion_id});
+ const rows=await rpc('balam_v7_history_items',{p_operativo:$('operative').value,p_distrito:$('district').value,p_participacion:current.participacion_id});
  const box=$('history');box.replaceChildren();
+ opts($('corr-action'),(rows||[]).map(v=>[v.accion_id,v.fecha_atencion+' · '+(AREAS[v.area]?.nombre||v.area)+' · '+v.codigo_accion+' · '+v.cantidad]),'Seleccionar acción');
  if(!rows?.length){box.textContent='Todavía no hay atenciones en este operativo.';return;}
  for(const v of rows){
   const p=document.createElement('div');p.className='history-card';
-  p.textContent=(v.fecha_atencion||'Sin fecha')+' · '+AREAS[v.area]?.nombre+' · '+v.codigo_accion+' · '+v.cantidad+' unidad(es)';
+  p.textContent=(v.fecha_atencion||'Sin fecha')+' · '+(AREAS[v.area]?.nombre||v.area)+' · '+v.codigo_accion+' · '+v.cantidad+' unidad(es)';
   box.append(p);
  }
 }
@@ -159,6 +163,71 @@ async function saveVisit(){
  actions=[];renderActions();$('identity-ok').checked=false;
  await history();say('Atención SINTÉTICA registrada con auditoría. ID '+id);
 }
+async function refreshCorrections(){
+ if(!$('district').value||!user)return;
+ const rows=await rpc('balam_v7_list_corrections',{p_distrito:$('district').value});
+ const box=$('correction-list');box.replaceChildren();
+ if(!rows?.length){box.textContent='No hay solicitudes registradas para este distrito.';}
+ for(const v of rows||[]){
+  const p=document.createElement('div');p.className='history-card';
+  p.textContent=v.estado.toUpperCase()+' · '+v.motivo_codigo+' · '+v.cantidad_anterior+' → '+v.cantidad_propuesta;
+  box.append(p);
+ }
+ const admin=['admin_maestro','admin_estatal'].includes(access?.role);
+ $('admin-review').hidden=!admin;
+ opts($('correction-pending'),(rows||[]).filter(x=>x.estado==='pendiente')
+ .map(x=>[x.id,x.motivo_codigo+' · '+x.cantidad_anterior+' → '+x.cantidad_propuesta]),'Sin solicitudes pendientes');
+}
+async function requestCorrection(){
+ const id=$('corr-action').value,qty=Number($('corr-quantity').value);
+ if(!current||!id)throw Error('Selecciona una acción existente del paciente.');
+ if(!Number.isSafeInteger(qty)||qty<1||qty>999999)throw Error('Indica una cantidad válida.');
+ const result=await rpc('balam_v7_request_correction',{
+ p_accion:id,p_cantidad:qty,p_motivo:$('corr-reason').value
+ });
+ await refreshCorrections();
+ say('Solicitud enviada para revisión administrativa. Folio de control: '+result);
+}
+async function resolveCorrection(){
+ if(!['admin_maestro','admin_estatal'].includes(access?.role))throw Error('Sin permiso de aprobación.');
+ const id=$('correction-pending').value;
+ if(!id)throw Error('Selecciona una solicitud pendiente.');
+ const approved=$('correction-decision').value==='aprobada';
+ await rpc('balam_v7_resolve_correction',{p_solicitud:id,p_aprobar:approved});
+ await refreshCorrections();await history();
+ say(approved?'Corrección aprobada y registrada.':'Corrección rechazada y registrada.');
+}
+async function precheckFile(){
+ const file=$('siesa-file').files?.[0];
+ if(!file)throw Error('Selecciona un Excel SIESA.');
+ if(!$('operative').value)throw Error('Selecciona un operativo de prueba activo.');
+ const ext=file.name.split('.').pop()?.toLowerCase();
+ if(!['xlsx','xlsm'].includes(ext)||file.size<1||file.size>36700160)
+  throw Error('Solo archivos XLSX o XLSM de hasta 35 MB.');
+ if(!crypto?.subtle)throw Error('Este navegador requiere HTTPS para calcular SHA-256.');
+ say('Calculando huella local del archivo; no se enviará su contenido.');
+ const hashbuf=await crypto.subtle.digest('SHA-256',await file.arrayBuffer());
+ const digest=Array.from(new Uint8Array(hashbuf)).map(v=>v.toString(16).padStart(2,'0')).join('');
+ const response=await rpc('balam_v7_precheck_siesa',{
+  p_operativo:$('operative').value,p_distrito:$('district').value,
+  p_sha256:digest,p_bytes:file.size,p_extension:ext
+ });
+ const result=response?.[0];
+ if(!result)throw Error('No fue posible identificar el archivo.');
+ await refreshLotes();
+ say(result.registrado_ahora?'Huella registrada sin contenido ni filas.':'El archivo ya tenía una huella registrada; no se duplicó el lote.');
+}
+async function refreshLotes(){
+ if(!$('operative').value||!$('district').value)return;
+ const rows=await rpc('balam_v7_list_siesa_lotes',{p_distrito:$('district').value,p_operativo:$('operative').value});
+ const box=$('siesa-import-list');box.replaceChildren();
+ if(!rows?.length){box.textContent='Ningún archivo de prueba identificado.';return;}
+ for(const x of rows){
+  const p=document.createElement('div');p.className='history-card';
+  p.textContent=x.alias_archivo+' · '+x.estado+' · '+x.filas_importadas+' filas incorporadas';
+  box.append(p);
+ }
+}
 async function login(ev){
  ev.preventDefault();say('Verificando credenciales...');
  const {data,error}=await supabase.auth.signInWithPassword({email:$('email').value.trim(),password:$('password').value});
@@ -186,5 +255,10 @@ function start(){
  on('register-patient','click',registerPatient);on('area','change',areaActions);
  on('add-action','click',addAction);on('save-visit','click',saveVisit);
  on('clear-actions','click',()=>{actions=[];renderActions();say('Acciones pendientes borradas.');});
+ on('request-correction','click',requestCorrection);
+ on('resolve-correction','click',resolveCorrection);
+ on('refresh-corrections','click',refreshCorrections);
+ on('precheck-file','click',precheckFile);
+ on('refresh-lotes','click',refreshLotes);
 }
 start();
