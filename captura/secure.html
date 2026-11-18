@@ -58,6 +58,12 @@
 <p class="danger"><b>Solo huella de archivo y metadatos.</b> La prevalidación NO importa filas, NO copia el Excel a Supabase y NO genera reportes oficiales. Usa únicamente operativos de prueba.</p>
 <label>Archivo SIESA de trabajo (XLSX o XLSM, máximo 35 MB)<input id="siesa-file" type="file" accept=".xlsx,.xlsm"></label>
 <div class="row-actions"><button id="precheck-file" class="outline" type="button">Identificar archivo por SHA-256</button><button id="refresh-lotes" class="muted" type="button">Actualizar lotes</button></div>
+<div class="fields">
+<label>Índice JSON sintético (solo huellas, sin contenido clínico)
+<input type="file" id="siesa-index-file" accept=".json,application/json"></label>
+</div>
+<div class="row-actions"><button id="send-row-index" type="button" class="outline">Indexar huellas de prueba</button></div>
+<div id="siesa-index-summary" class="footnote" role="status">Aún no hay índice verificado.</div>
 <div id="siesa-import-list" class="history"></div>
 <p class="footnote">Se registra un alias anónimo basado en la huella digital, evitando guardar el nombre original del archivo. La información de pacientes permanece en el Excel local.</p>
 </section>
