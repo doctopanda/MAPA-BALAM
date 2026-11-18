@@ -111,8 +111,30 @@ function guardar(){
   renderPendientes();renderHistorial();
   mensaje("Atención añadida SOLAMENTE a la memoria temporal de esta pestaña. No se guardó ningún dato en Supabase.","ok");
 }
+function simularOperativo(){
+  const n=operativos.length+1;
+  const id="OP-DEMO-NUEVO-"+n;
+  operativos.push({id,label:id+" · Nuevo operativo ficticio"});
+  renderOperativos();
+  $("operative").value=id;
+  cambiarOperativo();
+  mensaje("Operativo creado SOLO para esta demostración en memoria.","ok");
+}
+function simularPaciente(){
+  const op=$("operative").value;
+  if(!op){mensaje("Selecciona un operativo primero.","error");return}
+  const n=pacientes.length+1;
+  const id="P-DEMO-"+String(n).padStart(3,"0");
+  pacientes.push({id,op,folio:"DEMO-DS05-"+String(n).padStart(4,"0"),nombre:"Paciente ficticio "+n,edad:30,sexo:"No especificado",municipio:"Navojoa"});
+  cambiarOperativo();
+  $("patient").value=id;
+  renderPersona();
+  mensaje("Paciente sintético generado. En producción requerirá formulario y validación de identidad.","ok");
+}
 function iniciar(){
   renderOperativos();renderAreas();
+  $("new-operative").addEventListener("click",simularOperativo);
+  $("new-person").addEventListener("click",simularPaciente);
   $("patient").addEventListener("change",()=>{$("identity-ok").checked=false;estado.pendientes=[];renderPersona();renderPendientes();renderHistorial();mensaje("")});
   $("visit-date").value="2026-11-18";
   $("add-action").addEventListener("click",agregar);
