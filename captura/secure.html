@@ -36,6 +36,31 @@
 <p class="footnote">Estas categorías son de prueba. No generan reportes oficiales SIESA hasta homologar cada campo y unidad con la plantilla V2401.</p>
 </section>
 <section class="panel"><div class="section-head"><span class="num">04</span><h2>Historial autorizado del paciente</h2></div><div id="history" class="history">Selecciona un paciente por folio.</div></section>
+
+<section class="panel" aria-labelledby="correcciones-title">
+<div class="section-head"><span class="num">05</span><h2 id="correcciones-title">Solicitudes de corrección auditadas</h2></div>
+<p class="footnote">Selecciona una acción del historial. Solo se solicita la modificación de la cantidad, sin cambiar diagnósticos, identidad ni la intervención original. La administración autoriza o rechaza.</p>
+<div class="fields three">
+<label>Acción registrada<select id="corr-action"><option value="">Seleccionar acción</option></select></label>
+<label>Cantidad propuesta<input id="corr-quantity" type="number" min="1" max="999999" step="1"></label>
+<label>Motivo<select id="corr-reason"><option value="cantidad_erronea">Cantidad incorrecta</option><option value="transcripcion">Error de transcripción</option><option value="registro_duplicado">Posible duplicidad</option><option value="otro">Otro motivo operativo</option></select></label>
+</div>
+<div class="row-actions"><button id="request-correction" class="outline" type="button">Enviar solicitud de corrección</button><button id="refresh-corrections" class="muted" type="button">Actualizar seguimiento</button></div>
+<div id="correction-list" class="history"></div>
+<div id="admin-review" hidden>
+<h3>Resolución administrativa</h3>
+<div class="fields"><label>Solicitud pendiente<select id="correction-pending"></select></label><label>Decisión<select id="correction-decision"><option value="aprobada">Aprobar cambio</option><option value="rechazada">Rechazar cambio</option></select></label></div>
+<div class="row-actions"><button id="resolve-correction" class="primary" type="button">Registrar resolución</button></div>
+</div>
+</section>
+<section class="panel" aria-labelledby="siesa-title">
+<div class="section-head"><span class="num">06</span><h2 id="siesa-title">SIESA · Identificación de archivos</h2></div>
+<p class="danger"><b>Solo huella de archivo y metadatos.</b> La prevalidación NO importa filas, NO copia el Excel a Supabase y NO genera reportes oficiales. Usa únicamente operativos de prueba.</p>
+<label>Archivo SIESA de trabajo (XLSX o XLSM, máximo 35 MB)<input id="siesa-file" type="file" accept=".xlsx,.xlsm"></label>
+<div class="row-actions"><button id="precheck-file" class="outline" type="button">Identificar archivo por SHA-256</button><button id="refresh-lotes" class="muted" type="button">Actualizar lotes</button></div>
+<div id="siesa-import-list" class="history"></div>
+<p class="footnote">Se registra un alias anónimo basado en la huella digital, evitando guardar el nombre original del archivo. La información de pacientes permanece en el Excel local.</p>
+</section>
 </div>
 <div id="error-line" role="alert" aria-live="assertive"></div><div id="success-line" role="status" aria-live="polite"></div>
 <footer>BALAM v7 · Entorno privado de desarrollo · Sin publicación de nominales</footer>
