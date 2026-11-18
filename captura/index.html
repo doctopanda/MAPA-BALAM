@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>BALAM v7 · Captura Distrital (Prototipo)</title>
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#176d60">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<a class="skip" href="#contenido">Ir al contenido</a>
+<header class="top"><div class="brand"><div class="jaguar">🐆</div><div><strong>BALAM <span>CAPTURA</span></strong><small>Operativos · Registro integrado · SIESA</small></div></div><span class="status">ENTORNO DEMO</span></header>
+<main id="contenido">
+<div class="hero"><div><div class="eyebrow">BALAM v7 · PRIMERA CONSTRUCCIÓN</div><h1>Captura Distrital</h1><p>Una persona, varias áreas de atención y un registro auditado por operativo.</p></div></div>
+<div class="notice" role="note"><strong>Prototipo sin conexión a bases reales.</strong> Solo datos ficticios. Nada se envía a Supabase, GitHub ni se guarda en tu equipo. No captures nombres, CURP ni información clínica real.</div>
+<div class="layout">
+<section class="panel" aria-labelledby="contexto-title">
+<div class="section-head"><span class="num">01</span><h2 id="contexto-title">Contexto del operativo</h2></div>
+<div class="fields">
+<label>Distrito autorizado <input id="district" value="DS05 · Navojoa (simulación)" disabled></label>
+<label>Operativo <select id="operative"></select></label>
+</div>
+<div class="footnote">En producción el distrito y los operativos permitidos se obtendrán del usuario autenticado y se verificarán nuevamente en la base de datos.</div>
+</section>
+<section class="panel" aria-labelledby="persona-title">
+<div class="section-head"><span class="num">02</span><h2 id="persona-title">Paciente ya registrado</h2></div>
+<label>Buscar por folio del operativo <select id="patient"></select></label>
+<div id="person-card" class="person-card" aria-live="polite"></div>
+<div class="footnote">Antes de asociar una atención, confirma la identidad del paciente. Los datos clínicos de otras áreas no se precargan por defecto.</div>
+<label class="confirm"><input type="checkbox" id="identity-ok"> Confirmo que seleccioné al paciente correcto (solo demostración)</label>
+</section>
+<section class="panel" aria-labelledby="atencion-title">
+<div class="section-head"><span class="num">03</span><h2 id="atencion-title">Nueva atención multimódulo</h2></div>
+<div class="fields">
+<label>Fecha de la atención <input id="visit-date" type="date" required></label>
+<label>Localidad <select id="locality"><option value="">Seleccionar localidad</option><option>Álamos</option><option>Navojoa</option><option>Etchojoa</option><option>Huatabampo</option><option>Benito Juárez</option></select></label>
+<label>Área <select id="area"></select></label>
+<label>Acción <select id="action"></select></label>
+<label>Cantidad de acciones <input id="quantity" type="number" min="1" max="999" step="1" value="1"></label>
+</div>
+<div class="row-actions"><button type="button" id="add-action" class="outline">+ Añadir acción a la atención</button></div>
+<div id="action-list" class="action-list" aria-live="polite"></div>
+<div class="summary"><div><small>Persona única</small><strong id="unique-count">0</strong></div><div><small>Acciones distintas</small><strong id="types-count">0</strong></div><div><small>Unidades registradas</small><strong id="units-count">0</strong></div></div>
+<div class="row-actions"><button type="button" id="save" class="primary">Guardar atención de prueba</button><button type="button" id="clear" class="muted">Limpiar acciones</button></div>
+<div id="message" class="message" role="status" aria-live="polite"></div>
+</section>
+<section class="panel" aria-labelledby="seguimiento-title">
+<div class="section-head"><span class="num">04</span><h2 id="seguimiento-title">Seguimiento por paciente</h2></div>
+<div id="history" class="history"></div>
+</section>
+<section class="panel" aria-labelledby="siesa-title">
+<div class="section-head"><span class="num">05</span><h2 id="siesa-title">Compatibilidad con SIESA</h2></div>
+<div class="siesa-grid"><div><b>Fuente</b><span>BALAM: personas, operativo, atenciones y acciones</span></div><div><b>Transformación</b><span>Desnormalización a hojas y campos SIESA</span></div><div><b>Salida oficial</b><span>Por homologar y probar contra SIESA V2401 en Excel</span></div></div>
+<p class="footnote">No se genera un reporte «oficial» desde esta demostración. El formato institucional será validado en una copia de SIESA con tablas dinámicas y macros funcionales.</p>
+</section>
+</div>
+<footer>BALAM · Diseño de captura distrital · Rama experimental · Sin datos nominales ni funciones de producción</footer>
+</main>
+<script defer src="./app.js"></script>
+</body></html>
