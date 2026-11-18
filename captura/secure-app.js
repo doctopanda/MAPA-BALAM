@@ -17,6 +17,7 @@ const AREAS={
  riesgos_sanitarios:{nombre:'Riesgos sanitarios',acciones:[['DEMO_VISITA_SANITARIA','Visita sanitaria']]}
 };
 let user=null,access=null,operativos=[],current=null,actions=[];
+let activeLot=null,activeFileHash=null;
 const opts=(select,values,empty='Seleccione')=>{
  select.replaceChildren();
  if(empty){const o=new Option(empty,'');select.add(o);}
@@ -80,7 +81,8 @@ async function ensureAccess(){
  await refreshOperativos();
 }
 async function refreshOperativos(){
- resetPatient();
+ resetPatient();activeLot=null;activeFileHash=null;
+ $('siesa-index-summary').textContent='Selecciona y registra la huella del archivo primero.';
  const district=$('district').value;
  const records=await rpc('balam_v7_list_operativos',{p_distrito:district});
  operativos=records||[];
@@ -214,6 +216,7 @@ async function precheckFile(){
  });
  const result=response?.[0];
  if(!result)throw Error('No fue posible identificar el archivo.');
+ activeLot=result.lote_id;activeFileHash=digest;
  await refreshLotes();
  say(result.registrado_ahora?'Huella registrada sin contenido ni filas.':'El archivo ya tenía una huella registrada; no se duplicó el lote.');
 }
@@ -227,6 +230,36 @@ async function refreshLotes(){
   p.textContent=x.alias_archivo+' · '+x.estado+' · '+x.filas_importadas+' filas incorporadas';
   box.append(p);
  }
+}
+async function sendSiesaRowIndex(){
+ if(!activeLot||!activeFileHash)throw Error('Primero identifica el archivo XLSX/XLSM del que proviene este índice.');
+ const file=$('siesa-index-file').files?.[0];
+ if(!file||file.size>1024*1024)throw Error('Selecciona un JSON de índice de hasta 1 MB.');
+ const parsed=JSON.parse(await file.text());
+ if(parsed?.tipo!=='BALAM_SIESA_INDICE_SINTETICO_V7')throw Error('Índice de prueba incompatible.');
+ if(parsed.archivo_sha256!==activeFileHash)throw Error('La huella del índice no coincide con el archivo Excel.');
+ const rows=parsed.filas;
+ if(!Array.isArray(rows)||rows.length<1||rows.length>5000||parsed.total!==rows.length)
+  throw Error('El índice debe contener de 1 a 5000 filas candidatas.');
+ const allowed=['hoja','fila_excel','contenido_sha256','celdas_no_vacias'];
+ for(const x of rows){
+  if(!x||typeof x!=='object'||Array.isArray(x)||
+     Object.keys(x).length!==4||!Object.keys(x).every(k=>allowed.includes(k)))
+    throw Error('El índice contiene un campo no autorizado; no debe incluir nombres ni datos clínicos.');
+ }
+ let nuevos=0,repetidos=0;
+ for(let i=0;i<rows.length;i+=100){
+  const res=await rpc('balam_v7_index_siesa_rows',{p_lote:activeLot,p_rows:rows.slice(i,i+100)});
+  nuevos+=res?.[0]?.nuevas||0;repetidos+=res?.[0]?.ya_conocidas||0;
+ }
+ const summary=await rpc('balam_v7_index_siesa_summary',{p_lote:activeLot});
+ const v=summary?.[0];
+ $('siesa-index-summary').textContent=
+  'Huellas indexadas: '+(v?.filas_indexadas??0)+
+  ' · Contenidos repetidos: '+(v?.contenidos_repetidos??0)+
+  ' · Filas IMPORTADAS: '+(v?.filas_importadas??0)+
+  '. No se almacenaron valores de las celdas.';
+ say('Índice de prueba recibido: '+nuevos+' huellas nuevas, '+repetidos+' ya conocidas.');
 }
 async function login(ev){
  ev.preventDefault();say('Verificando credenciales...');
@@ -260,5 +293,6 @@ function start(){
  on('refresh-corrections','click',refreshCorrections);
  on('precheck-file','click',precheckFile);
  on('refresh-lotes','click',refreshLotes);
+ on('send-row-index','click',sendSiesaRowIndex);
 }
 start();
