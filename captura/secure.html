@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>BALAM v7 | Captura distrital protegida · Entorno de pruebas</title>
+<link rel="stylesheet" href="./style.css"><meta name="theme-color" content="#176d60">
+<style>.hidden{display:none!important}.panel{max-width:850px;margin:14px auto}.fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}.inline-fields{display:flex;gap:10px;flex-wrap:wrap}.inline-fields>*{flex:1}.hint{font-size:11px;color:#51695e}.danger{background:#fff5e2;border:1px solid #ddc79b;padding:12px;border-radius:10px;font-size:12px}.person-list{margin:12px 0}#session-line{font-size:12px;color:#58766b}#error-line{color:#a12d2d;white-space:pre-wrap}#success-line{color:#13734f;white-space:pre-wrap}.row-actions{align-items:center}.module-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}@media(max-width:650px){.fields.three{grid-template-columns:1fr}}.panel[hidden]{display:none}</style>
+</head>
+<body>
+<a class="skip" href="#contenido">Ir al contenido</a>
+<header class="top"><div class="brand"><div class="jaguar" aria-hidden="true">🐆</div><div><strong>BALAM <span>CAPTURA</span></strong><small>Operativos y atención multimódulo</small></div></div><span class="status">PRUEBAS PROTEGIDAS</span></header>
+<main id="contenido">
+<div class="hero"><div><div class="eyebrow">V7 · NO PUBLICADO EN MAIN</div><h1>Captura Distrital</h1><p>Expediente único, acciones múltiples y seguimiento por operativo.</p></div></div>
+<p class="danger"><b>Entorno de pruebas. Prohibido capturar datos de pacientes reales.</b> La base rechaza operativos que no empiecen por <code>TEST-</code> y nombres que no sean sintéticos (<code>PRUEBA ...</code> o <code>PACIENTE FICTICIO ...</code>).</p>
+<section id="auth-panel" class="panel"><div class="section-head"><span class="num">🔒</span><h2>Iniciar sesión institucional</h2></div>
+<form id="login-form" class="fields"><label>Correo institucional<input id="email" type="email" autocomplete="username" required></label><label>Contraseña<input id="password" type="password" autocomplete="current-password" required></label><button type="submit" class="primary">Entrar</button></form>
+<p class="footnote">El acceso utiliza Supabase Auth y los permisos ya asignados en <code>balam_access</code>. No crees cuentas desde esta pantalla.</p></section>
+<div id="work" hidden>
+<section class="panel"><div class="module-head"><div><div class="section-head"><span class="num">01</span><h2>Operativo y distrito</h2></div><div id="session-line"></div></div><button id="logout" class="muted" type="button">Cerrar sesión</button></div>
+<div class="fields"><label>Distrito permitido<select id="district"></select></label><label>Operativo autorizado<select id="operative"></select></label></div>
+<div class="row-actions"><button type="button" class="outline" id="refresh-op">Actualizar operativos</button><button type="button" class="outline" id="activate" hidden>Activar operativo de prueba</button></div>
+<div id="new-op-box" hidden><h3>Crear operativo ficticio (administración)</h3><div class="fields three"><label>Clave <input id="op-code" placeholder="TEST-EJEMPLO-001"></label><label>Nombre<input id="op-name" placeholder="Simulacro de captura"></label><label>Fecha de inicio<input id="op-start" type="date"></label></div><div class="row-actions"><button class="outline" type="button" id="create-op">Crear operativo en distrito seleccionado</button></div></div>
+<p class="footnote">Solo administradores pueden crear o activar operativos. La configuración distrital queda validada nuevamente en Supabase.</p></section>
+<section class="panel"><div class="section-head"><span class="num">02</span><h2>Buscar o registrar paciente</h2></div>
+<div class="fields"><label>Buscar por folio completo autorizado<input id="folio-query" placeholder="BAL-DS05-00000001"></label><label>Coincidencias autorizadas<select id="patient-matches"><option value="">Sin búsqueda</option></select></label></div><div class="row-actions"><button type="button" id="search" class="outline">Buscar folio</button></div>
+<div id="person-card" class="person-card">Sin paciente seleccionado.</div>
+<label class="confirm"><input type="checkbox" id="identity-ok"> Confirmo la selección del paciente ficticio correcto</label>
+<details><summary><b>+ Registrar paciente sintético nuevo</b></summary><div class="fields"><label>Nombre de prueba<input id="new-name" placeholder="PRUEBA PERSONA A" autocomplete="off"></label><label>Fecha de nacimiento ficticia<input id="birth" type="date"></label><label>Sexo del registro<select id="sex"><option>No especificado</option><option>Femenino</option><option>Masculino</option><option>Intersexual</option></select></label></div><div class="row-actions"><button type="button" id="register-patient" class="primary">Registrar paciente de prueba</button></div></details>
+</section>
+<section class="panel"><div class="section-head"><span class="num">03</span><h2>Acciones por atención</h2></div>
+<div class="fields three"><label>Fecha de la atención<input id="visit-date" type="date"></label><label>Clave de localidad de prueba<input id="locality" placeholder="260420001"></label><label>Área<select id="area"></select></label><label>Acción<select id="action"></select></label><label>Cantidad<input id="quantity" type="number" value="1" min="1" max="999"></label></div>
+<div class="row-actions"><button type="button" class="outline" id="add-action">+ Añadir acción</button></div><div id="action-list" class="action-list"></div>
+<div class="summary"><div><small>Pacientes en atención</small><strong id="count-people">0</strong></div><div><small>Tipos de acción</small><strong id="count-types">0</strong></div><div><small>Unidades de acción</small><strong id="count-units">0</strong></div></div>
+<div class="row-actions"><button type="button" class="primary" id="save-visit">Guardar atención en prueba</button><button type="button" class="muted" id="clear-actions">Limpiar acciones</button></div>
+<p class="footnote">Estas categorías son de prueba. No generan reportes oficiales SIESA hasta homologar cada campo y unidad con la plantilla V2401.</p>
+</section>
+<section class="panel"><div class="section-head"><span class="num">04</span><h2>Historial autorizado del paciente</h2></div><div id="history" class="history">Selecciona un paciente por folio.</div></section>
+
+<section class="panel" aria-labelledby="correcciones-title">
+<div class="section-head"><span class="num">05</span><h2 id="correcciones-title">Solicitudes de corrección auditadas</h2></div>
+<p class="footnote">Selecciona una acción del historial. Solo se solicita la modificación de la cantidad, sin cambiar diagnósticos, identidad ni la intervención original. La administración autoriza o rechaza.</p>
+<div class="fields three">
+<label>Acción registrada<select id="corr-action"><option value="">Seleccionar acción</option></select></label>
+<label>Cantidad propuesta<input id="corr-quantity" type="number" min="1" max="999999" step="1"></label>
+<label>Motivo<select id="corr-reason"><option value="cantidad_erronea">Cantidad incorrecta</option><option value="transcripcion">Error de transcripción</option><option value="registro_duplicado">Posible duplicidad</option><option value="otro">Otro motivo operativo</option></select></label>
+</div>
+<div class="row-actions"><button id="request-correction" class="outline" type="button">Enviar solicitud de corrección</button><button id="refresh-corrections" class="muted" type="button">Actualizar seguimiento</button></div>
+<div id="correction-list" class="history"></div>
+<div id="admin-review" hidden>
+<h3>Resolución administrativa</h3>
+<div class="fields"><label>Solicitud pendiente<select id="correction-pending"></select></label><label>Decisión<select id="correction-decision"><option value="aprobada">Aprobar cambio</option><option value="rechazada">Rechazar cambio</option></select></label></div>
+<div class="row-actions"><button id="resolve-correction" class="primary" type="button">Registrar resolución</button></div>
+</div>
+</section>
+<section class="panel" aria-labelledby="siesa-title">
+<div class="section-head"><span class="num">06</span><h2 id="siesa-title">SIESA · Identificación de archivos</h2></div>
+<p class="danger"><b>Solo huella de archivo y metadatos.</b> La prevalidación NO importa filas, NO copia el Excel a Supabase y NO genera reportes oficiales. Usa únicamente operativos de prueba.</p>
+<label>Archivo SIESA de trabajo (XLSX o XLSM, máximo 35 MB)<input id="siesa-file" type="file" accept=".xlsx,.xlsm"></label>
+<div class="row-actions"><button id="precheck-file" class="outline" type="button">Identificar archivo por SHA-256</button><button id="refresh-lotes" class="muted" type="button">Actualizar lotes</button></div>
+<div class="fields">
+<label>Índice JSON sintético (solo huellas, sin contenido clínico)
+<input type="file" id="siesa-index-file" accept=".json,application/json"></label>
+</div>
+<div class="row-actions"><button id="send-row-index" type="button" class="outline">Indexar huellas de prueba</button></div>
+<div id="siesa-index-summary" class="footnote" role="status">Aún no hay índice verificado.</div>
+<div id="siesa-import-list" class="history"></div>
+<p class="footnote">Se registra un alias anónimo basado en la huella digital, evitando guardar el nombre original del archivo. La información de pacientes permanece en el Excel local.</p>
+</section>
+</div>
+<div id="error-line" role="alert" aria-live="assertive"></div><div id="success-line" role="status" aria-live="polite"></div>
+<footer>BALAM v7 · Entorno privado de desarrollo · Sin publicación de nominales</footer>
+</main>
+<script type="module" src="./secure-app.js"></script>
+</body></html>
